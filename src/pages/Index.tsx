@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -11,17 +10,15 @@ import Navigation from "@/components/Navigation";
 
 interface Motorcycle {
   motorcycle_id: number;
-  "Year of launch": string | null;
+  Year: string | null;
   Make: string | null;
   Model: string | null;
   Category: string | null;
   Rating: string | null;
-  "Price as new (MSRP)": string | null;
+  MSRP: string | null;
   "Engine type": string | null;
   "Engine details": string | null;
   "Power (PS)": string | null;
-  "Power (rpm)": string | null;
-  "Top speed (kmph)": string | null;
   value?: number;
 }
 
@@ -42,14 +39,11 @@ const Index = () => {
 
   useEffect(() => {
     const fetchMakes = async () => {
-      console.log('Starting fetchMakes...');
       try {
         const { data, error } = await supabase
           .from('motorcycles_1')
-          .select('Make');
-
-        console.log('Query executed. Data:', data);
-        console.log('Error:', error);
+          .select('Make')
+          .not('Make', 'is', null);
 
         if (error) {
           console.error('Error fetching makes:', error);
@@ -59,14 +53,12 @@ const Index = () => {
         if (data) {
           const uniqueMakes = Array.from(new Set(data
             .map(item => item.Make)
-            .filter(make => make !== null && make !== '')))
+            .filter(Boolean)))
             .sort();
-          
-          console.log('Processed makes:', uniqueMakes);
           setMakes(uniqueMakes);
         }
       } catch (err) {
-        console.error('Exception in fetchMakes:', err);
+        console.error('Error:', err);
       }
     };
 
@@ -76,15 +68,12 @@ const Index = () => {
   useEffect(() => {
     const fetchModels = async () => {
       if (searchParams.make) {
-        console.log('Starting fetchModels for make:', searchParams.make);
         try {
           const { data, error } = await supabase
             .from('motorcycles_1')
             .select('Model')
-            .eq('Make', searchParams.make);
-
-          console.log('Query executed. Data:', data);
-          console.log('Error:', error);
+            .eq('Make', searchParams.make)
+            .not('Model', 'is', null);
 
           if (error) {
             console.error('Error fetching models:', error);
@@ -94,14 +83,12 @@ const Index = () => {
           if (data) {
             const uniqueModels = Array.from(new Set(data
               .map(item => item.Model)
-              .filter(model => model !== null && model !== '')))
+              .filter(Boolean)))
               .sort();
-            
-            console.log('Processed models:', uniqueModels);
             setModels(uniqueModels);
           }
         } catch (err) {
-          console.error('Exception in fetchModels:', err);
+          console.error('Error:', err);
         }
       } else {
         setModels([]);
@@ -113,25 +100,24 @@ const Index = () => {
 
   const calculateCurrentValue = (motorcycle: Motorcycle): number => {
     const currentYear = new Date().getFullYear();
-    const motorcycleYear = parseInt(motorcycle["Year of launch"] || "0");
-    const msrp = parseFloat(motorcycle["Price as new (MSRP)"]?.replace(/[^0-9.]/g, '') || "0");
+    const motorcycleYear = parseInt(motorcycle.Year || "0");
+    const msrp = parseFloat(motorcycle.MSRP?.replace(/[^0-9.]/g, '') || "0");
     const age = currentYear - motorcycleYear;
     
     let depreciationRate = 1;
 
     if (age >= 1) {
-      depreciationRate *= 0.85;
+      depreciationRate *= 0.85; // Initial 15% depreciation
       const earlyYears = Math.min(4, age - 1);
-      depreciationRate *= Math.pow(0.90, earlyYears);
+      depreciationRate *= Math.pow(0.90, earlyYears); // 10% for years 2-5
       const laterYears = Math.max(0, age - 5);
-      depreciationRate *= Math.pow(0.95, laterYears);
+      depreciationRate *= Math.pow(0.95, laterYears); // 5% for subsequent years
     }
 
     return Math.round(msrp * depreciationRate);
   };
 
   const handleSearch = async () => {
-    console.log('Starting search with params:', searchParams);
     setIsSearching(true);
     try {
       let query = supabase
@@ -139,7 +125,7 @@ const Index = () => {
         .select('*');
 
       if (searchParams.year) {
-        query = query.eq('Year of launch', searchParams.year);
+        query = query.eq('Year', searchParams.year);
       }
       if (searchParams.make) {
         query = query.eq('Make', searchParams.make);
@@ -149,9 +135,6 @@ const Index = () => {
       }
 
       const { data, error } = await query;
-
-      console.log('Search results:', data);
-      console.log('Search error:', error);
 
       if (error) {
         console.error('Error searching motorcycles:', error);
@@ -272,13 +255,13 @@ const Index = () => {
                     className="p-8 text-center hover-card"
                   >
                     <h3 className="text-xl font-bold mb-4">
-                      {motorcycle["Year of launch"]} {motorcycle.Make} {motorcycle.Model}
+                      {motorcycle.Year} {motorcycle.Make} {motorcycle.Model}
                     </h3>
                     <p className="text-3xl font-bold text-theme-600 mb-2">
                       ${motorcycle.value?.toLocaleString()}
                     </p>
                     <p className="text-sm text-gray-500">
-                      Original MSRP: ${motorcycle["Price as new (MSRP)"]?.replace(/[^0-9.]/g, '').toLocaleString() || 'N/A'}
+                      Original MSRP: ${motorcycle.MSRP?.replace(/[^0-9.]/g, '').toLocaleString() || 'N/A'}
                     </p>
                     <div className="mt-4 text-left text-sm text-gray-600">
                       <p>Category: {motorcycle.Category || 'N/A'}</p>

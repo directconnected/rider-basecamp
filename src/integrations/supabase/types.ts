@@ -86,15 +86,14 @@ export type Database = {
           Model: string | null
           "Modifications compared to previous model": string | null
           motorcycle_id: number
+          MSRP: string | null
           "Oil capacity (litres)": string | null
           "Overall height (mm)": string | null
           "Overall length (mm)": string | null
           "Overall width (mm)": string | null
-          "Page URL": string | null
           "Power (PS)": string | null
           "Power (rpm)": string | null
           "Power/weight ratio (HP/kgP": string | null
-          "Price as new (MSRP)": string | null
           "Rake (fork angle)": string | null
           Rating: string | null
           "Rear brakes": string | null
@@ -116,7 +115,7 @@ export type Database = {
           "Weight incl. oil, gas, etc (kg)": string | null
           "Wheelbase (mm)": string | null
           Wheels: string | null
-          "Year of launch": string | null
+          Year: string | null
         }
         Insert: {
           "0-100 km/h (sec)"?: string | null
@@ -164,15 +163,14 @@ export type Database = {
           Model?: string | null
           "Modifications compared to previous model"?: string | null
           motorcycle_id?: number
+          MSRP?: string | null
           "Oil capacity (litres)"?: string | null
           "Overall height (mm)"?: string | null
           "Overall length (mm)"?: string | null
           "Overall width (mm)"?: string | null
-          "Page URL"?: string | null
           "Power (PS)"?: string | null
           "Power (rpm)"?: string | null
           "Power/weight ratio (HP/kgP"?: string | null
-          "Price as new (MSRP)"?: string | null
           "Rake (fork angle)"?: string | null
           Rating?: string | null
           "Rear brakes"?: string | null
@@ -194,7 +192,7 @@ export type Database = {
           "Weight incl. oil, gas, etc (kg)"?: string | null
           "Wheelbase (mm)"?: string | null
           Wheels?: string | null
-          "Year of launch"?: string | null
+          Year?: string | null
         }
         Update: {
           "0-100 km/h (sec)"?: string | null
@@ -242,15 +240,14 @@ export type Database = {
           Model?: string | null
           "Modifications compared to previous model"?: string | null
           motorcycle_id?: number
+          MSRP?: string | null
           "Oil capacity (litres)"?: string | null
           "Overall height (mm)"?: string | null
           "Overall length (mm)"?: string | null
           "Overall width (mm)"?: string | null
-          "Page URL"?: string | null
           "Power (PS)"?: string | null
           "Power (rpm)"?: string | null
           "Power/weight ratio (HP/kgP"?: string | null
-          "Price as new (MSRP)"?: string | null
           "Rake (fork angle)"?: string | null
           Rating?: string | null
           "Rear brakes"?: string | null
@@ -272,7 +269,7 @@ export type Database = {
           "Weight incl. oil, gas, etc (kg)"?: string | null
           "Wheelbase (mm)"?: string | null
           Wheels?: string | null
-          "Year of launch"?: string | null
+          Year?: string | null
         }
         Relationships: []
       }
