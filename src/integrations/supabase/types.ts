@@ -76,7 +76,7 @@ export type Database = {
           Gearbox: string | null
           "Greenhouse gases (CO2 g/km)": string | null
           "Ground clearance (mm)": string | null
-          id: string | null
+          id: string
           Ignition: string | null
           "Image URL": string | null
           Instruments: string | null
@@ -154,7 +154,7 @@ export type Database = {
           Gearbox?: string | null
           "Greenhouse gases (CO2 g/km)"?: string | null
           "Ground clearance (mm)"?: string | null
-          id?: string | null
+          id?: string
           Ignition?: string | null
           "Image URL"?: string | null
           Instruments?: string | null
@@ -232,7 +232,7 @@ export type Database = {
           Gearbox?: string | null
           "Greenhouse gases (CO2 g/km)"?: string | null
           "Ground clearance (mm)"?: string | null
-          id?: string | null
+          id?: string
           Ignition?: string | null
           "Image URL"?: string | null
           Instruments?: string | null

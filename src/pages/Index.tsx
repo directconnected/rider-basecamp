@@ -10,18 +10,19 @@ import { supabase } from "@/integrations/supabase/client";
 import Navigation from "@/components/Navigation";
 
 interface Motorcycle {
-  id: string;
-  year: string;
-  make: string;
-  model: string;
-  Category: string;
-  Rating: string;
-  "Price as new (MSRP)": string;
-  "Engine type": string;
-  "Engine details": string;
-  "Power (PS)": string;
-  "Power (rpm)": string;
-  "Top speed (kmph)": string;
+  id: string | null;
+  "Year of launch": string | null;
+  Make: string | null;
+  Model: string | null;
+  Category: string | null;
+  Rating: string | null;
+  "Price as new (MSRP)": string | null;
+  "Engine type": string | null;
+  "Engine details": string | null;
+  "Power (PS)": string | null;
+  "Power (rpm)": string | null;
+  "Top speed (kmph)": string | null;
+  value?: number;
 }
 
 const Index = () => {
@@ -46,7 +47,7 @@ const Index = () => {
         .select('Make');
 
       if (!error && data) {
-        const uniqueMakes = Array.from(new Set(data.map(item => item.Make))).sort();
+        const uniqueMakes = Array.from(new Set(data.map(item => item.Make).filter(Boolean))).sort();
         setMakes(uniqueMakes);
       }
     };
@@ -63,7 +64,7 @@ const Index = () => {
           .eq('Make', searchParams.make);
 
         if (!error && data) {
-          const uniqueModels = Array.from(new Set(data.map(item => item.Model))).sort();
+          const uniqueModels = Array.from(new Set(data.map(item => item.Model).filter(Boolean))).sort();
           setModels(uniqueModels);
         }
       } else {
@@ -117,7 +118,7 @@ const Index = () => {
         return;
       }
 
-      const resultsWithCurrentValue = (data || []).map(motorcycle => ({
+      const resultsWithCurrentValue = (data || []).map((motorcycle: Motorcycle) => ({
         ...motorcycle,
         value: calculateCurrentValue(motorcycle)
       }));
@@ -234,7 +235,7 @@ const Index = () => {
                       {motorcycle["Year of launch"]} {motorcycle.Make} {motorcycle.Model}
                     </h3>
                     <p className="text-3xl font-bold text-theme-600 mb-2">
-                      ${motorcycle.value.toLocaleString()}
+                      ${motorcycle.value?.toLocaleString()}
                     </p>
                     <p className="text-sm text-gray-500">
                       Original MSRP: ${motorcycle["Price as new (MSRP)"]?.replace(/[^0-9.]/g, '').toLocaleString() || 'N/A'}
