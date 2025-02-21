@@ -10,7 +10,7 @@ import { supabase } from "@/integrations/supabase/client";
 import Navigation from "@/components/Navigation";
 
 interface Motorcycle {
-  id: string | null;
+  motorcycle_id: number;
   "Year of launch": string | null;
   Make: string | null;
   Model: string | null;
@@ -136,9 +136,9 @@ const Index = () => {
         return;
       }
 
-      const resultsWithCurrentValue = (data || []).map((motorcycle: Motorcycle) => ({
+      const resultsWithCurrentValue = (data || []).map((motorcycle) => ({
         ...motorcycle,
-        value: calculateCurrentValue(motorcycle)
+        value: calculateCurrentValue(motorcycle as Motorcycle)
       }));
 
       setSearchResults(resultsWithCurrentValue);
@@ -187,7 +187,7 @@ const Index = () => {
                     </SelectTrigger>
                     <SelectContent>
                       {makes.map(make => (
-                        <SelectItem key={make} value={make}>
+                        <SelectItem key={make} value={make || ''}>
                           {make}
                         </SelectItem>
                       ))}
@@ -203,7 +203,7 @@ const Index = () => {
                     </SelectTrigger>
                     <SelectContent>
                       {models.map(model => (
-                        <SelectItem key={model} value={model}>
+                        <SelectItem key={model} value={model || ''}>
                           {model}
                         </SelectItem>
                       ))}
