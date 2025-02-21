@@ -148,7 +148,7 @@ const Index = () => {
       <main className="flex-1">
         <section className="relative flex items-center justify-center overflow-hidden bg-gradient-to-b from-gray-900 to-gray-800 pt-20 pb-5">
           <div className="absolute inset-0 bg-black/50 z-0" />
-          <div className="container mx-auto px-4 z-10">
+          <div className="w-full px-4 z-10">
             <div className="text-center mb-12">
               <h1 className="text-4xl md:text-6xl font-bold text-white mb-6 animate-fade-in">
                 Get the real value of your motorcycle
@@ -216,17 +216,17 @@ const Index = () => {
         </section>
 
         {searchResults.length > 0 ? (
-          <div className="w-full bg-gray-50">
+          <div className="bg-gray-50 w-full">
             <div className="text-center py-16">
               <h2 className="text-3xl font-bold mb-4">Search Results</h2>
               <p className="text-gray-600">Found {searchResults.length} matches</p>
             </div>
-            <div className="w-full px-4 md:px-6 pb-24">
+            <div className="px-6 pb-24">
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6">
                 {searchResults.map((motorcycle) => (
                   <Card 
                     key={motorcycle.motorcycle_id}
-                    className="w-full p-6 hover:shadow-lg transition-shadow duration-300"
+                    className="p-6 hover:shadow-lg transition-shadow duration-300"
                   >
                     <div className="space-y-4">
                       <div className="text-center">
@@ -265,14 +265,14 @@ const Index = () => {
             </div>
           </div>
         ) : (
-          <section className="bg-gray-50 py-24">
+          <section className="bg-gray-50 py-24 w-full">
             <div className="text-center mb-16">
               <h2 className="text-3xl font-bold mb-4">
                 Why Choose Our Valuation System?
               </h2>
             </div>
-            <div className="px-4 md:px-6">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-7xl mx-auto">
+            <div className="px-6">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                 {[
                   {
                     icon: Database,
@@ -307,7 +307,7 @@ const Index = () => {
         )}
 
         <footer className="bg-gray-900 text-white py-12 border-t border-gray-800">
-          <div className="container mx-auto px-4">
+          <div className="px-4">
             <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
               <div>
                 <h3 className="font-bold text-lg mb-4">About Us</h3>
