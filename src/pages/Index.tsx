@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
-import { Search, Database, TrendingUp, ShieldCheck } from "lucide-react";
+import { Search, Database, TrendingUp, ShieldCheck, ArrowRight } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import Navigation from "@/components/Navigation";
 
@@ -262,11 +262,17 @@ const Index = () => {
                         )}
                       </div>
 
-                      <div className="pt-4 border-t border-gray-200">
-                        <div className="flex justify-between items-center">
+                      <div className="pt-4 border-t border-gray-200 flex justify-between items-center">
+                        <div className="flex items-center">
                           <span className="text-gray-500">Category:</span>
-                          <span className="font-medium">{motorcycle.Category || 'N/A'}</span>
+                          <span className="font-medium ml-2">{motorcycle.Category || 'N/A'}</span>
                         </div>
+                        <Link to={`/motorcycle/${motorcycle.motorcycle_id}`}>
+                          <Button className="button-gradient">
+                            View Details
+                            <ArrowRight className="ml-2" />
+                          </Button>
+                        </Link>
                       </div>
                     </div>
                   </Card>
