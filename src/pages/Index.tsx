@@ -49,7 +49,7 @@ const Index = () => {
       </header>
 
       {/* Hero Section */}
-      <section className="relative flex items-center justify-center overflow-hidden bg-gradient-to-b from-gray-900 to-gray-800 pt-10 pb-5">
+      <section className="relative flex items-center justify-center overflow-hidden bg-gradient-to-b from-gray-900 to-gray-800 pt-20 pb-5">
         <div className="absolute inset-0 bg-black/50 z-0" />
         <div className="container mx-auto px-4 z-10">
           <div className="text-center mb-12">
