@@ -221,9 +221,9 @@ const Index = () => {
               <p className="text-gray-600">Found {searchResults.length} matches</p>
             </div>
             <div className="container mx-auto px-6">
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-8">
+              <div className="grid grid-cols-5 gap-8">
                 {searchResults.map((motorcycle) => (
-                  <Card key={motorcycle.motorcycle_id} className="bg-white shadow-lg hover:shadow-xl transition-shadow">
+                  <Card key={motorcycle.motorcycle_id} className="col-span-5 lg:col-start-2 lg:col-span-3 bg-white shadow-lg hover:shadow-xl transition-shadow">
                     <div className="p-6">
                       <h3 className="text-2xl font-bold mb-1">
                         {motorcycle.Year} {motorcycle.Make}
