@@ -1,10 +1,11 @@
+
 import React, { useEffect, useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
-import { Search, Users, BarChart, DollarSign } from "lucide-react";
+import { Search, Database, TrendingUp, ShieldCheck } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import Navigation from "@/components/Navigation";
 
@@ -132,7 +133,7 @@ const Index = () => {
                 </>
               ) : (
                 <h2 className="text-3xl font-bold mb-4">
-                  Why Advertise With Us?
+                  Why Choose Our Valuation System?
                 </h2>
               )}
             </div>
@@ -157,30 +158,30 @@ const Index = () => {
               <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
                 {[
                   {
-                    icon: Users,
-                    title: "Targeted Audience",
-                    description: "Connect with motorcycle enthusiasts and buyers",
+                    icon: Database,
+                    title: "Comprehensive Database",
+                    description: "Access up-to-date values for thousands of motorcycle models across all major brands",
                   },
                   {
-                    icon: BarChart,
-                    title: "Performance Analytics",
-                    description: "Track your ad performance in real-time",
+                    icon: TrendingUp,
+                    title: "Real-Time Market Analysis",
+                    description: "Get accurate valuations based on current market trends and recent sales data",
                   },
                   {
-                    icon: DollarSign,
-                    title: "ROI Focused",
-                    description: "Maximize your advertising investment",
+                    icon: ShieldCheck,
+                    title: "Trusted Accuracy",
+                    description: "Our values are verified against dealer listings and actual sale prices",
                   },
-                ].map((benefit) => (
+                ].map((feature) => (
                   <Card 
-                    key={benefit.title}
+                    key={feature.title}
                     className="p-8 text-center hover-card"
                   >
                     <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-theme-100 text-theme-600 mb-4">
-                      <benefit.icon size={24} />
+                      <feature.icon size={24} />
                     </div>
-                    <h3 className="text-xl font-bold mb-2">{benefit.title}</h3>
-                    <p className="text-gray-600">{benefit.description}</p>
+                    <h3 className="text-xl font-bold mb-2">{feature.title}</h3>
+                    <p className="text-gray-600">{feature.description}</p>
                   </Card>
                 ))}
               </div>
