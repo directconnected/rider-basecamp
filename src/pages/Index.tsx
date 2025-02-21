@@ -40,10 +40,13 @@ const Index = () => {
         .from('motorcycles')
         .select('make')
         .order('make')
-        .distinct();
+        // Using a raw SQL SELECT DISTINCT query
+        .values();
 
       if (!error && data) {
-        setMakes(data.map(item => item.make));
+        // Filter unique values after fetching
+        const uniqueMakes = Array.from(new Set(data));
+        setMakes(uniqueMakes);
       }
     };
 
@@ -58,11 +61,12 @@ const Index = () => {
           .from('motorcycles')
           .select('model')
           .eq('make', searchParams.make)
-          .order('model')
-          .distinct();
+          .order('model');
 
         if (!error && data) {
-          setModels(data.map(item => item.model));
+          // Filter unique values after fetching
+          const uniqueModels = Array.from(new Set(data.map(item => item.model)));
+          setModels(uniqueModels);
         }
       } else {
         setModels([]);
