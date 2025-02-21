@@ -99,22 +99,8 @@ const Index = () => {
   }, [searchParams.make]);
 
   const calculateCurrentValue = (motorcycle: Motorcycle): number => {
-    const currentYear = new Date().getFullYear();
-    const motorcycleYear = parseInt(motorcycle.Year || "0");
     const msrp = parseFloat(motorcycle.MSRP?.replace(/[^0-9.]/g, '') || "0");
-    const age = currentYear - motorcycleYear;
-    
-    let depreciationRate = 1;
-
-    if (age >= 1) {
-      depreciationRate *= 0.85; // Initial 15% depreciation
-      const earlyYears = Math.min(4, age - 1);
-      depreciationRate *= Math.pow(0.90, earlyYears); // 10% for years 2-5
-      const laterYears = Math.max(0, age - 5);
-      depreciationRate *= Math.pow(0.95, laterYears); // 5% for subsequent years
-    }
-
-    return Math.round(msrp * depreciationRate);
+    return Math.round(msrp * 0.4); // 100% - 60% = 40% of MSRP
   };
 
   const handleSearch = async () => {
