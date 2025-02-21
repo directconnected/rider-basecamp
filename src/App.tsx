@@ -10,6 +10,7 @@ import About from "./pages/About";
 import AdvertiseWithUs from "./pages/AdvertiseWithUs";
 import Contact from "./pages/Contact";
 import NotFound from "./pages/NotFound";
+import MotorcycleDetails from "./pages/MotorcycleDetails";
 
 const queryClient = new QueryClient();
 
@@ -25,6 +26,7 @@ const App = () => (
           <Route path="/about" element={<About />} />
           <Route path="/advertise" element={<AdvertiseWithUs />} />
           <Route path="/contact" element={<Contact />} />
+          <Route path="/motorcycle/:id" element={<MotorcycleDetails />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
