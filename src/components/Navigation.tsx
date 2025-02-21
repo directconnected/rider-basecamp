@@ -19,6 +19,14 @@ const Navigation = () => {
           </div>
           <nav className="hidden md:flex items-center space-x-4">
             <Link 
+              to="/about" 
+              className={`text-sm text-white hover:text-theme-400 transition-colors ${
+                location.pathname === "/about" ? "text-theme-400" : ""
+              }`}
+            >
+              About
+            </Link>
+            <Link 
               to="/features" 
               className={`text-sm text-white hover:text-theme-400 transition-colors ${
                 location.pathname === "/features" ? "text-theme-400" : ""

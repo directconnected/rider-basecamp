@@ -1,6 +1,6 @@
 
 import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -130,19 +130,20 @@ const Index = () => {
               <div>
                 <h3 className="font-bold text-lg mb-4">Quick Links</h3>
                 <ul className="space-y-2">
-                  <li><a href="/" className="text-gray-400 hover:text-theme-400 transition-colors">Home</a></li>
-                  <li><a href="/pricing" className="text-gray-400 hover:text-theme-400 transition-colors">Pricing</a></li>
-                  <li><a href="/features" className="text-gray-400 hover:text-theme-400 transition-colors">Features</a></li>
-                  <li><a href="/contact" className="text-gray-400 hover:text-theme-400 transition-colors">Contact</a></li>
+                  <li><Link to="/" className="text-gray-400 hover:text-theme-400 transition-colors">Home</Link></li>
+                  <li><Link to="/about" className="text-gray-400 hover:text-theme-400 transition-colors">About</Link></li>
+                  <li><Link to="/features" className="text-gray-400 hover:text-theme-400 transition-colors">Features</Link></li>
+                  <li><Link to="/pricing" className="text-gray-400 hover:text-theme-400 transition-colors">Pricing</Link></li>
+                  <li><Link to="/contact" className="text-gray-400 hover:text-theme-400 transition-colors">Contact</Link></li>
                 </ul>
               </div>
               <div>
                 <h3 className="font-bold text-lg mb-4">Resources</h3>
                 <ul className="space-y-2">
-                  <li><a href="#" className="text-gray-400 hover:text-theme-400 transition-colors">Blog</a></li>
-                  <li><a href="#" className="text-gray-400 hover:text-theme-400 transition-colors">Documentation</a></li>
-                  <li><a href="#" className="text-gray-400 hover:text-theme-400 transition-colors">Support</a></li>
-                  <li><a href="#" className="text-gray-400 hover:text-theme-400 transition-colors">Terms of Service</a></li>
+                  <li><Link to="/blog" className="text-gray-400 hover:text-theme-400 transition-colors">Blog</Link></li>
+                  <li><Link to="/docs" className="text-gray-400 hover:text-theme-400 transition-colors">Documentation</Link></li>
+                  <li><Link to="/support" className="text-gray-400 hover:text-theme-400 transition-colors">Support</Link></li>
+                  <li><Link to="/terms" className="text-gray-400 hover:text-theme-400 transition-colors">Terms of Service</Link></li>
                 </ul>
               </div>
               <div>
