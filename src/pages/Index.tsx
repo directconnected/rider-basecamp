@@ -100,7 +100,7 @@ const Index = () => {
 
   const calculateCurrentValue = (motorcycle: Motorcycle): number => {
     const msrp = parseFloat(motorcycle.MSRP?.replace(/[^0-9.]/g, '') || "0");
-    return Math.round(msrp * 0.4); // 100% - 60% = 40% of MSRP
+    return Math.round(msrp * 0.6); // Taking 60% of MSRP
   };
 
   const handleSearch = async () => {
