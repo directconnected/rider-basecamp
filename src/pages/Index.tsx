@@ -4,28 +4,62 @@ import { useNavigate, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
 import { Search, Users, BarChart, DollarSign } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import Navigation from "@/components/Navigation";
 
+interface Motorcycle {
+  id: string;
+  year: number;
+  make: string;
+  model: string;
+  value: number;
+}
+
 const Index = () => {
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
-  const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useState({
+    year: '',
+    make: '',
+    model: ''
+  });
+  const [searchResults, setSearchResults] = useState<Motorcycle[]>([]);
+  const [isSearching, setIsSearching] = useState(false);
+  const [years] = useState(() => {
+    const currentYear = new Date().getFullYear();
+    return Array.from({ length: 30 }, (_, i) => currentYear - i);
+  });
 
-  useEffect(() => {
-    supabase.auth.onAuthStateChange((event, session) => {
-      setIsAuthenticated(!!session);
-    });
+  const handleSearch = async () => {
+    setIsSearching(true);
+    try {
+      let query = supabase
+        .from('motorcycles')
+        .select('*');
 
-    // Initial session check
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setIsAuthenticated(!!session);
-    });
-  }, []);
+      if (searchParams.year) {
+        query = query.eq('year', searchParams.year);
+      }
+      if (searchParams.make) {
+        query = query.ilike('make', `%${searchParams.make}%`);
+      }
+      if (searchParams.model) {
+        query = query.ilike('model', `%${searchParams.model}%`);
+      }
 
-  const handleSignOut = async () => {
-    await supabase.auth.signOut();
-    navigate("/auth");
+      const { data, error } = await query;
+
+      if (error) {
+        console.error('Error searching motorcycles:', error);
+        return;
+      }
+
+      setSearchResults(data || []);
+    } catch (error) {
+      console.error('Error:', error);
+    } finally {
+      setIsSearching(false);
+    }
   };
 
   return (
@@ -41,79 +75,117 @@ const Index = () => {
               <h1 className="text-4xl md:text-6xl font-bold text-white mb-6 animate-fade-in">
                 Get the real value of your motorcycle
               </h1>
-              {isAuthenticated ? (
-                <div className="max-w-2xl mx-auto mt-8">
-                  <div className="flex flex-col sm:flex-row gap-4 animate-fade-in">
-                    <Input 
-                      placeholder="Enter motorcycle make, model, or year" 
-                      className="py-6 text-lg flex-1"
-                    />
-                    <Button className="button-gradient text-white px-8 py-6">
-                      <Search className="mr-2" />
-                      Search
-                    </Button>
-                  </div>
-                  <Button 
-                    variant="outline" 
-                    className="mt-4 bg-white/10 text-white border-white/20 hover:bg-white/20"
-                    onClick={handleSignOut}
+              <div className="max-w-4xl mx-auto mt-8">
+                <div className="flex flex-col md:flex-row gap-4 animate-fade-in">
+                  <Select 
+                    value={searchParams.year}
+                    onValueChange={(value) => setSearchParams(prev => ({ ...prev, year: value }))}
                   >
-                    Sign Out
+                    <SelectTrigger className="bg-white">
+                      <SelectValue placeholder="Select Year" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {years.map(year => (
+                        <SelectItem key={year} value={year.toString()}>
+                          {year}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <Input 
+                    placeholder="Enter make (e.g., Honda)" 
+                    value={searchParams.make}
+                    onChange={(e) => setSearchParams(prev => ({ ...prev, make: e.target.value }))}
+                    className="bg-white"
+                  />
+                  <Input 
+                    placeholder="Enter model (e.g., CBR600RR)" 
+                    value={searchParams.model}
+                    onChange={(e) => setSearchParams(prev => ({ ...prev, model: e.target.value }))}
+                    className="bg-white"
+                  />
+                  <Button 
+                    className="button-gradient text-white px-8 py-6"
+                    onClick={handleSearch}
+                    disabled={isSearching}
+                  >
+                    <Search className="mr-2" />
+                    Search
                   </Button>
                 </div>
-              ) : (
-                <Button 
-                  className="button-gradient text-white px-8 py-6 text-lg animate-fade-in"
-                  onClick={() => navigate("/auth")}
-                >
-                  Sign In to Check Values
-                </Button>
-              )}
+              </div>
             </div>
           </div>
         </section>
 
-        {/* Benefits Section */}
+        {/* Search Results Section */}
         <section className="py-24 bg-gray-50">
           <div className="container mx-auto px-4">
             <div className="text-center mb-16">
-              <h2 className="text-3xl font-bold mb-4">
-                Why Advertise With Us?
-              </h2>
-              <p className="text-gray-600 max-w-2xl mx-auto">
-                Reach your target audience effectively
-              </p>
+              {searchResults.length > 0 ? (
+                <>
+                  <h2 className="text-3xl font-bold mb-4">
+                    Search Results
+                  </h2>
+                  <p className="text-gray-600 max-w-2xl mx-auto">
+                    Found {searchResults.length} matches
+                  </p>
+                </>
+              ) : (
+                <h2 className="text-3xl font-bold mb-4">
+                  Why Advertise With Us?
+                </h2>
+              )}
             </div>
-            <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
-              {[
-                {
-                  icon: Users,
-                  title: "Targeted Audience",
-                  description: "Connect with motorcycle enthusiasts and buyers",
-                },
-                {
-                  icon: BarChart,
-                  title: "Performance Analytics",
-                  description: "Track your ad performance in real-time",
-                },
-                {
-                  icon: DollarSign,
-                  title: "ROI Focused",
-                  description: "Maximize your advertising investment",
-                },
-              ].map((benefit) => (
-                <Card 
-                  key={benefit.title}
-                  className="p-8 text-center hover-card"
-                >
-                  <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-theme-100 text-theme-600 mb-4">
-                    <benefit.icon size={24} />
-                  </div>
-                  <h3 className="text-xl font-bold mb-2">{benefit.title}</h3>
-                  <p className="text-gray-600">{benefit.description}</p>
-                </Card>
-              ))}
-            </div>
+            
+            {searchResults.length > 0 ? (
+              <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+                {searchResults.map((motorcycle) => (
+                  <Card 
+                    key={motorcycle.id}
+                    className="p-8 text-center hover-card"
+                  >
+                    <h3 className="text-xl font-bold mb-4">
+                      {motorcycle.year} {motorcycle.make} {motorcycle.model}
+                    </h3>
+                    <p className="text-3xl font-bold text-theme-600">
+                      ${motorcycle.value.toLocaleString()}
+                    </p>
+                  </Card>
+                ))}
+              </div>
+            ) : (
+              <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+                {[
+                  {
+                    icon: Users,
+                    title: "Targeted Audience",
+                    description: "Connect with motorcycle enthusiasts and buyers",
+                  },
+                  {
+                    icon: BarChart,
+                    title: "Performance Analytics",
+                    description: "Track your ad performance in real-time",
+                  },
+                  {
+                    icon: DollarSign,
+                    title: "ROI Focused",
+                    description: "Maximize your advertising investment",
+                  },
+                ].map((benefit) => (
+                  <Card 
+                    key={benefit.title}
+                    className="p-8 text-center hover-card"
+                  >
+                    <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-theme-100 text-theme-600 mb-4">
+                      <benefit.icon size={24} />
+                    </div>
+                    <h3 className="text-xl font-bold mb-2">{benefit.title}</h3>
+                    <p className="text-gray-600">{benefit.description}</p>
+                  </Card>
+                ))}
+              </div>
+            )}
           </div>
         </section>
 
