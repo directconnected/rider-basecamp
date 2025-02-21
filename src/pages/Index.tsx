@@ -1,10 +1,9 @@
-
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Search, DollarSign, Users, BarChart } from "lucide-react";
+import { Search, Menu, Home } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
 const Index = () => {
@@ -29,6 +28,25 @@ const Index = () => {
 
   return (
     <div className="min-h-screen">
+      {/* Menu Header */}
+      <header className="bg-gray-900 border-b border-gray-800">
+        <div className="container mx-auto px-4">
+          <div className="flex items-center justify-between h-16">
+            <div className="flex items-center">
+              <a href="/" className="flex items-center space-x-2 text-white hover:text-theme-400 transition-colors">
+                <Home className="h-5 w-5" />
+                <span className="font-bold text-lg">Moto Values</span>
+              </a>
+            </div>
+            <nav className="flex items-center space-x-4">
+              <Button variant="ghost" className="text-white hover:text-theme-400 hover:bg-transparent">
+                <Menu className="h-5 w-5" />
+              </Button>
+            </nav>
+          </div>
+        </div>
+      </header>
+
       {/* Hero Section */}
       <section className="relative flex items-center justify-center overflow-hidden bg-gradient-to-b from-gray-900 to-gray-800 py-5">
         <div className="absolute inset-0 bg-black/50 z-0" />
