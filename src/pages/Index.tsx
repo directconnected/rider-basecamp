@@ -33,14 +33,12 @@ const Index = () => {
   const [models, setModels] = useState<string[]>([]);
 
   useEffect(() => {
-    // Fetch unique makes when component mounts
     const fetchMakes = async () => {
       const { data, error } = await supabase
         .from('motorcycles')
         .select('make');
 
       if (!error && data) {
-        // Filter unique makes and sort them
         const uniqueMakes = Array.from(new Set(data.map(item => item.make))).sort();
         setMakes(uniqueMakes);
       }
@@ -50,7 +48,6 @@ const Index = () => {
   }, []);
 
   useEffect(() => {
-    // Fetch models when make changes
     const fetchModels = async () => {
       if (searchParams.make) {
         const { data, error } = await supabase
@@ -59,7 +56,6 @@ const Index = () => {
           .eq('make', searchParams.make);
 
         if (!error && data) {
-          // Filter unique models and sort them
           const uniqueModels = Array.from(new Set(data.map(item => item.model))).sort();
           setModels(uniqueModels);
         }
@@ -75,21 +71,13 @@ const Index = () => {
     const currentYear = new Date().getFullYear();
     const age = currentYear - motorcycle.year;
     
-    // Depreciation rates:
-    // 1st year: 15%
-    // 2-5 years: 10% per year
-    // 6+ years: 5% per year
-    let depreciationRate = 1; // Start with full value
+    let depreciationRate = 1;
 
     if (age >= 1) {
-      depreciationRate *= 0.85; // First year 15% depreciation
-      
-      // Years 2-5
-      const earlyYears = Math.min(4, age - 1); // How many years between 2-5
+      depreciationRate *= 0.85;
+      const earlyYears = Math.min(4, age - 1);
       depreciationRate *= Math.pow(0.90, earlyYears);
-      
-      // Years 6+
-      const laterYears = Math.max(0, age - 5); // How many years after year 5
+      const laterYears = Math.max(0, age - 5);
       depreciationRate *= Math.pow(0.95, laterYears);
     }
 
@@ -120,7 +108,6 @@ const Index = () => {
         return;
       }
 
-      // Calculate current value for each motorcycle
       const resultsWithCurrentValue = (data || []).map(motorcycle => ({
         ...motorcycle,
         value: calculateCurrentValue(motorcycle)
@@ -139,7 +126,6 @@ const Index = () => {
       <Navigation />
 
       <main className="flex-1">
-        {/* Hero Section */}
         <section className="relative flex items-center justify-center overflow-hidden bg-gradient-to-b from-gray-900 to-gray-800 pt-20 pb-5">
           <div className="absolute inset-0 bg-black/50 z-0" />
           <div className="container mx-auto px-4 z-10">
@@ -209,9 +195,8 @@ const Index = () => {
           </div>
         </section>
 
-        {/* Search Results Section */}
         <section className="py-24 bg-gray-50">
-          <div className="container mx-auto px-4">
+          <div className="container mx-auto px-4 w-full">
             <div className="text-center mb-16">
               {searchResults.length > 0 ? (
                 <>
@@ -230,7 +215,7 @@ const Index = () => {
             </div>
             
             {searchResults.length > 0 ? (
-              <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-8">
                 {searchResults.map((motorcycle) => (
                   <Card 
                     key={motorcycle.id}
@@ -249,7 +234,7 @@ const Index = () => {
                 ))}
               </div>
             ) : (
-              <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                 {[
                   {
                     icon: Database,
@@ -283,7 +268,6 @@ const Index = () => {
           </div>
         </section>
 
-        {/* Footer */}
         <footer className="bg-gray-900 text-white py-12 border-t border-gray-800">
           <div className="container mx-auto px-4">
             <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
