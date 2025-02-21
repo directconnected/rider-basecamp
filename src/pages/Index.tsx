@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -38,7 +37,7 @@ const Index = () => {
         .select('*');
 
       if (searchParams.year) {
-        query = query.eq('year', searchParams.year);
+        query = query.eq('year', parseInt(searchParams.year));
       }
       if (searchParams.make) {
         query = query.ilike('make', `%${searchParams.make}%`);
@@ -204,8 +203,7 @@ const Index = () => {
                 <ul className="space-y-2">
                   <li><Link to="/" className="text-gray-400 hover:text-theme-400 transition-colors">Home</Link></li>
                   <li><Link to="/about" className="text-gray-400 hover:text-theme-400 transition-colors">About</Link></li>
-                  <li><Link to="/features" className="text-gray-400 hover:text-theme-400 transition-colors">Features</Link></li>
-                  <li><Link to="/pricing" className="text-gray-400 hover:text-theme-400 transition-colors">Pricing</Link></li>
+                  <li><Link to="/advertise" className="text-gray-400 hover:text-theme-400 transition-colors">Advertise</Link></li>
                   <li><Link to="/contact" className="text-gray-400 hover:text-theme-400 transition-colors">Contact</Link></li>
                 </ul>
               </div>
