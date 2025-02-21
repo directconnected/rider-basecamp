@@ -15,6 +15,7 @@ interface Motorcycle {
   make: string;
   model: string;
   value: number;
+  msrp: number;
 }
 
 const Index = () => {
@@ -29,6 +30,31 @@ const Index = () => {
     const currentYear = new Date().getFullYear();
     return Array.from({ length: 30 }, (_, i) => currentYear - i);
   });
+
+  const calculateCurrentValue = (motorcycle: Motorcycle): number => {
+    const currentYear = new Date().getFullYear();
+    const age = currentYear - motorcycle.year;
+    
+    // Depreciation rates:
+    // 1st year: 15%
+    // 2-5 years: 10% per year
+    // 6+ years: 5% per year
+    let depreciationRate = 1; // Start with full value
+
+    if (age >= 1) {
+      depreciationRate *= 0.85; // First year 15% depreciation
+      
+      // Years 2-5
+      const earlyYears = Math.min(4, age - 1); // How many years between 2-5
+      depreciationRate *= Math.pow(0.90, earlyYears);
+      
+      // Years 6+
+      const laterYears = Math.max(0, age - 5); // How many years after year 5
+      depreciationRate *= Math.pow(0.95, laterYears);
+    }
+
+    return Math.round(motorcycle.msrp * depreciationRate);
+  };
 
   const handleSearch = async () => {
     setIsSearching(true);
@@ -54,7 +80,13 @@ const Index = () => {
         return;
       }
 
-      setSearchResults(data || []);
+      // Calculate current value for each motorcycle
+      const resultsWithCurrentValue = (data || []).map(motorcycle => ({
+        ...motorcycle,
+        value: calculateCurrentValue(motorcycle)
+      }));
+
+      setSearchResults(resultsWithCurrentValue);
     } catch (error) {
       console.error('Error:', error);
     } finally {
@@ -148,8 +180,11 @@ const Index = () => {
                     <h3 className="text-xl font-bold mb-4">
                       {motorcycle.year} {motorcycle.make} {motorcycle.model}
                     </h3>
-                    <p className="text-3xl font-bold text-theme-600">
+                    <p className="text-3xl font-bold text-theme-600 mb-2">
                       ${motorcycle.value.toLocaleString()}
+                    </p>
+                    <p className="text-sm text-gray-500">
+                      Original MSRP: ${motorcycle.msrp.toLocaleString()}
                     </p>
                   </Card>
                 ))}
