@@ -1,7 +1,6 @@
 
 import React from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Button } from "@/components/ui/button";
 import { Home } from "lucide-react";
 
 const Navigation = () => {
@@ -27,20 +26,12 @@ const Navigation = () => {
               About
             </Link>
             <Link 
-              to="/features" 
+              to="/advertise" 
               className={`text-sm text-white hover:text-theme-400 transition-colors ${
-                location.pathname === "/features" ? "text-theme-400" : ""
+                location.pathname === "/advertise" ? "text-theme-400" : ""
               }`}
             >
-              Features
-            </Link>
-            <Link 
-              to="/pricing" 
-              className={`text-sm text-white hover:text-theme-400 transition-colors ${
-                location.pathname === "/pricing" ? "text-theme-400" : ""
-              }`}
-            >
-              Pricing
+              Advertise
             </Link>
             <Link 
               to="/contact" 

@@ -1,8 +1,10 @@
-
 import React from "react";
+import { Link } from "react-router-dom";
 import { Card } from "@/components/ui/card";
-import Navigation from "@/components/Navigation";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Building2, Users2, History, Target } from "lucide-react";
+import Navigation from "@/components/Navigation";
 
 const About = () => {
   return (
@@ -122,8 +124,7 @@ const About = () => {
               <ul className="space-y-2">
                 <li><Link to="/" className="text-gray-400 hover:text-theme-400 transition-colors">Home</Link></li>
                 <li><Link to="/about" className="text-gray-400 hover:text-theme-400 transition-colors">About</Link></li>
-                <li><Link to="/features" className="text-gray-400 hover:text-theme-400 transition-colors">Features</Link></li>
-                <li><Link to="/pricing" className="text-gray-400 hover:text-theme-400 transition-colors">Pricing</Link></li>
+                <li><Link to="/advertise" className="text-gray-400 hover:text-theme-400 transition-colors">Advertise</Link></li>
                 <li><Link to="/contact" className="text-gray-400 hover:text-theme-400 transition-colors">Contact</Link></li>
               </ul>
             </div>
