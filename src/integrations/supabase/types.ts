@@ -76,7 +76,6 @@ export type Database = {
           Gearbox: string | null
           "Greenhouse gases (CO2 g/km)": string | null
           "Ground clearance (mm)": string | null
-          id: string
           Ignition: string | null
           "Image URL": string | null
           Instruments: string | null
@@ -86,6 +85,7 @@ export type Database = {
           "Max RPM": string | null
           Model: string | null
           "Modifications compared to previous model": string | null
+          motorcycle_id: number
           "Oil capacity (litres)": string | null
           "Overall height (mm)": string | null
           "Overall length (mm)": string | null
@@ -154,7 +154,6 @@ export type Database = {
           Gearbox?: string | null
           "Greenhouse gases (CO2 g/km)"?: string | null
           "Ground clearance (mm)"?: string | null
-          id?: string
           Ignition?: string | null
           "Image URL"?: string | null
           Instruments?: string | null
@@ -164,6 +163,7 @@ export type Database = {
           "Max RPM"?: string | null
           Model?: string | null
           "Modifications compared to previous model"?: string | null
+          motorcycle_id?: number
           "Oil capacity (litres)"?: string | null
           "Overall height (mm)"?: string | null
           "Overall length (mm)"?: string | null
@@ -232,7 +232,6 @@ export type Database = {
           Gearbox?: string | null
           "Greenhouse gases (CO2 g/km)"?: string | null
           "Ground clearance (mm)"?: string | null
-          id?: string
           Ignition?: string | null
           "Image URL"?: string | null
           Instruments?: string | null
@@ -242,6 +241,7 @@ export type Database = {
           "Max RPM"?: string | null
           Model?: string | null
           "Modifications compared to previous model"?: string | null
+          motorcycle_id?: number
           "Oil capacity (litres)"?: string | null
           "Overall height (mm)"?: string | null
           "Overall length (mm)"?: string | null
