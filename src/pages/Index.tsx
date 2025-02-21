@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -214,19 +215,18 @@ const Index = () => {
           </div>
         </section>
 
-        <section className="py-24 bg-gray-50">
-          {searchResults.length > 0 ? (
-            <>
-              <div className="text-center mb-16">
-                <h2 className="text-3xl font-bold mb-4">Search Results</h2>
-                <p className="text-gray-600">Found {searchResults.length} matches</p>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6 px-6">
+        {searchResults.length > 0 ? (
+          <div className="w-full bg-gray-50">
+            <div className="text-center py-16">
+              <h2 className="text-3xl font-bold mb-4">Search Results</h2>
+              <p className="text-gray-600">Found {searchResults.length} matches</p>
+            </div>
+            <div className="w-full px-4 md:px-6 pb-24">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6">
                 {searchResults.map((motorcycle) => (
                   <Card 
                     key={motorcycle.motorcycle_id}
-                    className="p-6 hover:shadow-lg transition-shadow duration-300"
+                    className="w-full p-6 hover:shadow-lg transition-shadow duration-300"
                   >
                     <div className="space-y-4">
                       <div className="text-center">
@@ -262,49 +262,49 @@ const Index = () => {
                   </Card>
                 ))}
               </div>
-            </>
-          ) : (
-            <>
-              <div className="text-center mb-16">
-                <h2 className="text-3xl font-bold mb-4">
-                  Why Choose Our Valuation System?
-                </h2>
+            </div>
+          </div>
+        ) : (
+          <section className="bg-gray-50 py-24">
+            <div className="text-center mb-16">
+              <h2 className="text-3xl font-bold mb-4">
+                Why Choose Our Valuation System?
+              </h2>
+            </div>
+            <div className="px-4 md:px-6">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-7xl mx-auto">
+                {[
+                  {
+                    icon: Database,
+                    title: "Comprehensive Database",
+                    description: "Access up-to-date values for thousands of motorcycle models across all major brands",
+                  },
+                  {
+                    icon: TrendingUp,
+                    title: "Real-Time Market Analysis",
+                    description: "Get accurate valuations based on current market trends and recent sales data",
+                  },
+                  {
+                    icon: ShieldCheck,
+                    title: "Trusted Accuracy",
+                    description: "Our values are verified against dealer listings and actual sale prices",
+                  },
+                ].map((feature) => (
+                  <Card 
+                    key={feature.title}
+                    className="p-8 text-center hover-card"
+                  >
+                    <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-theme-100 text-theme-600 mb-4">
+                      <feature.icon size={24} />
+                    </div>
+                    <h3 className="text-xl font-bold mb-2">{feature.title}</h3>
+                    <p className="text-gray-600">{feature.description}</p>
+                  </Card>
+                ))}
               </div>
-              <div className="container mx-auto px-4">
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                  {[
-                    {
-                      icon: Database,
-                      title: "Comprehensive Database",
-                      description: "Access up-to-date values for thousands of motorcycle models across all major brands",
-                    },
-                    {
-                      icon: TrendingUp,
-                      title: "Real-Time Market Analysis",
-                      description: "Get accurate valuations based on current market trends and recent sales data",
-                    },
-                    {
-                      icon: ShieldCheck,
-                      title: "Trusted Accuracy",
-                      description: "Our values are verified against dealer listings and actual sale prices",
-                    },
-                  ].map((feature) => (
-                    <Card 
-                      key={feature.title}
-                      className="p-8 text-center hover-card"
-                    >
-                      <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-theme-100 text-theme-600 mb-4">
-                        <feature.icon size={24} />
-                      </div>
-                      <h3 className="text-xl font-bold mb-2">{feature.title}</h3>
-                      <p className="text-gray-600">{feature.description}</p>
-                    </Card>
-                  ))}
-                </div>
-              </div>
-            </>
-          )}
-        </section>
+            </div>
+          </section>
+        )}
 
         <footer className="bg-gray-900 text-white py-12 border-t border-gray-800">
           <div className="container mx-auto px-4">
