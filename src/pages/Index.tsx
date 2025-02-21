@@ -30,6 +30,47 @@ const Index = () => {
     const currentYear = new Date().getFullYear();
     return Array.from({ length: 30 }, (_, i) => currentYear - i);
   });
+  const [makes, setMakes] = useState<string[]>([]);
+  const [models, setModels] = useState<string[]>([]);
+
+  useEffect(() => {
+    // Fetch unique makes when component mounts
+    const fetchMakes = async () => {
+      const { data, error } = await supabase
+        .from('motorcycles')
+        .select('make')
+        .order('make')
+        .distinct();
+
+      if (!error && data) {
+        setMakes(data.map(item => item.make));
+      }
+    };
+
+    fetchMakes();
+  }, []);
+
+  useEffect(() => {
+    // Fetch models when make changes
+    const fetchModels = async () => {
+      if (searchParams.make) {
+        const { data, error } = await supabase
+          .from('motorcycles')
+          .select('model')
+          .eq('make', searchParams.make)
+          .order('model')
+          .distinct();
+
+        if (!error && data) {
+          setModels(data.map(item => item.model));
+        }
+      } else {
+        setModels([]);
+      }
+    };
+
+    fetchModels();
+  }, [searchParams.make]);
 
   const calculateCurrentValue = (motorcycle: Motorcycle): number => {
     const currentYear = new Date().getFullYear();
@@ -67,10 +108,10 @@ const Index = () => {
         query = query.eq('year', parseInt(searchParams.year));
       }
       if (searchParams.make) {
-        query = query.ilike('make', `%${searchParams.make}%`);
+        query = query.eq('make', searchParams.make);
       }
       if (searchParams.model) {
-        query = query.ilike('model', `%${searchParams.model}%`);
+        query = query.eq('model', searchParams.model);
       }
 
       const { data, error } = await query;
@@ -111,7 +152,7 @@ const Index = () => {
                 <div className="flex flex-col md:flex-row gap-4 animate-fade-in">
                   <Select 
                     value={searchParams.year}
-                    onValueChange={(value) => setSearchParams(prev => ({ ...prev, year: value }))}
+                    onValueChange={(value) => setSearchParams(prev => ({ ...prev, year: value, model: '' }))}
                   >
                     <SelectTrigger className="bg-white">
                       <SelectValue placeholder="Select Year" />
@@ -124,18 +165,37 @@ const Index = () => {
                       ))}
                     </SelectContent>
                   </Select>
-                  <Input 
-                    placeholder="Enter make (e.g., Honda)" 
+                  <Select 
                     value={searchParams.make}
-                    onChange={(e) => setSearchParams(prev => ({ ...prev, make: e.target.value }))}
-                    className="bg-white"
-                  />
-                  <Input 
-                    placeholder="Enter model (e.g., CBR600RR)" 
+                    onValueChange={(value) => setSearchParams(prev => ({ ...prev, make: value, model: '' }))}
+                  >
+                    <SelectTrigger className="bg-white">
+                      <SelectValue placeholder="Select Make" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {makes.map(make => (
+                        <SelectItem key={make} value={make}>
+                          {make}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <Select 
                     value={searchParams.model}
-                    onChange={(e) => setSearchParams(prev => ({ ...prev, model: e.target.value }))}
-                    className="bg-white"
-                  />
+                    onValueChange={(value) => setSearchParams(prev => ({ ...prev, model: value }))}
+                    disabled={!searchParams.make}
+                  >
+                    <SelectTrigger className="bg-white">
+                      <SelectValue placeholder="Select Model" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {models.map(model => (
+                        <SelectItem key={model} value={model}>
+                          {model}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                   <Button 
                     className="button-gradient text-white px-8 py-6"
                     onClick={handleSearch}
