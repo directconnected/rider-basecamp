@@ -229,7 +229,7 @@ const Index = () => {
         </section>
 
         <section className="py-24 bg-gray-50">
-          <div className="container mx-auto px-4 w-full">
+          <div className="container mx-auto px-4">
             <div className="text-center mb-16">
               {searchResults.length > 0 ? (
                 <>
@@ -248,25 +248,50 @@ const Index = () => {
             </div>
             
             {searchResults.length > 0 ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-8">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                 {searchResults.map((motorcycle) => (
                   <Card 
                     key={motorcycle.motorcycle_id}
-                    className="p-8 text-center hover-card"
+                    className="p-6 hover:shadow-lg transition-shadow duration-300"
                   >
-                    <h3 className="text-xl font-bold mb-4">
-                      {motorcycle.Year} {motorcycle.Make} {motorcycle.Model}
-                    </h3>
-                    <p className="text-3xl font-bold text-theme-600 mb-2">
-                      ${motorcycle.value?.toLocaleString()}
-                    </p>
-                    <p className="text-sm text-gray-500">
-                      Original MSRP: ${motorcycle.MSRP?.replace(/[^0-9.]/g, '').toLocaleString() || 'N/A'}
-                    </p>
-                    <div className="mt-4 text-left text-sm text-gray-600">
-                      <p>Category: {motorcycle.Category || 'N/A'}</p>
-                      <p>Engine: {motorcycle["Engine type"] || 'N/A'}</p>
-                      <p>Power: {motorcycle["Power (PS)"] || 'N/A'}</p>
+                    <div className="space-y-4">
+                      <div className="text-center">
+                        <h3 className="text-xl font-bold text-gray-900">
+                          {motorcycle.Year} {motorcycle.Make}
+                        </h3>
+                        <p className="text-lg text-gray-600">{motorcycle.Model}</p>
+                      </div>
+                      
+                      <div className="border-t border-b border-gray-200 py-4 space-y-2">
+                        <div className="text-center">
+                          <p className="text-sm text-gray-500">Estimated Current Value</p>
+                          <p className="text-3xl font-bold text-theme-600">
+                            ${motorcycle.value?.toLocaleString()}
+                          </p>
+                        </div>
+                        
+                        <div className="text-center">
+                          <p className="text-sm text-gray-500">Original MSRP</p>
+                          <p className="text-xl font-semibold text-gray-900">
+                            ${motorcycle.MSRP?.replace(/[^0-9.]/g, '').toLocaleString() || 'N/A'}
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="text-sm text-gray-500 space-y-1">
+                        <div className="flex justify-between">
+                          <span>Category:</span>
+                          <span className="font-medium text-gray-900">{motorcycle.Category || 'N/A'}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>Engine:</span>
+                          <span className="font-medium text-gray-900">{motorcycle["Engine type"] || 'N/A'}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>Power:</span>
+                          <span className="font-medium text-gray-900">{motorcycle["Power (PS)"] || 'N/A'} PS</span>
+                        </div>
+                      </div>
                     </div>
                   </Card>
                 ))}
