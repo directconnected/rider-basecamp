@@ -141,10 +141,10 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col w-full">
       <Navigation />
 
-      <main className="flex-1">
+      <main className="flex-1 w-full">
         <section className="relative flex items-center justify-center overflow-hidden bg-gradient-to-b from-gray-900 to-gray-800 pt-20 pb-5">
           <div className="absolute inset-0 bg-black/50 z-0" />
           <div className="container mx-auto px-4 z-10">
@@ -214,7 +214,7 @@ const Index = () => {
           </div>
         </section>
 
-        <section className="py-24 bg-gray-50">
+        <section className="py-24 bg-gray-50 w-full">
           <div className="text-center mb-16">
             {searchResults.length > 0 ? (
               <>
@@ -233,8 +233,8 @@ const Index = () => {
           </div>
           
           {searchResults.length > 0 ? (
-            <div className="px-6">
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6">
+            <div className="w-full px-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6 w-full">
                 {searchResults.map((motorcycle) => (
                   <Card 
                     key={motorcycle.motorcycle_id}
