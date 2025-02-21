@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -10,11 +11,17 @@ import Navigation from "@/components/Navigation";
 
 interface Motorcycle {
   id: string;
-  year: number;
+  year: string;
   make: string;
   model: string;
-  value: number;
-  msrp: number;
+  Category: string;
+  Rating: string;
+  "Price as new (MSRP)": string;
+  "Engine type": string;
+  "Engine details": string;
+  "Power (PS)": string;
+  "Power (rpm)": string;
+  "Top speed (kmph)": string;
 }
 
 const Index = () => {
@@ -35,11 +42,11 @@ const Index = () => {
   useEffect(() => {
     const fetchMakes = async () => {
       const { data, error } = await supabase
-        .from('motorcycles')
-        .select('make');
+        .from('motorcycles_1')
+        .select('Make');
 
       if (!error && data) {
-        const uniqueMakes = Array.from(new Set(data.map(item => item.make))).sort();
+        const uniqueMakes = Array.from(new Set(data.map(item => item.Make))).sort();
         setMakes(uniqueMakes);
       }
     };
@@ -51,12 +58,12 @@ const Index = () => {
     const fetchModels = async () => {
       if (searchParams.make) {
         const { data, error } = await supabase
-          .from('motorcycles')
-          .select('model')
-          .eq('make', searchParams.make);
+          .from('motorcycles_1')
+          .select('Model')
+          .eq('Make', searchParams.make);
 
         if (!error && data) {
-          const uniqueModels = Array.from(new Set(data.map(item => item.model))).sort();
+          const uniqueModels = Array.from(new Set(data.map(item => item.Model))).sort();
           setModels(uniqueModels);
         }
       } else {
@@ -69,7 +76,9 @@ const Index = () => {
 
   const calculateCurrentValue = (motorcycle: Motorcycle): number => {
     const currentYear = new Date().getFullYear();
-    const age = currentYear - motorcycle.year;
+    const motorcycleYear = parseInt(motorcycle["Year of launch"] || "0");
+    const msrp = parseFloat(motorcycle["Price as new (MSRP)"]?.replace(/[^0-9.]/g, '') || "0");
+    const age = currentYear - motorcycleYear;
     
     let depreciationRate = 1;
 
@@ -81,24 +90,24 @@ const Index = () => {
       depreciationRate *= Math.pow(0.95, laterYears);
     }
 
-    return Math.round(motorcycle.msrp * depreciationRate);
+    return Math.round(msrp * depreciationRate);
   };
 
   const handleSearch = async () => {
     setIsSearching(true);
     try {
       let query = supabase
-        .from('motorcycles')
+        .from('motorcycles_1')
         .select('*');
 
       if (searchParams.year) {
-        query = query.eq('year', parseInt(searchParams.year));
+        query = query.eq('Year of launch', searchParams.year);
       }
       if (searchParams.make) {
-        query = query.eq('make', searchParams.make);
+        query = query.eq('Make', searchParams.make);
       }
       if (searchParams.model) {
-        query = query.eq('model', searchParams.model);
+        query = query.eq('Model', searchParams.model);
       }
 
       const { data, error } = await query;
@@ -222,14 +231,19 @@ const Index = () => {
                     className="p-8 text-center hover-card"
                   >
                     <h3 className="text-xl font-bold mb-4">
-                      {motorcycle.year} {motorcycle.make} {motorcycle.model}
+                      {motorcycle["Year of launch"]} {motorcycle.Make} {motorcycle.Model}
                     </h3>
                     <p className="text-3xl font-bold text-theme-600 mb-2">
                       ${motorcycle.value.toLocaleString()}
                     </p>
                     <p className="text-sm text-gray-500">
-                      Original MSRP: ${motorcycle.msrp.toLocaleString()}
+                      Original MSRP: ${motorcycle["Price as new (MSRP)"]?.replace(/[^0-9.]/g, '').toLocaleString() || 'N/A'}
                     </p>
+                    <div className="mt-4 text-left text-sm text-gray-600">
+                      <p>Category: {motorcycle.Category || 'N/A'}</p>
+                      <p>Engine: {motorcycle["Engine type"] || 'N/A'}</p>
+                      <p>Power: {motorcycle["Power (PS)"] || 'N/A'}</p>
+                    </div>
                   </Card>
                 ))}
               </div>
