@@ -215,7 +215,7 @@ const Index = () => {
         </section>
 
         <section className="py-24 bg-gray-50">
-          <div className="w-full px-4 max-w-[2000px] mx-auto">
+          <div className="w-full px-4">
             <div className="text-center mb-16">
               {searchResults.length > 0 ? (
                 <>
@@ -234,7 +234,7 @@ const Index = () => {
             </div>
             
             {searchResults.length > 0 ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6 max-w-[2000px] mx-auto">
                 {searchResults.map((motorcycle) => (
                   <Card 
                     key={motorcycle.motorcycle_id}
