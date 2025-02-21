@@ -3,7 +3,7 @@ import React, { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, FileText } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import Navigation from "@/components/Navigation";
 
@@ -27,6 +27,7 @@ interface MotorcycleDetails {
   "Dry weight (kg)": string | null;
   "Fuel capacity (litres)": string | null;
   "Color options": string | null;
+  service_manual_url: string | null;
 }
 
 const MotorcycleDetails = () => {
@@ -116,6 +117,23 @@ const MotorcycleDetails = () => {
             <h1 className="text-3xl font-bold mb-2">
               {motorcycle.Year} {motorcycle.Make} {motorcycle.Model}
             </h1>
+            
+            {motorcycle.service_manual_url && (
+              <div className="mb-6">
+                <a 
+                  href={motorcycle.service_manual_url} 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center"
+                >
+                  <Button variant="secondary" className="gap-2">
+                    <FileText className="h-4 w-4" />
+                    View Service Manual
+                  </Button>
+                </a>
+              </div>
+            )}
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mt-6">
               <div className="space-y-6">
                 <div>

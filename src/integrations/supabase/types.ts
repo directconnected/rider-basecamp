@@ -105,6 +105,7 @@ export type Database = {
           "Reserve fuel capacity (litres)": string | null
           Seat: string | null
           "Seat height (mm)": string | null
+          service_manual_url: string | null
           Starter: string | null
           "Top speed (kmph)": string | null
           "Torque (Nm)": string | null
@@ -182,6 +183,7 @@ export type Database = {
           "Reserve fuel capacity (litres)"?: string | null
           Seat?: string | null
           "Seat height (mm)"?: string | null
+          service_manual_url?: string | null
           Starter?: string | null
           "Top speed (kmph)"?: string | null
           "Torque (Nm)"?: string | null
@@ -259,6 +261,7 @@ export type Database = {
           "Reserve fuel capacity (litres)"?: string | null
           Seat?: string | null
           "Seat height (mm)"?: string | null
+          service_manual_url?: string | null
           Starter?: string | null
           "Top speed (kmph)"?: string | null
           "Torque (Nm)"?: string | null
