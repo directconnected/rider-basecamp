@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -30,28 +29,36 @@ const Index = () => {
   return (
     <div className="min-h-screen">
       {/* Hero Section */}
-      <section className="relative h-screen flex items-center justify-center overflow-hidden bg-gradient-to-b from-gray-900 to-gray-800">
+      <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-gradient-to-b from-gray-900 to-gray-800">
         <div className="absolute inset-0 bg-black/50 z-0" />
-        <div className="container mx-auto px-4 z-10 text-center">
-          <h1 className="text-4xl md:text-6xl font-bold text-white mb-6 animate-fade-in">
-            Premium Advertising Space on
-            <span className="block text-theme-400">Motorcycle Valuations</span>
-          </h1>
-          <p className="text-xl text-gray-200 mb-8 max-w-2xl mx-auto animate-fade-in">
-            Connect with motorcycle enthusiasts through strategic banner placement on our high-traffic valuation platform
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center animate-fade-in">
-            <Button className="button-gradient text-white px-8 py-6 text-lg">
-              Start Advertising
-            </Button>
+        <div className="container mx-auto px-4 z-10">
+          <div className="text-center mb-12">
+            <h1 className="text-4xl md:text-6xl font-bold text-white mb-6 animate-fade-in">
+              Get the real value of your motorcycle
+            </h1>
             {isAuthenticated ? (
-              <Button variant="outline" className="bg-white/10 text-white border-white/20 hover:bg-white/20 px-8 py-6 text-lg" onClick={handleSignOut}>
-                Sign Out
-              </Button>
+              <div className="max-w-2xl mx-auto mt-8">
+                <div className="flex flex-col sm:flex-row gap-4 animate-fade-in">
+                  <Input 
+                    placeholder="Enter motorcycle make, model, or year" 
+                    className="py-6 text-lg flex-1"
+                  />
+                  <Button className="button-gradient text-white px-8 py-6">
+                    <Search className="mr-2" />
+                    Search
+                  </Button>
+                </div>
+                <Button 
+                  variant="outline" 
+                  className="mt-4 bg-white/10 text-white border-white/20 hover:bg-white/20"
+                  onClick={handleSignOut}
+                >
+                  Sign Out
+                </Button>
+              </div>
             ) : (
               <Button 
-                variant="outline" 
-                className="bg-white/10 text-white border-white/20 hover:bg-white/20 px-8 py-6 text-lg"
+                className="button-gradient text-white px-8 py-6 text-lg animate-fade-in"
                 onClick={() => navigate("/auth")}
               >
                 Sign In to Check Values
@@ -60,34 +67,6 @@ const Index = () => {
           </div>
         </div>
       </section>
-
-      {/* Search Section */}
-      {isAuthenticated ? (
-        <section className="py-24 bg-gray-50">
-          <div className="container mx-auto px-4">
-            <div className="text-center mb-12 animate-fade-in">
-              <h2 className="text-3xl font-bold mb-4">
-                Find Your Motorcycle's Value
-              </h2>
-              <p className="text-gray-600">
-                Get accurate market values based on real-time data
-              </p>
-            </div>
-            <div className="max-w-2xl mx-auto">
-              <div className="flex gap-4 mb-8 animate-fade-in">
-                <Input 
-                  placeholder="Enter motorcycle make, model, or year" 
-                  className="py-6 text-lg"
-                />
-                <Button className="button-gradient text-white px-8">
-                  <Search className="mr-2" />
-                  Search
-                </Button>
-              </div>
-            </div>
-          </div>
-        </section>
-      ) : null}
 
       {/* Subscription Plans */}
       <section className="py-24">
