@@ -269,14 +269,6 @@ const Index = () => {
                           <span>Category:</span>
                           <span className="font-medium text-gray-900">{motorcycle.Category || 'N/A'}</span>
                         </div>
-                        <div className="flex justify-between">
-                          <span>Engine:</span>
-                          <span className="font-medium text-gray-900">{motorcycle["Engine type"] || 'N/A'}</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span>Power:</span>
-                          <span className="font-medium text-gray-900">{motorcycle["Power (PS)"] || 'N/A'} PS</span>
-                        </div>
                       </div>
                     </div>
                   </Card>
