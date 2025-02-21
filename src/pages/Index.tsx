@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -38,14 +37,11 @@ const Index = () => {
     const fetchMakes = async () => {
       const { data, error } = await supabase
         .from('motorcycles')
-        .select('make')
-        .order('make')
-        // Using a raw SQL SELECT DISTINCT query
-        .values();
+        .select('make');
 
       if (!error && data) {
-        // Filter unique values after fetching
-        const uniqueMakes = Array.from(new Set(data));
+        // Filter unique makes and sort them
+        const uniqueMakes = Array.from(new Set(data.map(item => item.make))).sort();
         setMakes(uniqueMakes);
       }
     };
@@ -60,12 +56,11 @@ const Index = () => {
         const { data, error } = await supabase
           .from('motorcycles')
           .select('model')
-          .eq('make', searchParams.make)
-          .order('model');
+          .eq('make', searchParams.make);
 
         if (!error && data) {
-          // Filter unique values after fetching
-          const uniqueModels = Array.from(new Set(data.map(item => item.model)));
+          // Filter unique models and sort them
+          const uniqueModels = Array.from(new Set(data.map(item => item.model))).sort();
           setModels(uniqueModels);
         }
       } else {
