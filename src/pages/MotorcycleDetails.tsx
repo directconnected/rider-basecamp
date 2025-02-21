@@ -30,17 +30,25 @@ interface MotorcycleDetails {
 }
 
 const MotorcycleDetails = () => {
-  const { id } = useParams();
+  const { id } = useParams<{ id: string }>();
   const [motorcycle, setMotorcycle] = useState<MotorcycleDetails | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchMotorcycleDetails = async () => {
       try {
+        if (!id) return;
+        
+        const numericId = parseInt(id, 10);
+        if (isNaN(numericId)) {
+          console.error('Invalid ID format');
+          return;
+        }
+
         const { data, error } = await supabase
           .from('motorcycles_1')
           .select('*')
-          .eq('motorcycle_id', id)
+          .eq('motorcycle_id', numericId)
           .single();
 
         if (error) {
