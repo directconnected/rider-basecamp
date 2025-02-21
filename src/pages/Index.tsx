@@ -140,6 +140,15 @@ const Index = () => {
     }
   };
 
+  const formatCurrency = (value: string | null): string => {
+    if (!value) return 'N/A';
+    const numericValue = parseFloat(value.replace(/[^0-9.]/g, ''));
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD',
+    }).format(numericValue);
+  };
+
   return (
     <div className="min-h-screen flex flex-col">
       <Navigation />
@@ -241,7 +250,7 @@ const Index = () => {
                         <div>
                           <p className="text-gray-500 text-sm">Original MSRP</p>
                           <p className="text-xl font-semibold">
-                            ${motorcycle.MSRP?.replace(/[^0-9.]/g, '').toLocaleString() || 'N/A'}
+                            {formatCurrency(motorcycle.MSRP)}
                           </p>
                         </div>
 
