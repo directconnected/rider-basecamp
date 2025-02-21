@@ -141,10 +141,10 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col w-full">
+    <div className="min-h-screen flex flex-col">
       <Navigation />
 
-      <main className="flex-1 w-full">
+      <main className="flex-1">
         <section className="relative flex items-center justify-center overflow-hidden bg-gradient-to-b from-gray-900 to-gray-800 pt-20 pb-5">
           <div className="absolute inset-0 bg-black/50 z-0" />
           <div className="container mx-auto px-4 z-10">
@@ -214,27 +214,15 @@ const Index = () => {
           </div>
         </section>
 
-        <section className="py-24 bg-gray-50 w-full">
-          <div className="text-center mb-16">
-            {searchResults.length > 0 ? (
-              <>
-                <h2 className="text-3xl font-bold mb-4">
-                  Search Results
-                </h2>
-                <p className="text-gray-600 max-w-2xl mx-auto">
-                  Found {searchResults.length} matches
-                </p>
-              </>
-            ) : (
-              <h2 className="text-3xl font-bold mb-4">
-                Why Choose Our Valuation System?
-              </h2>
-            )}
-          </div>
-          
+        <section className="py-24 bg-gray-50">
           {searchResults.length > 0 ? (
-            <div className="w-full px-6">
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6 w-full">
+            <>
+              <div className="text-center mb-16">
+                <h2 className="text-3xl font-bold mb-4">Search Results</h2>
+                <p className="text-gray-600">Found {searchResults.length} matches</p>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6 px-6">
                 {searchResults.map((motorcycle) => (
                   <Card 
                     key={motorcycle.motorcycle_id}
@@ -274,40 +262,47 @@ const Index = () => {
                   </Card>
                 ))}
               </div>
-            </div>
+            </>
           ) : (
-            <div className="container mx-auto px-4">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                {[
-                  {
-                    icon: Database,
-                    title: "Comprehensive Database",
-                    description: "Access up-to-date values for thousands of motorcycle models across all major brands",
-                  },
-                  {
-                    icon: TrendingUp,
-                    title: "Real-Time Market Analysis",
-                    description: "Get accurate valuations based on current market trends and recent sales data",
-                  },
-                  {
-                    icon: ShieldCheck,
-                    title: "Trusted Accuracy",
-                    description: "Our values are verified against dealer listings and actual sale prices",
-                  },
-                ].map((feature) => (
-                  <Card 
-                    key={feature.title}
-                    className="p-8 text-center hover-card"
-                  >
-                    <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-theme-100 text-theme-600 mb-4">
-                      <feature.icon size={24} />
-                    </div>
-                    <h3 className="text-xl font-bold mb-2">{feature.title}</h3>
-                    <p className="text-gray-600">{feature.description}</p>
-                  </Card>
-                ))}
+            <>
+              <div className="text-center mb-16">
+                <h2 className="text-3xl font-bold mb-4">
+                  Why Choose Our Valuation System?
+                </h2>
               </div>
-            </div>
+              <div className="container mx-auto px-4">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                  {[
+                    {
+                      icon: Database,
+                      title: "Comprehensive Database",
+                      description: "Access up-to-date values for thousands of motorcycle models across all major brands",
+                    },
+                    {
+                      icon: TrendingUp,
+                      title: "Real-Time Market Analysis",
+                      description: "Get accurate valuations based on current market trends and recent sales data",
+                    },
+                    {
+                      icon: ShieldCheck,
+                      title: "Trusted Accuracy",
+                      description: "Our values are verified against dealer listings and actual sale prices",
+                    },
+                  ].map((feature) => (
+                    <Card 
+                      key={feature.title}
+                      className="p-8 text-center hover-card"
+                    >
+                      <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-theme-100 text-theme-600 mb-4">
+                        <feature.icon size={24} />
+                      </div>
+                      <h3 className="text-xl font-bold mb-2">{feature.title}</h3>
+                      <p className="text-gray-600">{feature.description}</p>
+                    </Card>
+                  ))}
+                </div>
+              </div>
+            </>
           )}
         </section>
 
