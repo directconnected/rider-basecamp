@@ -1,11 +1,32 @@
 
-import React from "react";
+import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Search, DollarSign, Users, BarChart } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 
 const Index = () => {
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    supabase.auth.onAuthStateChange((event, session) => {
+      setIsAuthenticated(!!session);
+    });
+
+    // Initial session check
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setIsAuthenticated(!!session);
+    });
+  }, []);
+
+  const handleSignOut = async () => {
+    await supabase.auth.signOut();
+    navigate("/auth");
+  };
+
   return (
     <div className="min-h-screen">
       {/* Hero Section */}
@@ -23,38 +44,50 @@ const Index = () => {
             <Button className="button-gradient text-white px-8 py-6 text-lg">
               Start Advertising
             </Button>
-            <Button variant="outline" className="bg-white/10 text-white border-white/20 hover:bg-white/20 px-8 py-6 text-lg">
-              Check Motorcycle Value
-            </Button>
+            {isAuthenticated ? (
+              <Button variant="outline" className="bg-white/10 text-white border-white/20 hover:bg-white/20 px-8 py-6 text-lg" onClick={handleSignOut}>
+                Sign Out
+              </Button>
+            ) : (
+              <Button 
+                variant="outline" 
+                className="bg-white/10 text-white border-white/20 hover:bg-white/20 px-8 py-6 text-lg"
+                onClick={() => navigate("/auth")}
+              >
+                Sign In to Check Values
+              </Button>
+            )}
           </div>
         </div>
       </section>
 
       {/* Search Section */}
-      <section className="py-24 bg-gray-50">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-12 animate-fade-in">
-            <h2 className="text-3xl font-bold mb-4">
-              Find Your Motorcycle's Value
-            </h2>
-            <p className="text-gray-600">
-              Get accurate market values based on real-time data
-            </p>
-          </div>
-          <div className="max-w-2xl mx-auto">
-            <div className="flex gap-4 mb-8 animate-fade-in">
-              <Input 
-                placeholder="Enter motorcycle make, model, or year" 
-                className="py-6 text-lg"
-              />
-              <Button className="button-gradient text-white px-8">
-                <Search className="mr-2" />
-                Search
-              </Button>
+      {isAuthenticated ? (
+        <section className="py-24 bg-gray-50">
+          <div className="container mx-auto px-4">
+            <div className="text-center mb-12 animate-fade-in">
+              <h2 className="text-3xl font-bold mb-4">
+                Find Your Motorcycle's Value
+              </h2>
+              <p className="text-gray-600">
+                Get accurate market values based on real-time data
+              </p>
+            </div>
+            <div className="max-w-2xl mx-auto">
+              <div className="flex gap-4 mb-8 animate-fade-in">
+                <Input 
+                  placeholder="Enter motorcycle make, model, or year" 
+                  className="py-6 text-lg"
+                />
+                <Button className="button-gradient text-white px-8">
+                  <Search className="mr-2" />
+                  Search
+                </Button>
+              </div>
             </div>
           </div>
-        </div>
-      </section>
+        </section>
+      ) : null}
 
       {/* Subscription Plans */}
       <section className="py-24">
