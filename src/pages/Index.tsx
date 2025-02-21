@@ -42,22 +42,31 @@ const Index = () => {
 
   useEffect(() => {
     const fetchMakes = async () => {
-      console.log('Fetching makes...');
-      const { data, error } = await supabase
-        .from('motorcycles_1')
-        .select('Make')
-        .not('Make', 'is', null); // Ensure we only get non-null values
+      console.log('Starting fetchMakes...');
+      try {
+        const { data, error } = await supabase
+          .from('motorcycles_1')
+          .select('Make');
 
-      if (error) {
-        console.error('Error fetching makes:', error);
-        return;
-      }
+        console.log('Query executed. Data:', data);
+        console.log('Error:', error);
 
-      console.log('Makes data received:', data);
-      if (data) {
-        const uniqueMakes = Array.from(new Set(data.map(item => item.Make).filter(Boolean))).sort();
-        console.log('Unique makes:', uniqueMakes);
-        setMakes(uniqueMakes);
+        if (error) {
+          console.error('Error fetching makes:', error);
+          return;
+        }
+
+        if (data) {
+          const uniqueMakes = Array.from(new Set(data
+            .map(item => item.Make)
+            .filter(make => make !== null && make !== '')))
+            .sort();
+          
+          console.log('Processed makes:', uniqueMakes);
+          setMakes(uniqueMakes);
+        }
+      } catch (err) {
+        console.error('Exception in fetchMakes:', err);
       }
     };
 
@@ -67,23 +76,32 @@ const Index = () => {
   useEffect(() => {
     const fetchModels = async () => {
       if (searchParams.make) {
-        console.log('Fetching models for make:', searchParams.make);
-        const { data, error } = await supabase
-          .from('motorcycles_1')
-          .select('Model')
-          .eq('Make', searchParams.make)
-          .not('Model', 'is', null); // Ensure we only get non-null values
+        console.log('Starting fetchModels for make:', searchParams.make);
+        try {
+          const { data, error } = await supabase
+            .from('motorcycles_1')
+            .select('Model')
+            .eq('Make', searchParams.make);
 
-        if (error) {
-          console.error('Error fetching models:', error);
-          return;
-        }
+          console.log('Query executed. Data:', data);
+          console.log('Error:', error);
 
-        console.log('Models data received:', data);
-        if (data) {
-          const uniqueModels = Array.from(new Set(data.map(item => item.Model).filter(Boolean))).sort();
-          console.log('Unique models:', uniqueModels);
-          setModels(uniqueModels);
+          if (error) {
+            console.error('Error fetching models:', error);
+            return;
+          }
+
+          if (data) {
+            const uniqueModels = Array.from(new Set(data
+              .map(item => item.Model)
+              .filter(model => model !== null && model !== '')))
+              .sort();
+            
+            console.log('Processed models:', uniqueModels);
+            setModels(uniqueModels);
+          }
+        } catch (err) {
+          console.error('Exception in fetchModels:', err);
         }
       } else {
         setModels([]);
@@ -113,6 +131,7 @@ const Index = () => {
   };
 
   const handleSearch = async () => {
+    console.log('Starting search with params:', searchParams);
     setIsSearching(true);
     try {
       let query = supabase
@@ -130,6 +149,9 @@ const Index = () => {
       }
 
       const { data, error } = await query;
+
+      console.log('Search results:', data);
+      console.log('Search error:', error);
 
       if (error) {
         console.error('Error searching motorcycles:', error);
@@ -187,7 +209,7 @@ const Index = () => {
                     </SelectTrigger>
                     <SelectContent>
                       {makes.map(make => (
-                        <SelectItem key={make} value={make || ''}>
+                        <SelectItem key={make} value={make}>
                           {make}
                         </SelectItem>
                       ))}
@@ -203,7 +225,7 @@ const Index = () => {
                     </SelectTrigger>
                     <SelectContent>
                       {models.map(model => (
-                        <SelectItem key={model} value={model || ''}>
+                        <SelectItem key={model} value={model}>
                           {model}
                         </SelectItem>
                       ))}
