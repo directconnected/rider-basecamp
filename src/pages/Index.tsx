@@ -214,93 +214,45 @@ const Index = () => {
           </div>
         </section>
 
-        {searchResults.length > 0 ? (
-          <>
-            <div className="w-full bg-white">
-              <div className="py-16 text-center">
-                <h2 className="text-3xl font-bold">Search Results</h2>
-                <p className="text-gray-600 mt-2">Found {searchResults.length} matches</p>
-              </div>
-              <div className="w-full">
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-8 px-8">
-                  {searchResults.map((motorcycle) => (
-                    <div key={motorcycle.motorcycle_id} className="bg-white rounded-lg shadow-md p-6">
-                      <div>
-                        <h3 className="text-2xl font-bold mb-1">
-                          {motorcycle.Year} {motorcycle.Make}
-                        </h3>
-                        <p className="text-gray-600 text-lg mb-6">{motorcycle.Model}</p>
-                        
-                        <div className="space-y-6 mb-6">
-                          <div>
-                            <p className="text-gray-500 text-sm">Estimated Current Value</p>
-                            <p className="text-3xl font-bold text-theme-600">
-                              ${motorcycle.value?.toLocaleString()}
-                            </p>
-                          </div>
-                          
-                          <div>
-                            <p className="text-gray-500 text-sm">Original MSRP</p>
-                            <p className="text-xl font-semibold">
-                              ${motorcycle.MSRP?.replace(/[^0-9.]/g, '').toLocaleString() || 'N/A'}
-                            </p>
-                          </div>
-                        </div>
-
-                        <div className="pt-4 border-t border-gray-200">
-                          <div className="flex justify-between items-center">
-                            <span className="text-gray-500">Category:</span>
-                            <span className="font-medium">{motorcycle.Category || 'N/A'}</span>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
+        <section className="bg-gray-50 py-24 w-full">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl font-bold mb-4">
+              Why Choose Our Valuation System?
+            </h2>
+          </div>
+          <div className="px-6">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              {[
+                {
+                  icon: Database,
+                  title: "Comprehensive Database",
+                  description: "Access up-to-date values for thousands of motorcycle models across all major brands",
+                },
+                {
+                  icon: TrendingUp,
+                  title: "Real-Time Market Analysis",
+                  description: "Get accurate valuations based on current market trends and recent sales data",
+                },
+                {
+                  icon: ShieldCheck,
+                  title: "Trusted Accuracy",
+                  description: "Our values are verified against dealer listings and actual sale prices",
+                },
+              ].map((feature) => (
+                <Card 
+                  key={feature.title}
+                  className="p-8 text-center hover-card"
+                >
+                  <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-theme-100 text-theme-600 mb-4">
+                    <feature.icon size={24} />
+                  </div>
+                  <h3 className="text-xl font-bold mb-2">{feature.title}</h3>
+                  <p className="text-gray-600">{feature.description}</p>
+                </Card>
+              ))}
             </div>
-          </>
-        ) : (
-          <section className="bg-gray-50 py-24 w-full">
-            <div className="text-center mb-16">
-              <h2 className="text-3xl font-bold mb-4">
-                Why Choose Our Valuation System?
-              </h2>
-            </div>
-            <div className="px-6">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                {[
-                  {
-                    icon: Database,
-                    title: "Comprehensive Database",
-                    description: "Access up-to-date values for thousands of motorcycle models across all major brands",
-                  },
-                  {
-                    icon: TrendingUp,
-                    title: "Real-Time Market Analysis",
-                    description: "Get accurate valuations based on current market trends and recent sales data",
-                  },
-                  {
-                    icon: ShieldCheck,
-                    title: "Trusted Accuracy",
-                    description: "Our values are verified against dealer listings and actual sale prices",
-                  },
-                ].map((feature) => (
-                  <Card 
-                    key={feature.title}
-                    className="p-8 text-center hover-card"
-                  >
-                    <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-theme-100 text-theme-600 mb-4">
-                      <feature.icon size={24} />
-                    </div>
-                    <h3 className="text-xl font-bold mb-2">{feature.title}</h3>
-                    <p className="text-gray-600">{feature.description}</p>
-                  </Card>
-                ))}
-              </div>
-            </div>
-          </section>
-        )}
+          </div>
+        </section>
 
         <footer className="bg-gray-900 text-white py-12 border-t border-gray-800">
           <div className="px-4">
