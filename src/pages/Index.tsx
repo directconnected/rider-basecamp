@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -216,52 +215,50 @@ const Index = () => {
         </section>
 
         {searchResults.length > 0 ? (
-          <div className="bg-gray-50 w-full">
+          <div className="bg-gray-50">
             <div className="text-center py-16">
               <h2 className="text-3xl font-bold mb-4">Search Results</h2>
               <p className="text-gray-600">Found {searchResults.length} matches</p>
             </div>
-            <div className="px-6 pb-24">
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6">
-                {searchResults.map((motorcycle) => (
-                  <Card 
-                    key={motorcycle.motorcycle_id}
-                    className="p-6 hover:shadow-lg transition-shadow duration-300"
-                  >
-                    <div className="space-y-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6">
+              {searchResults.map((motorcycle) => (
+                <Card 
+                  key={motorcycle.motorcycle_id}
+                  className="p-6 hover:shadow-lg transition-shadow duration-300"
+                >
+                  <div className="space-y-4">
+                    <div className="text-center">
+                      <h3 className="text-xl font-bold text-gray-900">
+                        {motorcycle.Year} {motorcycle.Make}
+                      </h3>
+                      <p className="text-lg text-gray-600">{motorcycle.Model}</p>
+                    </div>
+                    
+                    <div className="border-t border-b border-gray-200 py-4 space-y-2">
                       <div className="text-center">
-                        <h3 className="text-xl font-bold text-gray-900">
-                          {motorcycle.Year} {motorcycle.Make}
-                        </h3>
-                        <p className="text-lg text-gray-600">{motorcycle.Model}</p>
+                        <p className="text-sm text-gray-500">Estimated Current Value</p>
+                        <p className="text-3xl font-bold text-theme-600">
+                          ${motorcycle.value?.toLocaleString()}
+                        </p>
                       </div>
                       
-                      <div className="border-t border-b border-gray-200 py-4 space-y-2">
-                        <div className="text-center">
-                          <p className="text-sm text-gray-500">Estimated Current Value</p>
-                          <p className="text-3xl font-bold text-theme-600">
-                            ${motorcycle.value?.toLocaleString()}
-                          </p>
-                        </div>
-                        
-                        <div className="text-center">
-                          <p className="text-sm text-gray-500">Original MSRP</p>
-                          <p className="text-xl font-semibold text-gray-900">
-                            ${motorcycle.MSRP?.replace(/[^0-9.]/g, '').toLocaleString() || 'N/A'}
-                          </p>
-                        </div>
-                      </div>
-
-                      <div className="text-sm text-gray-500 space-y-1">
-                        <div className="flex justify-between">
-                          <span>Category:</span>
-                          <span className="font-medium text-gray-900">{motorcycle.Category || 'N/A'}</span>
-                        </div>
+                      <div className="text-center">
+                        <p className="text-sm text-gray-500">Original MSRP</p>
+                        <p className="text-xl font-semibold text-gray-900">
+                          ${motorcycle.MSRP?.replace(/[^0-9.]/g, '').toLocaleString() || 'N/A'}
+                        </p>
                       </div>
                     </div>
-                  </Card>
-                ))}
-              </div>
+
+                    <div className="text-sm text-gray-500 space-y-1">
+                      <div className="flex justify-between">
+                        <span>Category:</span>
+                        <span className="font-medium text-gray-900">{motorcycle.Category || 'N/A'}</span>
+                      </div>
+                    </div>
+                  </div>
+                </Card>
+              ))}
             </div>
           </div>
         ) : (
