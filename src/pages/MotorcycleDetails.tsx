@@ -7,6 +7,8 @@ import { ArrowLeft } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import Navigation from "@/components/Navigation";
 import { Motorcycle } from "@/types/motorcycle";
+import { updateMotorcycleValue } from "@/services/motorcycleValueService";
+import { formatCurrency } from "@/utils/motorcycleCalculations";
 
 type MotorcycleDetails = Motorcycle;
 
@@ -37,7 +39,16 @@ const MotorcycleDetails = () => {
           return;
         }
 
-        setMotorcycle(data);
+        // Update the current value before setting the motorcycle data
+        if (data && data.msrp) {
+          const updatedValue = await updateMotorcycleValue(data);
+          setMotorcycle({
+            ...data,
+            current_value: updatedValue
+          });
+        } else {
+          setMotorcycle(data);
+        }
       } catch (err) {
         console.error('Error:', err);
       } finally {
@@ -47,21 +58,6 @@ const MotorcycleDetails = () => {
 
     fetchMotorcycleDetails();
   }, [id]);
-
-  const formatCurrency = (value: string | null | number): string => {
-    if (value === null) return 'N/A';
-    if (typeof value === 'number') {
-      return new Intl.NumberFormat('en-US', {
-        style: 'currency',
-        currency: 'USD',
-      }).format(value);
-    }
-    const numericValue = parseFloat(value.replace(/[^0-9.]/g, ''));
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
-    }).format(numericValue);
-  };
 
   if (loading) {
     return (
