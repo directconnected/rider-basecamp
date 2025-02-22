@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { supabase } from "@/integrations/supabase/client";
 import { adminClient } from "@/integrations/supabase/adminClient";
@@ -70,13 +71,19 @@ export const useMotorcycleSearch = () => {
         throw new Error('Failed to verify update');
       }
 
-      setSearchResults(prev => 
-        prev.map(m => 
-          m.id === motorcycle.id 
-            ? { ...m, current_value: currentValue, value: currentValue }
-            : m
-        )
-      );
+      // Explicitly type the map operation to prevent infinite type instantiation
+      setSearchResults((prevResults: Motorcycle[]) => {
+        return prevResults.map((m: Motorcycle): Motorcycle => {
+          if (m.id === motorcycle.id) {
+            return {
+              ...m,
+              current_value: currentValue,
+              value: currentValue
+            };
+          }
+          return m;
+        });
+      });
 
       toast.success(`Updated value: ${formatCurrency(currentValue)}`);
 
@@ -170,6 +177,7 @@ export const useMotorcycleSearch = () => {
     makes,
     models,
     handleSearch,
-    handleSearchByVIN
+    handleSearchByVIN,
+    updateMotorcycleValue
   };
 };
