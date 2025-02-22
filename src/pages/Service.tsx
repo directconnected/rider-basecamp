@@ -3,7 +3,7 @@ import React from "react";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/layout/Footer";
 import { Card } from "@/components/ui/card";
-import { Wrench, Tool, Clock, Calendar } from "lucide-react";
+import { Wrench, Wrench2, Clock, Calendar } from "lucide-react";
 
 const Service = () => {
   return (
@@ -43,7 +43,7 @@ const Service = () => {
                     description: "Complete history"
                   },
                   {
-                    icon: Tool,
+                    icon: Wrench2,
                     title: "Maintenance",
                     description: "Regular upkeep"
                   },
