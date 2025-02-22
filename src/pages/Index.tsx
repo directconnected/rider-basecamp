@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button";
 const Index = () => {
   const features = [
     {
-      icon: Search,
+      icon: GPS,
       title: "Motorcycle Roads and Routes",
       description: "Top motorcycle roads, scenic routes, and riding tips."
     },
