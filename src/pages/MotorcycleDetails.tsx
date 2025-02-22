@@ -116,7 +116,7 @@ const MotorcycleDetails = () => {
                   </p>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 bg-gray-50 p-6 rounded-lg">
                   {motorcycle.engine_type && (
                     <div>
                       <p className="text-gray-500 text-sm">Engine Type</p>
