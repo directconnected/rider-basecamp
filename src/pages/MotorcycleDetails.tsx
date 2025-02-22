@@ -8,26 +8,12 @@ import { supabase } from "@/integrations/supabase/client";
 import Navigation from "@/components/Navigation";
 
 interface MotorcycleDetails {
-  motorcycle_id: number;
+  id: number;
   Year: string | null;
   Make: string | null;
   Model: string | null;
-  Category: string | null;
-  Rating: string | null;
   MSRP: string | null;
-  "Engine type": string | null;
-  "Engine details": string | null;
-  "Power (PS)": string | null;
-  "Displacement (cm3)": string | null;
-  "Transmission type, final drive": string | null;
-  "Front suspension": string | null;
-  "Rear suspension": string | null;
-  "Front brakes": string | null;
-  "Rear brakes": string | null;
-  "Dry weight (kg)": string | null;
-  "Fuel capacity (litres)": string | null;
-  "Color options": string | null;
-  service_manual_url: string | null;
+  Value: string | null;
 }
 
 const MotorcycleDetails = () => {
@@ -47,9 +33,9 @@ const MotorcycleDetails = () => {
         }
 
         const { data, error } = await supabase
-          .from('motorcycles_1')
+          .from('data_2025')
           .select('*')
-          .eq('motorcycle_id', numericId)
+          .eq('id', numericId)
           .single();
 
         if (error) {
