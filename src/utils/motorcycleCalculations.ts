@@ -1,14 +1,12 @@
 
-export const calculateCurrentValue = (msrp: number | null): number => {
-  // If msrp is null or not a number, return null
-  if (msrp === null || typeof msrp !== 'number' || isNaN(msrp)) {
-    console.log('Invalid MSRP value:', msrp);
+export const calculateCurrentValue = (msrp: number): number => {
+  if (typeof msrp !== 'number' || isNaN(msrp) || msrp <= 0) {
+    console.error('Invalid MSRP:', msrp);
     return 0;
   }
   
-  // Calculate 60% of MSRP
   const currentValue = Math.round(msrp * 0.6);
-  console.log('Calculated current value:', { msrp, currentValue });
+  console.log('Calculated value:', { msrp, currentValue });
   return currentValue;
 };
 

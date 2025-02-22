@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -23,78 +22,81 @@ export const useMotorcycleSearch = () => {
   });
 
   const updateMotorcycleValue = async (motorcycle: Motorcycle) => {
-    if (!motorcycle.msrp) {
-      console.log(`No MSRP for motorcycle ${motorcycle.id}, skipping update`);
-      return;
-    }
-
     try {
-      // Ensure MSRP is a number
-      const msrpValue = Number(motorcycle.msrp);
-      console.log(`Processing MSRP for motorcycle ${motorcycle.id}:`, msrpValue);
+      const { data: testData, error: testError } = await supabase
+        .from('data_2025')
+        .select('id')
+        .eq('id', motorcycle.id)
+        .single();
 
-      if (isNaN(msrpValue)) {
-        console.error(`Invalid MSRP value for motorcycle ${motorcycle.id}:`, motorcycle.msrp);
+      if (testError) {
+        console.error('Database access error:', testError);
+        toast.error('Database access error. Please check permissions.');
         return;
       }
 
-      // Calculate current value
-      const calculatedValue = calculateCurrentValue(msrpValue);
-      console.log(`Calculated value for motorcycle ${motorcycle.id}:`, calculatedValue);
-
-      if (calculatedValue === 0) {
-        console.error(`Invalid calculated value for motorcycle ${motorcycle.id}`);
+      if (!motorcycle.msrp) {
+        console.log('No MSRP available for motorcycle:', motorcycle.id);
         return;
       }
 
-      // Update database
-      console.log(`Updating database for motorcycle ${motorcycle.id}:`, {
-        current_value: calculatedValue,
-        original_msrp: msrpValue
+      const msrpNumber = Number(motorcycle.msrp);
+      if (isNaN(msrpNumber)) {
+        console.error('Invalid MSRP value:', motorcycle.msrp);
+        return;
+      }
+
+      const currentValue = calculateCurrentValue(msrpNumber);
+      if (currentValue === 0) {
+        console.error('Could not calculate valid current value');
+        return;
+      }
+
+      console.log('Attempting database update with:', {
+        id: motorcycle.id,
+        msrp: msrpNumber,
+        currentValue: currentValue
       });
 
       const { error: updateError } = await supabase
         .from('data_2025')
-        .update({
-          current_value: calculatedValue,
-          updated_at: new Date().toISOString()
+        .update({ 
+          current_value: currentValue
         })
         .eq('id', motorcycle.id);
 
       if (updateError) {
-        console.error(`Database update failed for motorcycle ${motorcycle.id}:`, updateError);
-        toast.error(`Failed to update value: ${updateError.message}`);
-        return;
+        throw new Error(`Update failed: ${updateError.message}`);
       }
 
-      // Verify the update
       const { data: verifyData, error: verifyError } = await supabase
         .from('data_2025')
-        .select('*')
+        .select('current_value')
         .eq('id', motorcycle.id)
         .single();
 
-      if (verifyError) {
-        console.error(`Verification failed for motorcycle ${motorcycle.id}:`, verifyError);
-        return;
+      if (verifyError || !verifyData) {
+        throw new Error('Failed to verify update');
       }
 
-      console.log(`Verification successful for motorcycle ${motorcycle.id}:`, verifyData);
+      console.log('Update verified:', {
+        id: motorcycle.id,
+        newValue: verifyData.current_value
+      });
 
-      // Update local state
       setSearchResults(prev => 
         prev.map(m => 
           m.id === motorcycle.id 
-            ? { ...m, current_value: calculatedValue, value: calculatedValue }
+            ? { ...m, current_value: currentValue, value: currentValue }
             : m
         )
       );
 
-      toast.success(`Updated value for ${motorcycle.make} ${motorcycle.model}: ${formatCurrency(calculatedValue)}`);
+      toast.success(`Updated value: ${formatCurrency(currentValue)}`);
 
-    } catch (err) {
-      console.error(`Error processing motorcycle ${motorcycle.id}:`, err);
-      toast.error('Failed to update motorcycle value');
+    } catch (error) {
+      console.error('Error in updateMotorcycleValue:', error);
+      toast.error('Failed to update motorcycle value. Check console for details.');
     }
   };
 
