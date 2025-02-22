@@ -13,8 +13,7 @@ import Auth from "@/pages/Auth";
 import MotorcycleDetails from "@/pages/MotorcycleDetails";
 import NotFound from "@/pages/NotFound";
 import Admin from "@/pages/Admin";
-
-import "./App.css";
+import VINLookup from "@/pages/VINLookup";
 
 const queryClient = new QueryClient();
 
@@ -32,6 +31,7 @@ function App() {
             <Route path="/auth" element={<Auth />} />
             <Route path="/motorcycle/:id" element={<MotorcycleDetails />} />
             <Route path="/admin" element={<Admin />} />
+            <Route path="/vin-lookup" element={<VINLookup />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
           <Toaster />
