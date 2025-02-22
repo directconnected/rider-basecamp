@@ -84,6 +84,7 @@ export const useMotorcycleSearch = () => {
         value: calculateCurrentValue(motorcycle.msrp)
       }));
 
+      // Update current_value in the database for each result
       for (const motorcycle of resultsWithCurrentValue) {
         await updateMotorcycleValue(motorcycle);
       }
@@ -129,6 +130,7 @@ export const useMotorcycleSearch = () => {
 
       if (error) {
         console.error('Error searching motorcycles:', error);
+        toast.error("Error searching for motorcycles");
         return;
       }
 
@@ -137,13 +139,21 @@ export const useMotorcycleSearch = () => {
         value: calculateCurrentValue(motorcycle.msrp)
       }));
 
+      // Update current_value in the database for each result
       for (const motorcycle of resultsWithCurrentValue) {
         await updateMotorcycleValue(motorcycle);
+      }
+
+      if (resultsWithCurrentValue.length === 0) {
+        toast.warning("No matches found");
+      } else {
+        toast.success(`Found ${resultsWithCurrentValue.length} matches`);
       }
 
       setSearchResults(resultsWithCurrentValue);
     } catch (error) {
       console.error('Error:', error);
+      toast.error("Error during search");
     } finally {
       setIsSearching(false);
     }
