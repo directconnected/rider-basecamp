@@ -1,7 +1,7 @@
 import React from "react";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/layout/Footer";
-import { Shield, Search, Database, BarChart, Clock, Users, Wrench, Map, RefreshCw, BellRing } from "lucide-react";
+import { Shield, Search, Database, BarChart, Clock, Users, Wrench, Map, RefreshCw, BellRing, Motorcycle, Helmet, Road, Compass, Fuel } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -9,44 +9,26 @@ import { Button } from "@/components/ui/button";
 const Index = () => {
   const features = [
     {
-      icon: Map,
+      icon: Road,
       title: "Motorcycle Roads and Routes",
       description: "Top motorcycle roads, scenic routes, and riding tips.",
       link: "/routes"
     },
     {
-      icon: Database,
+      icon: Compass,
       title: "Best Motorcycle Camping Gear",
       description: "Top camping gear for bikers: compact, durable, essentials.",
       link: "/camping-gear"
     },
     {
-      icon: BarChart,
+      icon: Helmet,
       title: "Best Motorcycle Riding Gear",
       description: "Top riding gear: safety, comfort, and style for bikers.",
       link: "/riding-gear"
     },
     {
-      icon: Shield,
-      title: "Trusted Data",
-      description: "Verified by industry experts",
-      link: "/data"
-    },
-    {
-      icon: Clock,
-      title: "Historical Trends",
-      description: "Track price changes over time",
-      link: "/trends"
-    },
-    {
-      icon: Users,
-      title: "Community Reviews",
-      description: "Read authentic reviews from real riders",
-      link: "/reviews"
-    },
-    {
       icon: Wrench,
-      title: "Service History",
+      title: "Service Records",
       description: "Track maintenance records and service intervals",
       link: "/service"
     },
@@ -55,18 +37,6 @@ const Index = () => {
       title: "Local Dealers",
       description: "Find trusted dealers in your area",
       link: "/dealers"
-    },
-    {
-      icon: RefreshCw,
-      title: "Regular Updates",
-      description: "Stay current with latest market data",
-      link: "/updates"
-    },
-    {
-      icon: BellRing,
-      title: "Price Alerts",
-      description: "Get notified when prices change",
-      link: "/alerts"
     }
   ];
 
