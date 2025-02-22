@@ -1,44 +1,55 @@
 
 import React from "react";
 import { Card } from "@/components/ui/card";
-import { Database, TrendingUp, ShieldCheck } from "lucide-react";
+import { 
+  Zap, 
+  LineChart, 
+  BookOpen, 
+  MessageCircle, 
+  Globe 
+} from "lucide-react";
 
 const Features = () => {
   return (
     <section className="bg-gray-50 py-24 w-full">
-      <div className="text-center mb-16">
-        <h2 className="text-3xl font-bold mb-4">
-          Why Choose Our Valuation System?
-        </h2>
-      </div>
       <div className="px-6">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-8 max-w-6xl mx-auto">
           {[
             {
-              icon: Database,
-              title: "Comprehensive Database",
-              description: "Access up-to-date values for thousands of motorcycle models across all major brands",
+              icon: Zap,
+              title: "Instant Results",
+              description: "Get valuation results in seconds with our optimized system"
             },
             {
-              icon: TrendingUp,
-              title: "Real-Time Market Analysis",
-              description: "Get accurate valuations based on current market trends and recent sales data",
+              icon: LineChart,
+              title: "Price Trends",
+              description: "View detailed price trends across different regions"
             },
             {
-              icon: ShieldCheck,
-              title: "Trusted Accuracy",
-              description: "Our values are verified against dealer listings and actual sale prices",
+              icon: BookOpen,
+              title: "Expert Reviews",
+              description: "Access professional motorcycle reviews and ratings"
             },
+            {
+              icon: MessageCircle,
+              title: "Community Input",
+              description: "Benefit from real owner experiences and feedback"
+            },
+            {
+              icon: Globe,
+              title: "Global Coverage",
+              description: "Access data from markets around the world"
+            }
           ].map((feature) => (
             <Card 
               key={feature.title}
-              className="p-8 text-center hover-card"
+              className="p-6 text-center hover-card"
             >
               <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-theme-100 text-theme-600 mb-4">
                 <feature.icon size={24} />
               </div>
-              <h3 className="text-xl font-bold mb-2">{feature.title}</h3>
-              <p className="text-gray-600">{feature.description}</p>
+              <h3 className="text-lg font-bold mb-2">{feature.title}</h3>
+              <p className="text-gray-600 text-sm">{feature.description}</p>
             </Card>
           ))}
         </div>
