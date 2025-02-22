@@ -128,7 +128,7 @@ const MotorcycleDetails = () => {
                 >
                   <Button variant="secondary" className="gap-2">
                     <FileText className="h-4 w-4" />
-                    View Service Manual
+                    View Owner's Manual
                   </Button>
                 </a>
               </div>
