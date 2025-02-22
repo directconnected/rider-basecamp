@@ -18,39 +18,51 @@ export const useMotorcycleSearch = () => {
   const [isSearching, setIsSearching] = useState(false);
   const [makes, setMakes] = useState<string[]>([]);
   const [models, setModels] = useState<string[]>([]);
-  const [years] = useState(() => {
+  const [years] = useState<string[]>(() => {
     const currentYear = new Date().getFullYear();
-    return Array.from({ length: 30 }, (_, i) => currentYear - i);
+    return Array.from({ length: 30 }, (_, i) => (currentYear - i).toString());
   });
 
   const updateMotorcycleValue = async (motorcycle: Motorcycle) => {
     try {
       if (!motorcycle.msrp) {
         console.log('No MSRP available for motorcycle:', motorcycle.id);
-        return;
+        return null;
       }
 
       const msrpNumber = Number(motorcycle.msrp);
       if (isNaN(msrpNumber)) {
         console.error('Invalid MSRP value:', motorcycle.msrp);
-        return;
+        return null;
       }
 
       const currentValue = calculateCurrentValue(msrpNumber);
       if (currentValue === 0) {
         console.error('Could not calculate valid current value');
-        return;
+        return null;
       }
 
-      console.log('Attempting database update with:', {
-        id: motorcycle.id,
-        currentValue: currentValue
-      });
+      // Check if update is needed
+      const { data: existingData, error: checkError } = await adminClient
+        .from('data_2025')
+        .select('current_value')
+        .eq('id', motorcycle.id)
+        .maybeSingle();
+
+      if (checkError) {
+        console.error('Check error:', checkError);
+        return null;
+      }
+
+      if (existingData?.current_value === currentValue) {
+        console.log('No update needed for:', motorcycle.id);
+        return currentValue;
+      }
 
       const { error: updateError } = await adminClient
         .from('data_2025')
         .update({
-          current_value: currentValue,
+          current_value: currentValue, // Pass number directly
           updated_at: new Date().toISOString()
         })
         .eq('id', motorcycle.id);
@@ -60,56 +72,61 @@ export const useMotorcycleSearch = () => {
         throw new Error(`Update failed: ${updateError.message}`);
       }
 
-      const { data: verifyData, error: verifyError } = await adminClient
-        .from('data_2025')
-        .select('current_value')
-        .eq('id', motorcycle.id)
-        .maybeSingle();
-
-      if (verifyError) {
-        console.error('Verify error:', verifyError);
-        throw new Error('Failed to verify update');
-      }
-
-      // Explicitly type the map operation to prevent infinite type instantiation
-      setSearchResults((prevResults: Motorcycle[]) => {
-        return prevResults.map((m: Motorcycle): Motorcycle => {
-          if (m.id === motorcycle.id) {
-            return {
-              ...m,
-              current_value: currentValue,
-              value: currentValue
-            };
-          }
-          return m;
-        });
-      });
-
       toast.success(`Updated value: ${formatCurrency(currentValue)}`);
+      return currentValue;
 
     } catch (error) {
       console.error('Error in updateMotorcycleValue:', error);
       toast.error('Failed to update motorcycle value. Check console for details.');
+      return null;
     }
   };
 
   const handleSearchByVIN = async (vin: string) => {
-    try {
-      const { data, error } = await supabase
-        .from('data_2025')
-        .select('*')
-        .eq('vin', vin);
+    if (vin.length !== 17) {
+      toast.error("Invalid VIN length - must be 17 characters");
+      return;
+    }
 
-      if (error) {
-        console.error('Search error:', error);
-        throw new Error('Failed to search by VIN');
+    setIsSearching(true);
+    try {
+      const year = decodeVINYear(vin);
+      const make = decodeVINMake(vin);
+      
+      if (!year || !make) {
+        toast.error("Could not decode VIN manufacturer or year");
+        return;
       }
 
-      setSearchResults(data || []);
-      setIsSearching(false);
+      const { data, error } = await supabase
+        .from('data_2025')
+        .select('id, year, make, model, msrp, current_value')
+        .eq('make', make)
+        .eq('year', year);
+
+      if (error) throw error;
+
+      const updatedResults = await Promise.all(
+        (data || []).map(async (motorcycle) => {
+          if (motorcycle.msrp) {
+            const updatedValue = await updateMotorcycleValue(motorcycle);
+            return {
+              ...motorcycle,
+              current_value: updatedValue ?? motorcycle.current_value
+            };
+          }
+          return motorcycle;
+        })
+      );
+
+      setSearchResults(updatedResults);
+      toast.success(`Found ${updatedResults.length} potential matches`);
+
     } catch (error) {
       console.error('Error in handleSearchByVIN:', error);
       toast.error('Failed to search by VIN. Check console for details.');
+    } finally {
+      setIsSearching(false);
     }
   };
 
@@ -117,7 +134,7 @@ export const useMotorcycleSearch = () => {
     try {
       const { data, error } = await supabase
         .from('data_2025')
-        .select('*')
+        .select('id, year, make, model, msrp, current_value')
         .eq('year', searchParams.year)
         .eq('make', searchParams.make)
         .eq('model', searchParams.model);
@@ -127,7 +144,20 @@ export const useMotorcycleSearch = () => {
         throw new Error('Failed to search');
       }
 
-      setSearchResults(data || []);
+      const updatedResults = await Promise.all(
+        (data || []).map(async (motorcycle) => {
+          if (motorcycle.msrp) {
+            const updatedValue = await updateMotorcycleValue(motorcycle);
+            return {
+              ...motorcycle,
+              current_value: updatedValue ?? motorcycle.current_value
+            };
+          }
+          return motorcycle;
+        })
+      );
+
+      setSearchResults(updatedResults);
       setIsSearching(false);
     } catch (error) {
       console.error('Error in handleSearch:', error);
@@ -153,7 +183,8 @@ export const useMotorcycleSearch = () => {
     const fetchModels = async () => {
       const { data, error } = await supabase
         .from('data_2025')
-        .select('model');
+        .select('model')
+        .eq('make', searchParams.make);
 
       if (error) {
         console.error('Fetch models error:', error);
@@ -165,8 +196,12 @@ export const useMotorcycleSearch = () => {
     };
 
     fetchMakes();
-    fetchModels();
-  }, []);
+    if (searchParams.make) {
+      fetchModels();
+    } else {
+      setModels([]);
+    }
+  }, [searchParams.make]);
 
   return {
     searchParams,
