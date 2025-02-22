@@ -44,8 +44,8 @@ export const useMotorcycleSearch = () => {
       
       const { error } = await supabase
         .from('data_2025')
-        .update({ 
-          current_value: calculatedValue,  // Now sending as a number since column is numeric
+        .update({
+          current_value: calculatedValue,
           updated_at: new Date().toISOString()
         })
         .eq('id', motorcycle.id);
@@ -56,8 +56,17 @@ export const useMotorcycleSearch = () => {
         return;
       }
 
+      // Update the local state with the new value
+      setSearchResults(prev => 
+        prev.map(m => 
+          m.id === motorcycle.id 
+            ? { ...m, current_value: calculatedValue, value: calculatedValue }
+            : m
+        )
+      );
+
       console.log(`Successfully updated motorcycle ${motorcycle.id} with value ${calculatedValue}`);
-      toast.success(`Updated value for ${motorcycle.make} ${motorcycle.model}: ${formatCurrency(calculatedValue.toString())}`);
+      toast.success(`Updated value for ${motorcycle.make} ${motorcycle.model}: ${formatCurrency(calculatedValue)}`);
     } catch (err) {
       console.error('Exception during update:', err);
       toast.error('Failed to update motorcycle value');
@@ -99,11 +108,13 @@ export const useMotorcycleSearch = () => {
 
       const resultsWithCurrentValue = (data || []).map((motorcycle) => ({
         ...motorcycle,
-        value: calculateCurrentValue(motorcycle.msrp)
+        value: motorcycle.msrp ? calculateCurrentValue(motorcycle.msrp) : null
       }));
 
       for (const motorcycle of resultsWithCurrentValue) {
-        await updateMotorcycleValue(motorcycle);
+        if (motorcycle.msrp) {
+          await updateMotorcycleValue(motorcycle);
+        }
       }
 
       if (resultsWithCurrentValue.length === 0) {
@@ -153,13 +164,15 @@ export const useMotorcycleSearch = () => {
 
       const resultsWithCurrentValue = (data || []).map((motorcycle) => ({
         ...motorcycle,
-        value: calculateCurrentValue(motorcycle.msrp)
+        value: motorcycle.msrp ? calculateCurrentValue(motorcycle.msrp) : null
       }));
 
       console.log('Results with calculated values:', resultsWithCurrentValue);
 
       for (const motorcycle of resultsWithCurrentValue) {
-        await updateMotorcycleValue(motorcycle);
+        if (motorcycle.msrp) {
+          await updateMotorcycleValue(motorcycle);
+        }
       }
 
       if (resultsWithCurrentValue.length === 0) {
