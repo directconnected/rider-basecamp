@@ -80,8 +80,8 @@ serve(async (req) => {
       .from('data_2025')
       .select('*')
       .is('msrp', null)
-      .limit(5) // Reduced limit to avoid hitting API rate limits
-    
+      .limit(25) // Increased from 5 to 25 motorcycles per batch
+
     if (fetchError) {
       console.error('Error fetching motorcycles:', fetchError)
       throw fetchError
@@ -138,7 +138,7 @@ serve(async (req) => {
         }
 
         // Add delay between requests to respect API rate limits
-        await new Promise(resolve => setTimeout(resolve, 2000))
+        await new Promise(resolve => setTimeout(resolve, 1000)) // Reduced delay from 2000ms to 1000ms
       } catch (error) {
         console.error(`Error processing motorcycle ID ${motorcycle.id}:`, error)
       }
