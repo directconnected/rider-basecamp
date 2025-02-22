@@ -73,16 +73,8 @@ const Index = () => {
                 Gear Up and Ride
               </h2>
               <p className="text-xl md:text-2xl text-gray-200 mb-8 animate-fade-in">
-                Your Home for Motorcycle Knowledge and Community.
+                Your Home for Motorcycle Knowledge and Community
               </p>
-              <div className="max-w-4xl mx-auto mt-8">
-                <Link to="/vin-lookup">
-                  <Button className="button-gradient text-white px-8 py-6">
-                    <Search className="mr-2" />
-                    Search Motorcycles
-                  </Button>
-                </Link>
-              </div>
             </div>
           </div>
         </section>
@@ -93,9 +85,6 @@ const Index = () => {
               <h2 className="text-3xl font-bold mb-4">
                 Features
               </h2>
-              <p className="text-gray-600 max-w-2xl mx-auto">
-                Everything you need to make informed decisions about motorcycles
-              </p>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-8 max-w-6xl mx-auto">
               {features.map((feature) => (
