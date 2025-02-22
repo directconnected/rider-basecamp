@@ -3,7 +3,6 @@ import React from "react";
 import Navigation from "@/components/Navigation";
 import SearchForm from "@/components/search/SearchForm";
 import SearchResults from "@/components/search/SearchResults";
-import Features from "@/components/features/Features";
 import Footer from "@/components/layout/Footer";
 import { useMotorcycleSearch } from "@/hooks/useMotorcycleSearch";
 import { formatCurrency } from "@/utils/motorcycleCalculations";
@@ -107,7 +106,6 @@ const Index = () => {
         </section>
 
         <SearchResults results={searchResults} formatCurrency={formatCurrency} />
-        <Features />
         <Footer />
       </main>
     </div>
