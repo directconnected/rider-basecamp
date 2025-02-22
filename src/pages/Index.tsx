@@ -45,7 +45,7 @@ const Index = () => {
       description: "Track maintenance records and service intervals"
     },
     {
-      icon: Map,
+      icon: Search,
       title: "Local Dealers",
       description: "Find trusted dealers in your area"
     },
