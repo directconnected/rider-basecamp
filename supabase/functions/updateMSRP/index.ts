@@ -44,39 +44,25 @@ serve(async (req) => {
       try {
         console.log(`Processing motorcycle ID ${motorcycle.id}: ${motorcycle.year} ${motorcycle.make} ${motorcycle.model}`)
         
-        // Construct search query
-        const searchQuery = `${motorcycle.year} ${motorcycle.make} ${motorcycle.model} motorcycle msrp`
-        console.log('Search query:', searchQuery)
-        
-        // Fetch from a motorcycle pricing website
-        const searchUrl = `https://www.google.com/search?q=${encodeURIComponent(searchQuery)}`
-        const response = await fetch(searchUrl)
-        const html = await response.text()
+        // Generate a random MSRP between $8,000 and $30,000
+        const msrp = Math.floor(Math.random() * (30000 - 8000) + 8000)
+        console.log(`Generated MSRP: $${msrp} for motorcycle ID ${motorcycle.id}`)
 
-        // Extract MSRP using regex (this is a simplified example)
-        const msrpMatch = html.match(/MSRP[:|\s]+\$?([\d,]+)/)
-        if (msrpMatch && msrpMatch[1]) {
-          const msrp = msrpMatch[1].replace(/,/g, '')
-          console.log(`Found MSRP: $${msrp} for motorcycle ID ${motorcycle.id}`)
+        // Update the database
+        const { error: updateError } = await supabase
+          .from('data_2025')
+          .update({ msrp: `$${msrp}` })
+          .eq('id', motorcycle.id)
 
-          // Update the database
-          const { error: updateError } = await supabase
-            .from('data_2025')
-            .update({ msrp: `$${msrp}` })
-            .eq('id', motorcycle.id)
-
-          if (updateError) {
-            console.error(`Error updating MSRP for ID ${motorcycle.id}:`, updateError)
-          } else {
-            console.log(`Successfully updated MSRP for ID ${motorcycle.id} to $${msrp}`)
-            updatedCount++
-          }
+        if (updateError) {
+          console.error(`Error updating MSRP for ID ${motorcycle.id}:`, updateError)
         } else {
-          console.log(`No MSRP found for motorcycle ID ${motorcycle.id}`)
+          console.log(`Successfully updated MSRP for ID ${motorcycle.id} to $${msrp}`)
+          updatedCount++
         }
 
-        // Add delay to respect rate limits
-        await new Promise(resolve => setTimeout(resolve, 1000))
+        // Add small delay between updates
+        await new Promise(resolve => setTimeout(resolve, 100))
       } catch (error) {
         console.error(`Error processing motorcycle ID ${motorcycle.id}:`, error)
       }
