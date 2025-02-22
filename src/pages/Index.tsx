@@ -2,7 +2,7 @@
 import React from "react";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/layout/Footer";
-import { Map, Search, Database, BarChart, Clock, Users, Wrench, Route, Helmet, Tent } from "lucide-react";
+import { Map, Search, Database, BarChart, Clock, Users, Wrench, Route, Shield, Tent } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -22,7 +22,7 @@ const Index = () => {
       link: "/camping-gear"
     },
     {
-      icon: Helmet,
+      icon: Shield,
       title: "Best Motorcycle Riding Gear",
       description: "Top riding gear: safety, comfort, and style for bikers.",
       link: "/riding-gear"
