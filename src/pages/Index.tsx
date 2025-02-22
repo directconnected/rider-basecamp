@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import Navigation from "@/components/Navigation";
@@ -104,6 +103,36 @@ const Index = () => {
     fetchModels();
   }, [searchParams.make]);
 
+  const calculateCurrentValue = (msrp: string | null): string => {
+    if (!msrp) return '';
+    const numericValue = parseFloat(msrp.replace(/[^0-9.]/g, ''));
+    const deprecatedValue = Math.round(numericValue * 0.6).toString();
+    return `$${deprecatedValue}`;
+  };
+
+  const updateMotorcycleValue = async (motorcycle: Motorcycle) => {
+    if (motorcycle.current_value) {
+      return;
+    }
+
+    const calculatedValue = calculateCurrentValue(motorcycle.msrp);
+    if (!calculatedValue) {
+      return;
+    }
+
+    const { error } = await supabase
+      .from('data_2025')
+      .update({ current_value: calculatedValue })
+      .eq('id', motorcycle.id);
+
+    if (error) {
+      console.error('Error updating current value:', error);
+      return;
+    }
+
+    console.log(`Updated current value for ID ${motorcycle.id} to ${calculatedValue}`);
+  };
+
   const decodeVINYear = (vin: string): string => {
     const yearChar = vin.charAt(9);
     const yearMap: { [key: string]: string } = {
@@ -170,8 +199,12 @@ const Index = () => {
 
       const resultsWithCurrentValue = (data || []).map((motorcycle) => ({
         ...motorcycle,
-        value: calculateCurrentValue(motorcycle)
+        value: calculateCurrentValue(motorcycle.msrp)
       }));
+
+      for (const motorcycle of resultsWithCurrentValue) {
+        await updateMotorcycleValue(motorcycle);
+      }
 
       if (resultsWithCurrentValue.length === 0) {
         toast.warning("No matches found for this VIN");
@@ -186,11 +219,6 @@ const Index = () => {
     } finally {
       setIsSearching(false);
     }
-  };
-
-  const calculateCurrentValue = (motorcycle: Motorcycle): number => {
-    const msrp = parseFloat(motorcycle.msrp?.replace(/[^0-9.]/g, '') || "0");
-    return Math.round(msrp * 0.6);
   };
 
   const handleSearch = async () => {
@@ -224,8 +252,12 @@ const Index = () => {
 
       const resultsWithCurrentValue = (data || []).map((motorcycle) => ({
         ...motorcycle,
-        value: calculateCurrentValue(motorcycle)
+        value: calculateCurrentValue(motorcycle.msrp)
       }));
+
+      for (const motorcycle of resultsWithCurrentValue) {
+        await updateMotorcycleValue(motorcycle);
+      }
 
       setSearchResults(resultsWithCurrentValue);
     } catch (error) {
