@@ -1,7 +1,8 @@
+
 import React from "react";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/layout/Footer";
-import { Shield, Search, Database, BarChart, Clock, Users, Wrench, Map, RefreshCw, BellRing, Motorcycle, Helmet, Road, Compass, Fuel } from "lucide-react";
+import { Map, Search, Database, BarChart, Clock, Users, Wrench, Route, Compass, Tent } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -9,19 +10,19 @@ import { Button } from "@/components/ui/button";
 const Index = () => {
   const features = [
     {
-      icon: Road,
+      icon: Route,
       title: "Motorcycle Roads and Routes",
       description: "Top motorcycle roads, scenic routes, and riding tips.",
       link: "/routes"
     },
     {
-      icon: Compass,
+      icon: Tent,
       title: "Best Motorcycle Camping Gear",
       description: "Top camping gear for bikers: compact, durable, essentials.",
       link: "/camping-gear"
     },
     {
-      icon: Helmet,
+      icon: Compass,
       title: "Best Motorcycle Riding Gear",
       description: "Top riding gear: safety, comfort, and style for bikers.",
       link: "/riding-gear"
