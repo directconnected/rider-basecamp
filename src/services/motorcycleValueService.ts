@@ -21,35 +21,51 @@ export const updateMotorcycleValue = async (motorcycle: Motorcycle) => {
     console.log('Attempting to update value for motorcycle:', motorcycle.id);
     console.log('MSRP:', msrpNumber, 'Calculated value:', currentValue);
 
-    // Update with numeric values and ensure ID is used correctly
+    // First, verify the record exists
+    const { data: existingRecord, error: checkError } = await supabase
+      .from('data_2025')
+      .select('id')
+      .eq('id', motorcycle.id)
+      .single();
+
+    if (checkError || !existingRecord) {
+      console.error('Record not found:', motorcycle.id);
+      throw new Error('Record not found');
+    }
+
+    // Perform the update with explicit type casting
     const { error: updateError } = await supabase
       .from('data_2025')
-      .update({ 
-        current_value: Number(currentValue), // Ensure value is numeric
+      .update({
+        current_value: currentValue,
         updated_at: new Date().toISOString()
       })
-      .eq('id', Number(motorcycle.id)); // Ensure ID is numeric
+      .match({ id: motorcycle.id });
 
     if (updateError) {
       console.error('Update error:', updateError);
       throw new Error(`Update failed: ${updateError.message}`);
     }
 
-    // Verify the update
+    // Double-check the update with a fresh query
     const { data: verifyData, error: verifyError } = await supabase
       .from('data_2025')
-      .select('current_value')
-      .eq('id', Number(motorcycle.id))
+      .select('*')
+      .eq('id', motorcycle.id)
       .single();
 
-    if (verifyError || !verifyData) {
+    if (verifyError) {
       console.error('Verification error:', verifyError);
       throw new Error('Failed to verify update');
     }
 
-    console.log('Successfully updated motorcycle with value:', currentValue);
-    console.log('Verified database value:', verifyData.current_value);
+    console.log('Full record after update:', verifyData);
     
+    if (!verifyData.current_value) {
+      console.error('Update did not persist:', verifyData);
+      throw new Error('Update did not persist');
+    }
+
     toast.success(`Updated value: ${formatCurrency(currentValue)}`);
     return currentValue;
 
