@@ -6,7 +6,7 @@ import SearchResults from "@/components/search/SearchResults";
 import Footer from "@/components/layout/Footer";
 import { useMotorcycleSearch } from "@/hooks/useMotorcycleSearch";
 import { formatCurrency } from "@/utils/motorcycleCalculations";
-import { Shield, Search, Database, BarChart, Clock } from "lucide-react";
+import { Shield, Search, Database, BarChart, Clock, Users, Tool, Map, Refresh, BellRing } from "lucide-react";
 import { Card } from "@/components/ui/card";
 
 const Index = () => {
@@ -21,6 +21,59 @@ const Index = () => {
     handleSearch,
     handleSearchByVIN
   } = useMotorcycleSearch();
+
+  const features = [
+    {
+      icon: Search,
+      title: "Smart Search",
+      description: "Find any motorcycle with our powerful search engine"
+    },
+    {
+      icon: Database,
+      title: "Rich Database",
+      description: "Access comprehensive motorcycle specifications"
+    },
+    {
+      icon: BarChart,
+      title: "Market Analysis",
+      description: "Get real-time market valuations"
+    },
+    {
+      icon: Shield,
+      title: "Trusted Data",
+      description: "Verified by industry experts"
+    },
+    {
+      icon: Clock,
+      title: "Historical Trends",
+      description: "Track price changes over time"
+    },
+    {
+      icon: Users,
+      title: "Community Reviews",
+      description: "Read authentic reviews from real riders"
+    },
+    {
+      icon: Tool,
+      title: "Service History",
+      description: "Track maintenance records and service intervals"
+    },
+    {
+      icon: Map,
+      title: "Local Dealers",
+      description: "Find trusted dealers in your area"
+    },
+    {
+      icon: Refresh,
+      title: "Regular Updates",
+      description: "Stay current with latest market data"
+    },
+    {
+      icon: BellRing,
+      title: "Price Alerts",
+      description: "Get notified when prices change"
+    }
+  ];
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -63,33 +116,7 @@ const Index = () => {
               </p>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-8 max-w-6xl mx-auto">
-              {[
-                {
-                  icon: Search,
-                  title: "Smart Search",
-                  description: "Find any motorcycle with our powerful search engine"
-                },
-                {
-                  icon: Database,
-                  title: "Rich Database",
-                  description: "Access comprehensive motorcycle specifications"
-                },
-                {
-                  icon: BarChart,
-                  title: "Market Analysis",
-                  description: "Get real-time market valuations"
-                },
-                {
-                  icon: Shield,
-                  title: "Trusted Data",
-                  description: "Verified by industry experts"
-                },
-                {
-                  icon: Clock,
-                  title: "Historical Trends",
-                  description: "Track price changes over time"
-                }
-              ].map((feature) => (
+              {features.map((feature) => (
                 <Card 
                   key={feature.title}
                   className="p-6 text-center hover-card"
