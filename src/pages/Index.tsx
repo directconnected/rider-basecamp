@@ -10,13 +10,13 @@ import { Button } from "@/components/ui/button";
 const Index = () => {
   const features = [
     {
-      icon: Map,
-      title: "Motorcycle Roads and Routes",
-      description: "Top motorcycle roads, scenic routes, and riding tips."
-    },
-    {
       icon: Database,
       title: "Motorcycle Data",
+      description: ""
+    },
+    {
+      icon: Clock,
+      title: "Motorcycle Roads & Routes",
       description: ""
     },
     {
@@ -27,11 +27,6 @@ const Index = () => {
     {
       icon: Shield,
       title: "Motorcycle Camping Gear",
-      description: ""
-    },
-    {
-      icon: Clock,
-      title: "Motorcycle Roads & Routes",
       description: ""
     },
     {
