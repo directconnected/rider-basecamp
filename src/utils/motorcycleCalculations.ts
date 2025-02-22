@@ -11,14 +11,16 @@ export const calculateCurrentValue = (msrp: number): number => {
 };
 
 export const formatCurrency = (value: string | null | number): string => {
-  if (value === null || value === '') return 'N/A';
+  if (value === null || value === undefined || value === '') return 'N/A';
   if (typeof value === 'number') {
+    if (isNaN(value) || value === 0) return 'N/A';
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
       currency: 'USD',
     }).format(value);
   }
   const numericValue = parseFloat(value.replace(/[^0-9.]/g, ''));
+  if (isNaN(numericValue) || numericValue === 0) return 'N/A';
   return new Intl.NumberFormat('en-US', {
       style: 'currency',
       currency: 'USD',

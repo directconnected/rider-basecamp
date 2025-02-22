@@ -47,7 +47,8 @@ export const updateMotorcycleValue = async (motorcycle: Motorcycle) => {
       throw new Error('Failed to verify update');
     }
 
-    console.log('Successfully updated motorcycle:', updatedData);
+    // Return the calculated value immediately after successful update
+    console.log('Successfully updated motorcycle with value:', currentValue);
     toast.success(`Updated value: ${formatCurrency(currentValue)}`);
     return currentValue;
 
