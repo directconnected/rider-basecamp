@@ -12,7 +12,7 @@ export type Database = {
       data_2025: {
         Row: {
           created_at: string
-          current_value: string | null
+          current_value: number | null
           id: number
           make: string | null
           model: string | null
@@ -22,7 +22,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string
-          current_value?: string | null
+          current_value?: number | null
           id?: number
           make?: string | null
           model?: string | null
@@ -32,7 +32,7 @@ export type Database = {
         }
         Update: {
           created_at?: string
-          current_value?: string | null
+          current_value?: number | null
           id?: number
           make?: string | null
           model?: string | null

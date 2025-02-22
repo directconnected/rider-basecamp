@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -38,25 +39,25 @@ export const useMotorcycleSearch = () => {
       return;
     }
 
-    console.log(`Attempting to update motorcycle ${motorcycle.id} with value ${calculatedValue}`);
-    
     try {
+      console.log(`Attempting to update motorcycle ${motorcycle.id} with value:`, calculatedValue);
+      
       const { error } = await supabase
         .from('data_2025')
         .update({ 
-          current_value: calculatedValue.toString(),
+          current_value: calculatedValue,  // Now sending as a number since column is numeric
           updated_at: new Date().toISOString()
         })
         .eq('id', motorcycle.id);
 
       if (error) {
         console.error('Error updating current value:', error);
-        toast.error(`Failed to update value for motorcycle ${motorcycle.id}: ${error.message}`);
+        toast.error(`Update failed: ${error.message}`);
         return;
       }
 
       console.log(`Successfully updated motorcycle ${motorcycle.id} with value ${calculatedValue}`);
-      toast.success(`Updated value for ${motorcycle.make} ${motorcycle.model}`);
+      toast.success(`Updated value for ${motorcycle.make} ${motorcycle.model}: ${formatCurrency(calculatedValue.toString())}`);
     } catch (err) {
       console.error('Exception during update:', err);
       toast.error('Failed to update motorcycle value');
@@ -101,7 +102,6 @@ export const useMotorcycleSearch = () => {
         value: calculateCurrentValue(motorcycle.msrp)
       }));
 
-      // Update current_value in the database for each result
       for (const motorcycle of resultsWithCurrentValue) {
         await updateMotorcycleValue(motorcycle);
       }
@@ -151,8 +151,6 @@ export const useMotorcycleSearch = () => {
         return;
       }
 
-      console.log('Search results:', data);
-
       const resultsWithCurrentValue = (data || []).map((motorcycle) => ({
         ...motorcycle,
         value: calculateCurrentValue(motorcycle.msrp)
@@ -160,13 +158,9 @@ export const useMotorcycleSearch = () => {
 
       console.log('Results with calculated values:', resultsWithCurrentValue);
 
-      // Update current_value in the database for each result
-      console.log('Starting database updates...');
       for (const motorcycle of resultsWithCurrentValue) {
-        console.log('Processing motorcycle:', motorcycle);
         await updateMotorcycleValue(motorcycle);
       }
-      console.log('Database updates completed');
 
       if (resultsWithCurrentValue.length === 0) {
         toast.warning("No matches found");
@@ -186,7 +180,6 @@ export const useMotorcycleSearch = () => {
   useEffect(() => {
     const fetchMakes = async () => {
       try {
-        console.log('Fetching makes...');
         const { data, error } = await supabase
           .from('data_2025')
           .select('make')
@@ -199,12 +192,10 @@ export const useMotorcycleSearch = () => {
         }
 
         if (data) {
-          console.log('Makes data:', data);
           const uniqueMakes = Array.from(new Set(data
             .map(item => item.make)
             .filter(Boolean)))
             .sort();
-          console.log('Unique makes:', uniqueMakes);
           setMakes(uniqueMakes);
         }
       } catch (err) {
@@ -219,7 +210,6 @@ export const useMotorcycleSearch = () => {
     const fetchModels = async () => {
       if (searchParams.make) {
         try {
-          console.log('Fetching models for make:', searchParams.make);
           const { data, error } = await supabase
             .from('data_2025')
             .select('model')
@@ -233,12 +223,10 @@ export const useMotorcycleSearch = () => {
           }
 
           if (data) {
-            console.log('Models data:', data);
             const uniqueModels = Array.from(new Set(data
               .map(item => item.model)
               .filter(Boolean)))
               .sort();
-            console.log('Unique models:', uniqueModels);
             setModels(uniqueModels);
           }
         } catch (err) {
