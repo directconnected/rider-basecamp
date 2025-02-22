@@ -1,7 +1,5 @@
-
 import { useState, useEffect } from 'react';
-import { supabase } from "@/integrations/supabase/client";
-import { adminClient } from "@/integrations/supabase/adminClient";
+import { supabase, adminClient } from "@/integrations/supabase/client";
 import { Motorcycle, SearchParams } from "@/types/motorcycle";
 import { calculateCurrentValue, formatCurrency } from "@/utils/motorcycleCalculations";
 import { decodeVINMake, decodeVINYear } from "@/utils/vinDecoder";
