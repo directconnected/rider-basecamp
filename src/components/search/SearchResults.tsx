@@ -34,7 +34,7 @@ const SearchResults = ({ results, formatCurrency }: SearchResultsProps) => {
                   <div>
                     <p className="text-gray-500 text-sm">Estimated Current Value</p>
                     <p className="text-3xl font-bold text-theme-600">
-                      ${motorcycle.value?.toLocaleString()}
+                      {formatCurrency(motorcycle.current_value)}
                     </p>
                   </div>
                   

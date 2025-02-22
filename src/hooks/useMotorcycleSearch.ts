@@ -14,6 +14,22 @@ export const useMotorcycleSearch = () => {
   const [searchResults, setSearchResults] = useState<Motorcycle[]>([]);
   const [isSearching, setIsSearching] = useState(false);
 
+  const processSearchResults = async (motorcycles: Motorcycle[]) => {
+    const updatedResults = await Promise.all(
+      motorcycles.map(async (motorcycle) => {
+        if (motorcycle.msrp) {
+          const updatedValue = await updateMotorcycleValue(motorcycle);
+          return {
+            ...motorcycle,
+            current_value: updatedValue
+          };
+        }
+        return motorcycle;
+      })
+    );
+    return updatedResults;
+  };
+
   const handleSearchByVIN = async (vin: string) => {
     if (vin.length !== 17) {
       toast.error("Invalid VIN length - must be 17 characters");
@@ -32,25 +48,13 @@ export const useMotorcycleSearch = () => {
 
       const { data, error } = await supabase
         .from('data_2025')
-        .select('id, year, make, model, msrp, current_value, created_at')
+        .select('*')
         .eq('make', make)
         .eq('year', year);
 
       if (error) throw error;
 
-      const updatedResults = await Promise.all(
-        (data || []).map(async (motorcycle: Motorcycle) => {
-          if (motorcycle.msrp) {
-            const updatedValue = await updateMotorcycleValue(motorcycle);
-            return {
-              ...motorcycle,
-              current_value: updatedValue ?? motorcycle.current_value
-            };
-          }
-          return motorcycle;
-        })
-      );
-
+      const updatedResults = await processSearchResults(data || []);
       setSearchResults(updatedResults);
       toast.success(`Found ${updatedResults.length} potential matches`);
 
@@ -63,10 +67,11 @@ export const useMotorcycleSearch = () => {
   };
 
   const handleSearch = async () => {
+    setIsSearching(true);
     try {
       const { data, error } = await supabase
         .from('data_2025')
-        .select('id, year, make, model, msrp, current_value, created_at')
+        .select('*')
         .eq('year', searchParams.year)
         .eq('make', searchParams.make)
         .eq('model', searchParams.model);
@@ -76,24 +81,14 @@ export const useMotorcycleSearch = () => {
         throw new Error('Failed to search');
       }
 
-      const updatedResults = await Promise.all(
-        (data || []).map(async (motorcycle: Motorcycle) => {
-          if (motorcycle.msrp) {
-            const updatedValue = await updateMotorcycleValue(motorcycle);
-            return {
-              ...motorcycle,
-              current_value: updatedValue ?? motorcycle.current_value
-            };
-          }
-          return motorcycle;
-        })
-      );
-
+      const updatedResults = await processSearchResults(data || []);
       setSearchResults(updatedResults);
-      setIsSearching(false);
+
     } catch (error) {
       console.error('Error in handleSearch:', error);
       toast.error('Failed to search. Check console for details.');
+    } finally {
+      setIsSearching(false);
     }
   };
 
