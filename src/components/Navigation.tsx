@@ -13,7 +13,7 @@ const Navigation = () => {
           <div className="flex items-center">
             <Link to="/" className="flex items-center space-x-2 text-white hover:text-theme-400 transition-colors">
               <Home className="h-5 w-5" />
-              <span className="font-bold text-lg">Motorcycle Basecamp</span>
+              <span className="font-bold text-lg">Rider Basecamp</span>
             </Link>
           </div>
           <nav className="hidden md:flex items-center space-x-4">
