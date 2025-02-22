@@ -21,35 +21,33 @@ export const updateMotorcycleValue = async (motorcycle: Motorcycle) => {
     console.log('Attempting to update value for motorcycle:', motorcycle.id);
     console.log('MSRP:', msrpNumber, 'Calculated value:', currentValue);
 
-    // First verify if we can update the record
-    const { data: existingData, error: checkError } = await supabase
-      .from('data_2025')
-      .select('id')
-      .eq('id', motorcycle.id)
-      .single();
-
-    if (checkError || !existingData) {
-      console.error('Error checking motorcycle record:', checkError);
-      throw new Error('Could not verify motorcycle record');
-    }
-
-    // Perform the update
-    const { data: updateData, error: updateError } = await supabase
+    // Perform the update without requiring a single row return
+    const { error: updateError } = await supabase
       .from('data_2025')
       .update({
         current_value: currentValue,
         updated_at: new Date().toISOString()
       })
-      .eq('id', motorcycle.id)
-      .select()
-      .single();
+      .eq('id', motorcycle.id);
 
     if (updateError) {
       console.error('Update error:', updateError);
       throw new Error(`Update failed: ${updateError.message}`);
     }
 
-    console.log('Successfully updated motorcycle:', updateData);
+    // Verify the update was successful by fetching the updated record
+    const { data: updatedData, error: fetchError } = await supabase
+      .from('data_2025')
+      .select('current_value')
+      .eq('id', motorcycle.id)
+      .maybeSingle();
+
+    if (fetchError) {
+      console.error('Error fetching updated value:', fetchError);
+      throw new Error('Failed to verify update');
+    }
+
+    console.log('Successfully updated motorcycle:', updatedData);
     toast.success(`Updated value: ${formatCurrency(currentValue)}`);
     return currentValue;
 
