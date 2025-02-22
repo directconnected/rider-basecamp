@@ -1,286 +1,25 @@
-import React, { useEffect, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
+
+import React from "react";
 import Navigation from "@/components/Navigation";
 import SearchForm from "@/components/search/SearchForm";
 import SearchResults from "@/components/search/SearchResults";
 import Features from "@/components/features/Features";
 import Footer from "@/components/layout/Footer";
-import { toast } from "sonner";
-
-interface Motorcycle {
-  id: number;
-  created_at: string;
-  year: string | null;
-  make: string | null;
-  model: string | null;
-  msrp: string | null;
-  current_value: string | null;
-  value?: number;
-}
+import { useMotorcycleSearch } from "@/hooks/useMotorcycleSearch";
+import { formatCurrency } from "@/utils/motorcycleCalculations";
 
 const Index = () => {
-  const [searchParams, setSearchParams] = useState({
-    year: '',
-    make: '',
-    model: '',
-    vin: ''
-  });
-  const [searchResults, setSearchResults] = useState<Motorcycle[]>([]);
-  const [isSearching, setIsSearching] = useState(false);
-  const [years] = useState(() => {
-    const currentYear = new Date().getFullYear();
-    return Array.from({ length: 30 }, (_, i) => currentYear - i);
-  });
-  const [makes, setMakes] = useState<string[]>([]);
-  const [models, setModels] = useState<string[]>([]);
-
-  useEffect(() => {
-    const fetchMakes = async () => {
-      try {
-        console.log('Fetching makes...');
-        const { data, error } = await supabase
-          .from('data_2025')
-          .select('make')
-          .not('make', 'eq', null)
-          .order('make');
-
-        if (error) {
-          console.error('Error fetching makes:', error);
-          return;
-        }
-
-        if (data) {
-          console.log('Makes data:', data);
-          const uniqueMakes = Array.from(new Set(data
-            .map(item => item.make)
-            .filter(Boolean))) // This removes any null or undefined values
-            .sort();
-          console.log('Unique makes:', uniqueMakes);
-          setMakes(uniqueMakes);
-        }
-      } catch (err) {
-        console.error('Error:', err);
-      }
-    };
-
-    fetchMakes();
-  }, []);
-
-  useEffect(() => {
-    const fetchModels = async () => {
-      if (searchParams.make) {
-        try {
-          console.log('Fetching models for make:', searchParams.make);
-          const { data, error } = await supabase
-            .from('data_2025')
-            .select('model')
-            .eq('make', searchParams.make)
-            .not('model', 'eq', null)
-            .order('model');
-
-          if (error) {
-            console.error('Error fetching models:', error);
-            return;
-          }
-
-          if (data) {
-            console.log('Models data:', data);
-            const uniqueModels = Array.from(new Set(data
-              .map(item => item.model)
-              .filter(Boolean))) // This removes any null or undefined values
-              .sort();
-            console.log('Unique models:', uniqueModels);
-            setModels(uniqueModels);
-          }
-        } catch (err) {
-          console.error('Error:', err);
-        }
-      } else {
-        setModels([]);
-      }
-    };
-
-    fetchModels();
-  }, [searchParams.make]);
-
-  const calculateCurrentValue = (msrp: string | null): number => {
-    if (!msrp) return 0;
-    const numericValue = parseFloat(msrp.replace(/[^0-9.]/g, ''));
-    return Math.round(numericValue * 0.6);
-  };
-
-  const updateMotorcycleValue = async (motorcycle: Motorcycle) => {
-    if (motorcycle.current_value) {
-      return;
-    }
-
-    const calculatedValue = calculateCurrentValue(motorcycle.msrp);
-    if (calculatedValue === 0) {
-      return;
-    }
-
-    const formattedValue = `$${calculatedValue}`;
-    const { error } = await supabase
-      .from('data_2025')
-      .update({ current_value: formattedValue })
-      .eq('id', motorcycle.id);
-
-    if (error) {
-      console.error('Error updating current value:', error);
-      return;
-    }
-
-    console.log(`Updated current value for ID ${motorcycle.id} to ${formattedValue}`);
-  };
-
-  const decodeVINYear = (vin: string): string => {
-    const yearChar = vin.charAt(9);
-    const yearMap: { [key: string]: string } = {
-      'A': '2010', 'B': '2011', 'C': '2012', 'D': '2013',
-      'E': '2014', 'F': '2015', 'G': '2016', 'H': '2017',
-      'J': '2018', 'K': '2019', 'L': '2020', 'M': '2021',
-      'N': '2022', 'P': '2023', 'R': '2024',
-      '1': '2001', '2': '2002', '3': '2003', '4': '2004',
-      '5': '2005', '6': '2006', '7': '2007', '8': '2008',
-      '9': '2009'
-    };
-    return yearMap[yearChar] || '';
-  };
-
-  const decodeVINMake = (vin: string): string => {
-    const makePrefix = vin.substring(0, 3);
-    const makeMap: { [key: string]: string } = {
-      'JYA': 'Yamaha',
-      'KAW': 'Kawasaki',
-      'JH2': 'Honda',
-      'JSB': 'Suzuki',
-      'KTM': 'KTM',
-      'WB1': 'BMW',
-      'ZDM': 'Ducati',
-      'MEH': 'Harley-Davidson',
-      'SMT': 'Triumph',
-      '1HD': 'Harley-Davidson',
-    };
-    return makeMap[makePrefix] || '';
-  };
-
-  const handleSearchByVIN = async (vin: string) => {
-    if (vin.length !== 17) {
-      toast.error("Invalid VIN length - must be 17 characters");
-      return;
-    }
-
-    setIsSearching(true);
-    try {
-      const year = decodeVINYear(vin);
-      const make = decodeVINMake(vin);
-
-      if (!year || !make) {
-        toast.error("Could not decode VIN manufacturer or year");
-        return;
-      }
-
-      let query = supabase
-        .from('data_2025')
-        .select('*')
-        .eq('make', make);
-
-      if (year) {
-        query = query.eq('year', year);
-      }
-
-      const { data, error } = await query;
-
-      if (error) {
-        console.error('Error searching motorcycles:', error);
-        toast.error("Error searching for motorcycles");
-        return;
-      }
-
-      const resultsWithCurrentValue = (data || []).map((motorcycle) => ({
-        ...motorcycle,
-        value: calculateCurrentValue(motorcycle.msrp)
-      }));
-
-      for (const motorcycle of resultsWithCurrentValue) {
-        await updateMotorcycleValue(motorcycle);
-      }
-
-      if (resultsWithCurrentValue.length === 0) {
-        toast.warning("No matches found for this VIN");
-      } else {
-        toast.success(`Found ${resultsWithCurrentValue.length} potential matches`);
-      }
-
-      setSearchResults(resultsWithCurrentValue);
-    } catch (error) {
-      console.error('Error:', error);
-      toast.error("Error processing VIN");
-    } finally {
-      setIsSearching(false);
-    }
-  };
-
-  const handleSearch = async () => {
-    setIsSearching(true);
-    try {
-      if (searchParams.vin) {
-        await handleSearchByVIN(searchParams.vin);
-        return;
-      }
-
-      let query = supabase
-        .from('data_2025')
-        .select('*');
-
-      if (searchParams.year) {
-        query = query.eq('year', searchParams.year);
-      }
-      if (searchParams.make) {
-        query = query.eq('make', searchParams.make);
-      }
-      if (searchParams.model) {
-        query = query.eq('model', searchParams.model);
-      }
-
-      const { data, error } = await query;
-
-      if (error) {
-        console.error('Error searching motorcycles:', error);
-        return;
-      }
-
-      const resultsWithCurrentValue = (data || []).map((motorcycle) => ({
-        ...motorcycle,
-        value: calculateCurrentValue(motorcycle.msrp)
-      }));
-
-      for (const motorcycle of resultsWithCurrentValue) {
-        await updateMotorcycleValue(motorcycle);
-      }
-
-      setSearchResults(resultsWithCurrentValue);
-    } catch (error) {
-      console.error('Error:', error);
-    } finally {
-      setIsSearching(false);
-    }
-  };
-
-  const formatCurrency = (value: string | null | number): string => {
-    if (value === null || value === '') return 'N/A';
-    if (typeof value === 'number') {
-      return new Intl.NumberFormat('en-US', {
-        style: 'currency',
-        currency: 'USD',
-      }).format(value);
-    }
-    const numericValue = parseFloat(value.replace(/[^0-9.]/g, ''));
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
-    }).format(numericValue);
-  };
+  const {
+    searchParams,
+    setSearchParams,
+    searchResults,
+    isSearching,
+    years,
+    makes,
+    models,
+    handleSearch,
+    handleSearchByVIN
+  } = useMotorcycleSearch();
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -291,7 +30,7 @@ const Index = () => {
           <div className="w-full px-4 z-10">
             <div className="text-center mb-12">
               <h2 className="text-4xl md:text-6xl font-bold text-white mb-4 animate-fade-in">
-               Gear Up and Ride
+                Gear Up and Ride
               </h2>
               <p className="text-xl md:text-2xl text-gray-200 mb-8 animate-fade-in">
                 Your Home for Motorcycle Knowledge and Community.
