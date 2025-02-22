@@ -1,9 +1,17 @@
+
 import { useState, useEffect } from 'react';
 import { supabase } from "@/integrations/supabase/client";
+import { createClient } from '@supabase/supabase-js';
 import { toast } from "sonner";
 import { Motorcycle, SearchParams } from "@/types/motorcycle";
 import { calculateCurrentValue, formatCurrency } from "@/utils/motorcycleCalculations";
 import { decodeVINMake, decodeVINYear } from "@/utils/vinDecoder";
+
+// Create a separate admin client for database operations
+const adminClient = createClient(
+  'https://hungfeisnqbmzurpxvel.supabase.co',
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh1bmdmZWlzbnFibXp1cnB4dmVsIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTcwODYxNjMzMywiZXhwIjoyMDI0MTkyMzMzfQ.IrEC7Jf3qIWTun4kfKUOPxsW8s0n5R01Drqz0rGUst0'
+);
 
 export const useMotorcycleSearch = () => {
   const [searchParams, setSearchParams] = useState<SearchParams>({
@@ -45,16 +53,14 @@ export const useMotorcycleSearch = () => {
         currentValue: currentValue
       });
 
-      // Use the upsert method with explicit return type
-      const { error: updateError } = await supabase
+      // Use adminClient for the update operation
+      const { error: updateError } = await adminClient
         .from('data_2025')
-        .upsert({
-          id: motorcycle.id,
+        .update({
           current_value: currentValue,
           updated_at: new Date().toISOString()
-        }, {
-          onConflict: 'id'
-        });
+        })
+        .eq('id', motorcycle.id);
 
       if (updateError) {
         console.error('Update error:', updateError);
@@ -62,7 +68,7 @@ export const useMotorcycleSearch = () => {
       }
 
       // Verify the update with a separate query
-      const { data: verifyData, error: verifyError } = await supabase
+      const { data: verifyData, error: verifyError } = await adminClient
         .from('data_2025')
         .select('current_value')
         .eq('id', motorcycle.id)
