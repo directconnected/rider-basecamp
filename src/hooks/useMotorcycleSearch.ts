@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -23,16 +22,14 @@ export const useMotorcycleSearch = () => {
   });
 
   const updateMotorcycleValue = async (motorcycle: Motorcycle) => {
-    if (motorcycle.current_value) {
-      return;
-    }
-
     const calculatedValue = calculateCurrentValue(motorcycle.msrp);
     if (calculatedValue === 0) {
       return;
     }
 
     const formattedValue = `$${calculatedValue}`;
+    console.log(`Updating value for motorcycle ID ${motorcycle.id} to ${formattedValue}`);
+    
     const { error } = await supabase
       .from('data_2025')
       .update({ current_value: formattedValue })
@@ -43,7 +40,7 @@ export const useMotorcycleSearch = () => {
       return;
     }
 
-    console.log(`Updated current value for ID ${motorcycle.id} to ${formattedValue}`);
+    console.log(`Successfully updated current value for ID ${motorcycle.id} to ${formattedValue}`);
   };
 
   const handleSearchByVIN = async (vin: string) => {
