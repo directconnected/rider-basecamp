@@ -8,6 +8,7 @@ import Index from "@/pages/Index";
 import About from "@/pages/About";
 import Contact from "@/pages/Contact";
 import AdvertiseWithUs from "@/pages/AdvertiseWithUs";
+import Subscribe from "@/pages/Subscribe";
 import Auth from "@/pages/Auth";
 import MotorcycleDetails from "@/pages/MotorcycleDetails";
 import NotFound from "@/pages/NotFound";
@@ -27,6 +28,7 @@ function App() {
             <Route path="/about" element={<About />} />
             <Route path="/contact" element={<Contact />} />
             <Route path="/advertise" element={<AdvertiseWithUs />} />
+            <Route path="/subscribe" element={<Subscribe />} />
             <Route path="/auth" element={<Auth />} />
             <Route path="/motorcycle/:id" element={<MotorcycleDetails />} />
             <Route path="/admin" element={<Admin />} />
