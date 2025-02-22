@@ -18,9 +18,9 @@ export const useMotorcycleSearch = () => {
   const [isSearching, setIsSearching] = useState(false);
   const [makes, setMakes] = useState<string[]>([]);
   const [models, setModels] = useState<string[]>([]);
-  const [years] = useState<string[]>(() => {
+  const [years] = useState<number[]>(() => {
     const currentYear = new Date().getFullYear();
-    return Array.from({ length: 30 }, (_, i) => (currentYear - i).toString());
+    return Array.from({ length: 30 }, (_, i) => currentYear - i);
   });
 
   const updateMotorcycleValue = async (motorcycle: Motorcycle) => {
@@ -62,7 +62,7 @@ export const useMotorcycleSearch = () => {
       const { error: updateError } = await adminClient
         .from('data_2025')
         .update({
-          current_value: currentValue, // Pass number directly
+          current_value: currentValue,
           updated_at: new Date().toISOString()
         })
         .eq('id', motorcycle.id);
@@ -100,14 +100,14 @@ export const useMotorcycleSearch = () => {
 
       const { data, error } = await supabase
         .from('data_2025')
-        .select('id, year, make, model, msrp, current_value')
+        .select('id, year, make, model, msrp, current_value, created_at')
         .eq('make', make)
         .eq('year', year);
 
       if (error) throw error;
 
       const updatedResults = await Promise.all(
-        (data || []).map(async (motorcycle) => {
+        (data || []).map(async (motorcycle: Motorcycle) => {
           if (motorcycle.msrp) {
             const updatedValue = await updateMotorcycleValue(motorcycle);
             return {
@@ -134,7 +134,7 @@ export const useMotorcycleSearch = () => {
     try {
       const { data, error } = await supabase
         .from('data_2025')
-        .select('id, year, make, model, msrp, current_value')
+        .select('id, year, make, model, msrp, current_value, created_at')
         .eq('year', searchParams.year)
         .eq('make', searchParams.make)
         .eq('model', searchParams.model);
@@ -145,7 +145,7 @@ export const useMotorcycleSearch = () => {
       }
 
       const updatedResults = await Promise.all(
-        (data || []).map(async (motorcycle) => {
+        (data || []).map(async (motorcycle: Motorcycle) => {
           if (motorcycle.msrp) {
             const updatedValue = await updateMotorcycleValue(motorcycle);
             return {
