@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -23,9 +24,10 @@ export const useMotorcycleSearch = () => {
 
   const updateMotorcycleValue = async (motorcycle: Motorcycle) => {
     try {
+      // First, verify we can write to the database
       const { data: testData, error: testError } = await supabase
         .from('data_2025')
-        .select('id')
+        .select('id, msrp')
         .eq('id', motorcycle.id)
         .single();
 
@@ -34,6 +36,8 @@ export const useMotorcycleSearch = () => {
         toast.error('Database access error. Please check permissions.');
         return;
       }
+
+      console.log('Current database record:', testData);
 
       if (!motorcycle.msrp) {
         console.log('No MSRP available for motorcycle:', motorcycle.id);
@@ -58,32 +62,38 @@ export const useMotorcycleSearch = () => {
         currentValue: currentValue
       });
 
+      // Explicitly cast the value to numeric for PostgreSQL
       const { error: updateError } = await supabase
         .from('data_2025')
         .update({ 
-          current_value: currentValue
+          current_value: currentValue.toString(),  // Convert to string as Supabase will handle the casting
+          updated_at: new Date().toISOString()
         })
         .eq('id', motorcycle.id);
 
       if (updateError) {
+        console.error('Update error:', updateError);
         throw new Error(`Update failed: ${updateError.message}`);
       }
 
+      // Verify the update immediately
       const { data: verifyData, error: verifyError } = await supabase
         .from('data_2025')
         .select('current_value')
         .eq('id', motorcycle.id)
         .single();
 
-      if (verifyError || !verifyData) {
+      if (verifyError) {
+        console.error('Verify error:', verifyError);
         throw new Error('Failed to verify update');
       }
 
       console.log('Update verified:', {
         id: motorcycle.id,
-        newValue: verifyData.current_value
+        newValue: verifyData?.current_value
       });
 
+      // Update local state
       setSearchResults(prev => 
         prev.map(m => 
           m.id === motorcycle.id 
