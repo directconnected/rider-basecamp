@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -12,7 +11,7 @@ const Footer = () => {
           <div className="text-left">
             <h3 className="font-bold text-lg mb-4">About Us</h3>
             <p className="text-gray-400">
-              Your trusted source for accurate motorcycle valuations and market insights.
+              Developed by riders for riders.
             </p>
           </div>
           <div className="text-left">
