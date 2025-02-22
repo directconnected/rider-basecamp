@@ -21,34 +21,35 @@ export const updateMotorcycleValue = async (motorcycle: Motorcycle) => {
     console.log('Attempting to update value for motorcycle:', motorcycle.id);
     console.log('MSRP:', msrpNumber, 'Calculated value:', currentValue);
 
-    // Perform the update without requiring a single row return
+    // Update with numeric values and ensure ID is used correctly
     const { error: updateError } = await supabase
       .from('data_2025')
-      .update({
-        current_value: currentValue,
+      .update({ 
+        current_value: Number(currentValue), // Ensure value is numeric
         updated_at: new Date().toISOString()
       })
-      .eq('id', motorcycle.id);
+      .eq('id', Number(motorcycle.id)); // Ensure ID is numeric
 
     if (updateError) {
       console.error('Update error:', updateError);
       throw new Error(`Update failed: ${updateError.message}`);
     }
 
-    // Verify the update was successful by fetching the updated record
-    const { data: updatedData, error: fetchError } = await supabase
+    // Verify the update
+    const { data: verifyData, error: verifyError } = await supabase
       .from('data_2025')
       .select('current_value')
-      .eq('id', motorcycle.id)
-      .maybeSingle();
+      .eq('id', Number(motorcycle.id))
+      .single();
 
-    if (fetchError) {
-      console.error('Error fetching updated value:', fetchError);
+    if (verifyError || !verifyData) {
+      console.error('Verification error:', verifyError);
       throw new Error('Failed to verify update');
     }
 
-    // Return the calculated value immediately after successful update
     console.log('Successfully updated motorcycle with value:', currentValue);
+    console.log('Verified database value:', verifyData.current_value);
+    
     toast.success(`Updated value: ${formatCurrency(currentValue)}`);
     return currentValue;
 
