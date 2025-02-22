@@ -10,6 +10,46 @@ const corsHeaders = {
 const supabaseUrl = 'https://hungfeisnqbmzurpxvel.supabase.co'
 const serviceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
 
+async function searchMSRP(year: string, make: string, model: string): Promise<string | null> {
+  try {
+    const apiKey = Deno.env.get('GOOGLE_SEARCH_API_KEY')
+    const searchEngineId = Deno.env.get('GOOGLE_SEARCH_ENGINE_ID')
+    
+    if (!apiKey || !searchEngineId) {
+      throw new Error('Missing Google Search API configuration')
+    }
+
+    const query = encodeURIComponent(`${year} ${make} ${model} motorcycle MSRP price`)
+    const url = `https://www.googleapis.com/customsearch/v1?key=${apiKey}&cx=${searchEngineId}&q=${query}`
+
+    console.log(`Searching for MSRP of: ${year} ${make} ${model}`)
+    const response = await fetch(url)
+    const data = await response.json()
+
+    if (!response.ok) {
+      console.error('Google Search API error:', data)
+      throw new Error('Failed to fetch search results')
+    }
+
+    // Look for price patterns in snippets
+    for (const item of data.items || []) {
+      const text = item.snippet || ''
+      // Look for price patterns like $X,XXX or $XX,XXX
+      const priceMatch = text.match(/\$\d{1,3}(,\d{3})*(\.\d{2})?/)
+      if (priceMatch) {
+        console.log(`Found price in snippet: ${priceMatch[0]}`)
+        return priceMatch[0]
+      }
+    }
+
+    console.log('No MSRP found in search results')
+    return null
+  } catch (error) {
+    console.error('Error searching for MSRP:', error)
+    return null
+  }
+}
+
 serve(async (req) => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
@@ -29,8 +69,8 @@ serve(async (req) => {
       .from('data_2025')
       .select('*')
       .is('msrp', null)
-      .limit(10)
-
+      .limit(5) // Reduced limit to avoid hitting API rate limits
+    
     if (fetchError) {
       console.error('Error fetching motorcycles:', fetchError)
       throw fetchError
@@ -44,25 +84,32 @@ serve(async (req) => {
       try {
         console.log(`Processing motorcycle ID ${motorcycle.id}: ${motorcycle.year} ${motorcycle.make} ${motorcycle.model}`)
         
-        // Generate a random MSRP between $8,000 and $30,000
-        const msrp = Math.floor(Math.random() * (30000 - 8000) + 8000)
-        console.log(`Generated MSRP: $${msrp} for motorcycle ID ${motorcycle.id}`)
+        // Search for MSRP using Google Custom Search
+        const msrp = await searchMSRP(
+          motorcycle.year || '',
+          motorcycle.make || '',
+          motorcycle.model || ''
+        )
 
-        // Update the database
-        const { error: updateError } = await supabase
-          .from('data_2025')
-          .update({ msrp: `$${msrp}` })
-          .eq('id', motorcycle.id)
+        if (msrp) {
+          // Update the database with found MSRP
+          const { error: updateError } = await supabase
+            .from('data_2025')
+            .update({ msrp: msrp })
+            .eq('id', motorcycle.id)
 
-        if (updateError) {
-          console.error(`Error updating MSRP for ID ${motorcycle.id}:`, updateError)
+          if (updateError) {
+            console.error(`Error updating MSRP for ID ${motorcycle.id}:`, updateError)
+          } else {
+            console.log(`Successfully updated MSRP for ID ${motorcycle.id} to ${msrp}`)
+            updatedCount++
+          }
         } else {
-          console.log(`Successfully updated MSRP for ID ${motorcycle.id} to $${msrp}`)
-          updatedCount++
+          console.log(`No MSRP found for motorcycle ID ${motorcycle.id}`)
         }
 
-        // Add small delay between updates
-        await new Promise(resolve => setTimeout(resolve, 100))
+        // Add delay between requests to respect API rate limits
+        await new Promise(resolve => setTimeout(resolve, 2000))
       } catch (error) {
         console.error(`Error processing motorcycle ID ${motorcycle.id}:`, error)
       }
@@ -71,7 +118,7 @@ serve(async (req) => {
     return new Response(
       JSON.stringify({
         success: true,
-        message: `Successfully updated ${updatedCount} out of ${motorcycles?.length || 0} motorcycles`
+        message: `Successfully updated ${updatedCount} out of ${motorcycles?.length || 0} motorcycles with MSRP data`
       }),
       {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' }
