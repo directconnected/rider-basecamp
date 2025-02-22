@@ -43,7 +43,7 @@ async function searchSpecifications(year: string, make: string, model: string): 
       throw new Error('Missing Google Search API configuration')
     }
 
-    const query = encodeURIComponent(`${year} ${make} ${model} motorcycle specifications engine transmission suspension`)
+    const query = encodeURIComponent(`${year} ${make} ${model} motorcycle specifications engine transmission suspension clutch tires rake trail`)
     const url = `https://www.googleapis.com/customsearch/v1?key=${apiKey}&cx=${searchEngineId}&q=${query}`
 
     console.log(`Searching for specifications of: ${year} ${make} ${model}`)
@@ -69,14 +69,21 @@ async function searchSpecifications(year: string, make: string, model: string): 
     const patterns = {
       engine_type: /engine:?\s*([^\.|\n]+)/i,
       transmission: /transmission:?\s*([^\.|\n]+)/i,
+      clutch: /clutch:?\s*([^\.|\n]+)/i,
       front_suspension: /front suspension:?\s*([^\.|\n]+)/i,
       rear_suspension: /rear suspension:?\s*([^\.|\n]+)/i,
       front_brakes: /front brake[s]?:?\s*([^\.|\n]+)/i,
       rear_brakes: /rear brake[s]?:?\s*([^\.|\n]+)/i,
+      front_tire: /front tire:?\s*([^\.|\n]+)/i,
+      rear_tire: /rear tire:?\s*([^\.|\n]+)/i,
+      rake: /rake:?\s*([\d\.]+°|\d+(?:\.\d+)?\s*degrees)/i,
+      trail: /trail:?\s*([\d\.]+\s*(?:mm|in))/i,
       wheelbase: /wheelbase:?\s*([\d\.]+\s*(?:mm|in))/i,
       seat_height: /seat height:?\s*([\d\.]+\s*(?:mm|in))/i,
+      ground_clearance: /ground clearance:?\s*([\d\.]+\s*(?:mm|in))/i,
       fuel_capacity: /fuel capacity:?\s*([\d\.]+\s*(?:l|gal))/i,
       curb_weight: /(?:curb )?weight:?\s*([\d\.]+\s*(?:kg|lbs?))/i,
+      colors: /colors?:?\s*([^\.|\n]+)/i
     }
 
     // Extract specifications using regex patterns
