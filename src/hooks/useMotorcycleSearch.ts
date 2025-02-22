@@ -45,9 +45,11 @@ export const useMotorcycleSearch = () => {
     try {
       const { data, error } = await supabase
         .from('data_2025')
-        .update({ current_value: formattedValue })
-        .eq('id', motorcycle.id)
-        .select();
+        .update({ 
+          current_value: formattedValue,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', motorcycle.id);
 
       if (error) {
         console.error('Error updating current value:', error);
@@ -55,7 +57,7 @@ export const useMotorcycleSearch = () => {
         return;
       }
 
-      console.log(`Successfully updated motorcycle ${motorcycle.id}:`, data);
+      console.log(`Successfully updated motorcycle ${motorcycle.id}`);
       toast.success(`Updated value for ${motorcycle.make} ${motorcycle.model}`);
     } catch (err) {
       console.error('Exception during update:', err);
