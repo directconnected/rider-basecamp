@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import Navigation from "@/components/Navigation";
@@ -6,6 +5,7 @@ import SearchForm from "@/components/search/SearchForm";
 import SearchResults from "@/components/search/SearchResults";
 import Features from "@/components/features/Features";
 import Footer from "@/components/layout/Footer";
+import { toast } from "sonner";
 
 interface Motorcycle {
   motorcycle_id: number;
@@ -98,23 +98,89 @@ const Index = () => {
     fetchModels();
   }, [searchParams.make]);
 
+  const decodeVINYear = (vin: string): string => {
+    const yearChar = vin.charAt(9);
+    const yearMap: { [key: string]: string } = {
+      'A': '2010', 'B': '2011', 'C': '2012', 'D': '2013',
+      'E': '2014', 'F': '2015', 'G': '2016', 'H': '2017',
+      'J': '2018', 'K': '2019', 'L': '2020', 'M': '2021',
+      'N': '2022', 'P': '2023', 'R': '2024',
+      '1': '2001', '2': '2002', '3': '2003', '4': '2004',
+      '5': '2005', '6': '2006', '7': '2007', '8': '2008',
+      '9': '2009'
+    };
+    return yearMap[yearChar] || '';
+  };
+
+  const decodeVINMake = (vin: string): string => {
+    const makePrefix = vin.substring(0, 3);
+    const makeMap: { [key: string]: string } = {
+      'JYA': 'Yamaha',
+      'KAW': 'Kawasaki',
+      'JH2': 'Honda',
+      'JSB': 'Suzuki',
+      'KTM': 'KTM',
+      'WB1': 'BMW',
+      'ZDM': 'Ducati',
+      'MEH': 'Harley-Davidson',
+      'SMT': 'Triumph',
+      '1HD': 'Harley-Davidson',
+      // Add more manufacturer codes as needed
+    };
+    return makeMap[makePrefix] || '';
+  };
+
   const handleSearchByVIN = async (vin: string) => {
     if (vin.length !== 17) {
-      console.log("Invalid VIN length");
+      toast.error("Invalid VIN length - must be 17 characters");
       return;
     }
 
-    const year = vin.charAt(9);
-    const make = vin.substring(0, 3);
-    
-    setSearchParams(prev => ({
-      ...prev,
-      year: year,
-      make: make,
-      vin: vin
-    }));
+    setIsSearching(true);
+    try {
+      const year = decodeVINYear(vin);
+      const make = decodeVINMake(vin);
 
-    handleSearch();
+      if (!year || !make) {
+        toast.error("Could not decode VIN manufacturer or year");
+        return;
+      }
+
+      let query = supabase
+        .from('motorcycles_1')
+        .select('*')
+        .eq('Make', make);
+
+      if (year) {
+        query = query.eq('Year', year);
+      }
+
+      const { data, error } = await query;
+
+      if (error) {
+        console.error('Error searching motorcycles:', error);
+        toast.error("Error searching for motorcycles");
+        return;
+      }
+
+      const resultsWithCurrentValue = (data || []).map((motorcycle) => ({
+        ...motorcycle,
+        value: calculateCurrentValue(motorcycle as Motorcycle)
+      }));
+
+      if (resultsWithCurrentValue.length === 0) {
+        toast.warning("No matches found for this VIN");
+      } else {
+        toast.success(`Found ${resultsWithCurrentValue.length} potential matches`);
+      }
+
+      setSearchResults(resultsWithCurrentValue);
+    } catch (error) {
+      console.error('Error:', error);
+      toast.error("Error processing VIN");
+    } finally {
+      setIsSearching(false);
+    }
   };
 
   const calculateCurrentValue = (motorcycle: Motorcycle): number => {
