@@ -1,10 +1,11 @@
+
 import { useState, useEffect } from 'react';
 import { supabase } from "@/integrations/supabase/client";
+import { adminClient } from "@/integrations/supabase/adminClient";
 import { Motorcycle, SearchParams } from "@/types/motorcycle";
 import { calculateCurrentValue, formatCurrency } from "@/utils/motorcycleCalculations";
 import { decodeVINMake, decodeVINYear } from "@/utils/vinDecoder";
 import { toast } from "sonner";
-import { adminClient } from "@/integrations/supabase/adminClient";
 
 export const useMotorcycleSearch = () => {
   const [searchParams, setSearchParams] = useState<SearchParams>({
@@ -132,31 +133,29 @@ export const useMotorcycleSearch = () => {
     const fetchMakes = async () => {
       const { data, error } = await supabase
         .from('data_2025')
-        .select('make')
-        .distinct()
-        .order('make', { ascending: true });
+        .select('make');
 
       if (error) {
         console.error('Fetch makes error:', error);
         throw new Error('Failed to fetch makes');
       }
 
-      setMakes(data.map(make => make.make));
+      const uniqueMakes = Array.from(new Set(data.map(item => item.make).filter(Boolean)));
+      setMakes(uniqueMakes.sort());
     };
 
     const fetchModels = async () => {
       const { data, error } = await supabase
         .from('data_2025')
-        .select('model')
-        .distinct()
-        .order('model', { ascending: true });
+        .select('model');
 
       if (error) {
         console.error('Fetch models error:', error);
         throw new Error('Failed to fetch models');
       }
 
-      setModels(data.map(model => model.model));
+      const uniqueModels = Array.from(new Set(data.map(item => item.model).filter(Boolean)));
+      setModels(uniqueModels.sort());
     };
 
     fetchMakes();
