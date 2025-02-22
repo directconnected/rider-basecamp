@@ -16,7 +16,7 @@ export type Database = {
           id: number
           make: string | null
           model: string | null
-          msrp: string | null
+          msrp: number | null
           updated_at: string | null
           year: string | null
         }
@@ -26,7 +26,7 @@ export type Database = {
           id?: number
           make?: string | null
           model?: string | null
-          msrp?: string | null
+          msrp?: number | null
           updated_at?: string | null
           year?: string | null
         }
@@ -36,7 +36,7 @@ export type Database = {
           id?: number
           make?: string | null
           model?: string | null
-          msrp?: string | null
+          msrp?: number | null
           updated_at?: string | null
           year?: string | null
         }

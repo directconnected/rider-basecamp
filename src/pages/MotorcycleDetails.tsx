@@ -14,7 +14,7 @@ interface MotorcycleDetails {
   make: string | null;
   model: string | null;
   msrp: string | null;
-  current_value: string | null;
+  current_value: number | null;
 }
 
 const MotorcycleDetails = () => {
@@ -55,8 +55,14 @@ const MotorcycleDetails = () => {
     fetchMotorcycleDetails();
   }, [id]);
 
-  const formatCurrency = (value: string | null): string => {
-    if (!value) return 'N/A';
+  const formatCurrency = (value: string | null | number): string => {
+    if (value === null) return 'N/A';
+    if (typeof value === 'number') {
+      return new Intl.NumberFormat('en-US', {
+        style: 'currency',
+        currency: 'USD',
+      }).format(value);
+    }
     const numericValue = parseFloat(value.replace(/[^0-9.]/g, ''));
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
