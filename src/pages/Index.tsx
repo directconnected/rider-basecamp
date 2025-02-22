@@ -1,11 +1,10 @@
-
 import React, { useEffect, useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
-import { Search, Database, TrendingUp, ShieldCheck, ArrowRight } from "lucide-react";
+import { Search, Database, TrendingUp, ShieldCheck, ArrowRight, ScanBarcode } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import Navigation from "@/components/Navigation";
 
@@ -27,7 +26,8 @@ const Index = () => {
   const [searchParams, setSearchParams] = useState({
     year: '',
     make: '',
-    model: ''
+    model: '',
+    vin: ''
   });
   const [searchResults, setSearchResults] = useState<Motorcycle[]>([]);
   const [isSearching, setIsSearching] = useState(false);
@@ -99,14 +99,39 @@ const Index = () => {
     fetchModels();
   }, [searchParams.make]);
 
+  const handleSearchByVIN = async (vin: string) => {
+    if (vin.length !== 17) {
+      console.log("Invalid VIN length");
+      return;
+    }
+
+    const year = vin.charAt(9); // 10th character represents the year
+    const make = vin.substring(0, 3); // First 3 characters typically represent the manufacturer
+    
+    setSearchParams(prev => ({
+      ...prev,
+      year: year,
+      make: make,
+      vin: vin
+    }));
+
+    // Trigger the regular search with the decoded VIN information
+    handleSearch();
+  };
+
   const calculateCurrentValue = (motorcycle: Motorcycle): number => {
     const msrp = parseFloat(motorcycle.MSRP?.replace(/[^0-9.]/g, '') || "0");
-    return Math.round(msrp * 0.6); // Taking 60% of MSRP
+    return Math.round(msrp * 0.6);
   };
 
   const handleSearch = async () => {
     setIsSearching(true);
     try {
+      if (searchParams.vin) {
+        await handleSearchByVIN(searchParams.vin);
+        return;
+      }
+
       let query = supabase
         .from('motorcycles_1')
         .select('*');
@@ -166,61 +191,82 @@ const Index = () => {
                 owner's manuals, service manuals, manufacturer specs, maintenance schedules, parts diagrams
               </p>
               <div className="max-w-4xl mx-auto mt-8">
-                <div className="flex flex-col md:flex-row gap-4 animate-fade-in">
-                  <Select 
-                    value={searchParams.year}
-                    onValueChange={(value) => setSearchParams(prev => ({ ...prev, year: value, model: '' }))}
-                  >
-                    <SelectTrigger className="bg-white">
-                      <SelectValue placeholder="Select Year" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {years.map(year => (
-                        <SelectItem key={year} value={year.toString()}>
-                          {year}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <Select 
-                    value={searchParams.make}
-                    onValueChange={(value) => setSearchParams(prev => ({ ...prev, make: value, model: '' }))}
-                  >
-                    <SelectTrigger className="bg-white">
-                      <SelectValue placeholder="Select Make" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {makes.map(make => (
-                        <SelectItem key={make} value={make}>
-                          {make}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <Select 
-                    value={searchParams.model}
-                    onValueChange={(value) => setSearchParams(prev => ({ ...prev, model: value }))}
-                    disabled={!searchParams.make}
-                  >
-                    <SelectTrigger className="bg-white">
-                      <SelectValue placeholder="Select Model" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {models.map(model => (
-                        <SelectItem key={model} value={model}>
-                          {model}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <Button 
-                    className="button-gradient text-white px-8 py-6"
-                    onClick={handleSearch}
-                    disabled={isSearching}
-                  >
-                    <Search className="mr-2" />
-                    Search
-                  </Button>
+                <div className="flex flex-col gap-4 animate-fade-in">
+                  <div className="flex flex-col md:flex-row gap-4">
+                    <Input
+                      type="text"
+                      placeholder="Enter VIN (17 characters)"
+                      value={searchParams.vin}
+                      onChange={(e) => setSearchParams(prev => ({ ...prev, vin: e.target.value.toUpperCase() }))}
+                      className="flex-1 bg-white"
+                      maxLength={17}
+                    />
+                    <Button 
+                      className="button-gradient text-white px-8 py-6"
+                      onClick={() => handleSearchByVIN(searchParams.vin)}
+                      disabled={isSearching || (searchParams.vin.length > 0 && searchParams.vin.length !== 17)}
+                    >
+                      <ScanBarcode className="mr-2" />
+                      Decode VIN
+                    </Button>
+                  </div>
+                  <div className="text-white text-center my-2">- OR -</div>
+                  <div className="flex flex-col md:flex-row gap-4">
+                    <Select 
+                      value={searchParams.year}
+                      onValueChange={(value) => setSearchParams(prev => ({ ...prev, year: value, model: '' }))}
+                    >
+                      <SelectTrigger className="bg-white">
+                        <SelectValue placeholder="Select Year" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {years.map(year => (
+                          <SelectItem key={year} value={year.toString()}>
+                            {year}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <Select 
+                      value={searchParams.make}
+                      onValueChange={(value) => setSearchParams(prev => ({ ...prev, make: value, model: '' }))}
+                    >
+                      <SelectTrigger className="bg-white">
+                        <SelectValue placeholder="Select Make" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {makes.map(make => (
+                          <SelectItem key={make} value={make}>
+                            {make}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <Select 
+                      value={searchParams.model}
+                      onValueChange={(value) => setSearchParams(prev => ({ ...prev, model: value }))}
+                      disabled={!searchParams.make}
+                    >
+                      <SelectTrigger className="bg-white">
+                        <SelectValue placeholder="Select Model" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {models.map(model => (
+                          <SelectItem key={model} value={model}>
+                            {model}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <Button 
+                      className="button-gradient text-white px-8 py-6"
+                      onClick={handleSearch}
+                      disabled={isSearching}
+                    >
+                      <Search className="mr-2" />
+                      Search
+                    </Button>
+                  </div>
                 </div>
               </div>
             </div>
@@ -378,4 +424,3 @@ const Index = () => {
 };
 
 export default Index;
-
