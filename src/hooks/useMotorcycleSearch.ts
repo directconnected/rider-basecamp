@@ -27,7 +27,7 @@ export const useMotorcycleSearch = () => {
       // First, verify we can write to the database
       const { data: testData, error: testError } = await supabase
         .from('data_2025')
-        .select('id, msrp')
+        .select('id, msrp, current_value')
         .eq('id', motorcycle.id)
         .single();
 
@@ -37,7 +37,7 @@ export const useMotorcycleSearch = () => {
         return;
       }
 
-      console.log('Current database record:', testData);
+      console.log('Current database record before update:', testData);
 
       if (!motorcycle.msrp) {
         console.log('No MSRP available for motorcycle:', motorcycle.id);
@@ -59,22 +59,31 @@ export const useMotorcycleSearch = () => {
       console.log('Attempting database update with:', {
         id: motorcycle.id,
         msrp: msrpNumber,
-        currentValue: currentValue
+        currentValue: currentValue,
+        type: typeof currentValue
       });
 
-      // Explicitly cast the value to numeric for PostgreSQL
-      const { error: updateError } = await supabase
+      // Cast to numeric and ensure it's a valid number
+      const updateData = {
+        current_value: Number(currentValue),
+        updated_at: new Date().toISOString()
+      };
+
+      console.log('Update payload:', updateData);
+
+      const { data: updateResult, error: updateError } = await supabase
         .from('data_2025')
-        .update({ 
-          current_value: currentValue,  // Keep as number
-          updated_at: new Date().toISOString()
-        })
-        .eq('id', motorcycle.id);
+        .update(updateData)
+        .eq('id', motorcycle.id)
+        .select('*')
+        .single();
 
       if (updateError) {
         console.error('Update error:', updateError);
         throw new Error(`Update failed: ${updateError.message}`);
       }
+
+      console.log('Update result:', updateResult);
 
       // Verify the update immediately
       const { data: verifyData, error: verifyError } = await supabase
@@ -90,7 +99,8 @@ export const useMotorcycleSearch = () => {
 
       console.log('Update verified:', {
         id: motorcycle.id,
-        newValue: verifyData?.current_value
+        newValue: verifyData?.current_value,
+        valueType: typeof verifyData?.current_value
       });
 
       // Update local state
