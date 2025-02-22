@@ -16,8 +16,8 @@ const Index = () => {
     },
     {
       icon: Database,
-      title: "Rich Database",
-      description: "Access comprehensive motorcycle specifications"
+      title: "Best Motorcycle Camping Gear",
+      description: "Top camping gear for bikers: compact, durable, essentials."
     },
     {
       icon: BarChart,
