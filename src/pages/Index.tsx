@@ -11,19 +11,19 @@ const Index = () => {
   const features = [
     {
       icon: Route,
-      title: "Motorcycle Roads and Routes",
+      title: "Motorcycle Roads",
       description: "Top motorcycle roads, scenic routes, and riding tips.",
       link: "/routes"
     },
     {
       icon: Tent,
-      title: "Best Motorcycle Camping Gear",
+      title: "Motorcycle Camping",
       description: "Top camping gear for bikers: compact, durable, essentials.",
       link: "/camping-gear"
     },
     {
       icon: Shield,
-      title: "Best Motorcycle Riding Gear",
+      title: "Motorcycle Gear",
       description: "Top riding gear: safety, comfort, and style for bikers.",
       link: "/riding-gear"
     },
