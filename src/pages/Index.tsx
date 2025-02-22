@@ -21,8 +21,8 @@ const Index = () => {
     },
     {
       icon: BarChart,
-      title: "Market Analysis",
-      description: "Get real-time market valuations"
+      title: "Best Motorcycle Riding Gear",
+      description: "Top riding gear: safety, comfort, and style for bikers."
     },
     {
       icon: Shield,
