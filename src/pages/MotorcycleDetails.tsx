@@ -3,17 +3,18 @@ import React, { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { ArrowLeft, FileText } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import Navigation from "@/components/Navigation";
 
 interface MotorcycleDetails {
   id: number;
-  Year: string | null;
-  Make: string | null;
-  Model: string | null;
-  MSRP: string | null;
-  Value: string | null;
+  created_at: string;
+  year: string | null;
+  make: string | null;
+  model: string | null;
+  msrp: string | null;
+  current_value: string | null;
 }
 
 const MotorcycleDetails = () => {
@@ -101,24 +102,8 @@ const MotorcycleDetails = () => {
         <Card className="bg-white shadow-lg">
           <div className="p-6">
             <h1 className="text-3xl font-bold mb-2">
-              {motorcycle.Year} {motorcycle.Make} {motorcycle.Model}
+              {motorcycle.year} {motorcycle.make} {motorcycle.model}
             </h1>
-            
-            {motorcycle.service_manual_url && (
-              <div className="mb-6">
-                <a 
-                  href={motorcycle.service_manual_url} 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center"
-                >
-                  <Button variant="secondary" className="gap-2">
-                    <FileText className="h-4 w-4" />
-                    View Owner's Manual
-                  </Button>
-                </a>
-              </div>
-            )}
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mt-6">
               <div className="space-y-6">
@@ -126,84 +111,12 @@ const MotorcycleDetails = () => {
                   <h2 className="text-xl font-semibold mb-4">Basic Information</h2>
                   <div className="space-y-3">
                     <div>
-                      <p className="text-gray-500">Category</p>
-                      <p className="font-medium">{motorcycle.Category || 'N/A'}</p>
-                    </div>
-                    <div>
                       <p className="text-gray-500">MSRP</p>
-                      <p className="font-medium">{formatCurrency(motorcycle.MSRP)}</p>
+                      <p className="font-medium">{formatCurrency(motorcycle.msrp)}</p>
                     </div>
                     <div>
-                      <p className="text-gray-500">Rating</p>
-                      <p className="font-medium">{motorcycle.Rating || 'N/A'}</p>
-                    </div>
-                  </div>
-                </div>
-
-                <div>
-                  <h2 className="text-xl font-semibold mb-4">Engine</h2>
-                  <div className="space-y-3">
-                    <div>
-                      <p className="text-gray-500">Engine Type</p>
-                      <p className="font-medium">{motorcycle["Engine type"] || 'N/A'}</p>
-                    </div>
-                    <div>
-                      <p className="text-gray-500">Engine Details</p>
-                      <p className="font-medium">{motorcycle["Engine details"] || 'N/A'}</p>
-                    </div>
-                    <div>
-                      <p className="text-gray-500">Power</p>
-                      <p className="font-medium">{motorcycle["Power (PS)"] || 'N/A'}</p>
-                    </div>
-                    <div>
-                      <p className="text-gray-500">Displacement</p>
-                      <p className="font-medium">{motorcycle["Displacement (cm3)"] || 'N/A'}</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div className="space-y-6">
-                <div>
-                  <h2 className="text-xl font-semibold mb-4">Chassis & Suspension</h2>
-                  <div className="space-y-3">
-                    <div>
-                      <p className="text-gray-500">Transmission</p>
-                      <p className="font-medium">{motorcycle["Transmission type, final drive"] || 'N/A'}</p>
-                    </div>
-                    <div>
-                      <p className="text-gray-500">Front Suspension</p>
-                      <p className="font-medium">{motorcycle["Front suspension"] || 'N/A'}</p>
-                    </div>
-                    <div>
-                      <p className="text-gray-500">Rear Suspension</p>
-                      <p className="font-medium">{motorcycle["Rear suspension"] || 'N/A'}</p>
-                    </div>
-                  </div>
-                </div>
-
-                <div>
-                  <h2 className="text-xl font-semibold mb-4">Additional Specifications</h2>
-                  <div className="space-y-3">
-                    <div>
-                      <p className="text-gray-500">Front Brakes</p>
-                      <p className="font-medium">{motorcycle["Front brakes"] || 'N/A'}</p>
-                    </div>
-                    <div>
-                      <p className="text-gray-500">Rear Brakes</p>
-                      <p className="font-medium">{motorcycle["Rear brakes"] || 'N/A'}</p>
-                    </div>
-                    <div>
-                      <p className="text-gray-500">Dry Weight</p>
-                      <p className="font-medium">{motorcycle["Dry weight (kg)"] || 'N/A'}</p>
-                    </div>
-                    <div>
-                      <p className="text-gray-500">Fuel Capacity</p>
-                      <p className="font-medium">{motorcycle["Fuel capacity (litres)"] || 'N/A'}</p>
-                    </div>
-                    <div>
-                      <p className="text-gray-500">Available Colors</p>
-                      <p className="font-medium">{motorcycle["Color options"] || 'N/A'}</p>
+                      <p className="text-gray-500">Current Value</p>
+                      <p className="font-medium">{formatCurrency(motorcycle.current_value)}</p>
                     </div>
                   </div>
                 </div>

@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import Navigation from "@/components/Navigation";
@@ -9,11 +10,12 @@ import { toast } from "sonner";
 
 interface Motorcycle {
   id: number;
-  Year: string | null;
-  Make: string | null;
-  Model: string | null;
-  MSRP: string | null;
-  Value: string | null;
+  created_at: string;
+  year: string | null;
+  make: string | null;
+  model: string | null;
+  msrp: string | null;
+  current_value: string | null;
   value?: number;
 }
 
@@ -121,7 +123,6 @@ const Index = () => {
       'MEH': 'Harley-Davidson',
       'SMT': 'Triumph',
       '1HD': 'Harley-Davidson',
-      // Add more manufacturer codes as needed
     };
     return makeMap[makePrefix] || '';
   };
@@ -148,7 +149,7 @@ const Index = () => {
         .eq('make', make);
 
       if (year) {
-        query = query.eq('Year', year);
+        query = query.eq('year', year);
       }
 
       const { data, error } = await query;
@@ -161,7 +162,7 @@ const Index = () => {
 
       const resultsWithCurrentValue = (data || []).map((motorcycle) => ({
         ...motorcycle,
-        value: calculateCurrentValue(motorcycle as Motorcycle)
+        value: calculateCurrentValue(motorcycle)
       }));
 
       if (resultsWithCurrentValue.length === 0) {
@@ -180,7 +181,7 @@ const Index = () => {
   };
 
   const calculateCurrentValue = (motorcycle: Motorcycle): number => {
-    const msrp = parseFloat(motorcycle.MSRP?.replace(/[^0-9.]/g, '') || "0");
+    const msrp = parseFloat(motorcycle.msrp?.replace(/[^0-9.]/g, '') || "0");
     return Math.round(msrp * 0.6);
   };
 
@@ -215,7 +216,7 @@ const Index = () => {
 
       const resultsWithCurrentValue = (data || []).map((motorcycle) => ({
         ...motorcycle,
-        value: calculateCurrentValue(motorcycle as Motorcycle)
+        value: calculateCurrentValue(motorcycle)
       }));
 
       setSearchResults(resultsWithCurrentValue);
@@ -238,7 +239,6 @@ const Index = () => {
   return (
     <div className="min-h-screen flex flex-col">
       <Navigation />
-
       <main className="flex-1">
         <section className="relative flex items-center justify-center overflow-hidden bg-gradient-to-b from-gray-900 to-gray-800 pt-20 pb-5">
           <div className="absolute inset-0 bg-black/50 z-0" />
