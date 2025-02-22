@@ -248,9 +248,9 @@ const Index = () => {
           <div className="absolute inset-0 bg-black/50 z-0" />
           <div className="w-full px-4 z-10">
             <div className="text-center mb-12">
-              <h1 className="text-4xl md:text-6xl font-bold text-white mb-4 animate-fade-in">
-                Rider Basecamp: Gear Up, Connect, and Ride
-              </h1>
+              <h2 className="text-4xl md:text-6xl font-bold text-white mb-4 animate-fade-in">
+               Gear Up, Connect, and Ride
+              </h2>
               <p className="text-xl md:text-2xl text-gray-200 mb-8 animate-fade-in">
                 Your Home for Motorcycle Knowledge & Community.
               </p>
