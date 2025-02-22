@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Motorcycle, SearchParams } from "@/types/motorcycle";
-import { calculateCurrentValue } from "@/utils/motorcycleCalculations";
+import { calculateCurrentValue, formatCurrency } from "@/utils/motorcycleCalculations";
 import { decodeVINMake, decodeVINYear } from "@/utils/vinDecoder";
 
 export const useMotorcycleSearch = () => {
@@ -23,6 +23,11 @@ export const useMotorcycleSearch = () => {
   });
 
   const updateMotorcycleValue = async (motorcycle: Motorcycle) => {
+    if (!motorcycle.msrp) {
+      console.log(`No MSRP for motorcycle ${motorcycle.id}, skipping update`);
+      return;
+    }
+
     const calculatedValue = calculateCurrentValue(motorcycle.msrp);
     console.log(`Calculating value for motorcycle ${motorcycle.id}:`, {
       msrp: motorcycle.msrp,
@@ -34,7 +39,7 @@ export const useMotorcycleSearch = () => {
       return;
     }
 
-    const formattedValue = `$${calculatedValue}`;
+    const formattedValue = formatCurrency(calculatedValue);
     console.log(`Attempting to update motorcycle ${motorcycle.id} with value ${formattedValue}`);
     
     try {
@@ -42,8 +47,7 @@ export const useMotorcycleSearch = () => {
         .from('data_2025')
         .update({ current_value: formattedValue })
         .eq('id', motorcycle.id)
-        .select('*')
-        .single();
+        .select();
 
       if (error) {
         console.error('Error updating current value:', error);
@@ -157,9 +161,12 @@ export const useMotorcycleSearch = () => {
       console.log('Results with calculated values:', resultsWithCurrentValue);
 
       // Update current_value in the database for each result
+      console.log('Starting database updates...');
       for (const motorcycle of resultsWithCurrentValue) {
+        console.log('Processing motorcycle:', motorcycle);
         await updateMotorcycleValue(motorcycle);
       }
+      console.log('Database updates completed');
 
       if (resultsWithCurrentValue.length === 0) {
         toast.warning("No matches found");
