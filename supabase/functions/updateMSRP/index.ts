@@ -80,7 +80,7 @@ serve(async (req) => {
       .from('data_2025')
       .select('*')
       .is('msrp', null)
-      .limit(25) // Increased from 5 to 25 motorcycles per batch
+      .limit(50) // Increased from 5 to 25 motorcycles per batch
 
     if (fetchError) {
       console.error('Error fetching motorcycles:', fetchError)
