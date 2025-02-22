@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -158,9 +159,12 @@ const Index = () => {
           <div className="absolute inset-0 bg-black/50 z-0" />
           <div className="w-full px-4 z-10">
             <div className="text-center mb-12">
-              <h1 className="text-4xl md:text-6xl font-bold text-white mb-6 animate-fade-in">
-                Get the real value of your motorcycle
+              <h1 className="text-4xl md:text-6xl font-bold text-white mb-4 animate-fade-in">
+                Find Your Motorcycle's Value
               </h1>
+              <p className="text-xl md:text-2xl text-gray-200 mb-8 animate-fade-in">
+                service manuals, manufacturer specs, maintenance schedules, parts diagrams
+              </p>
               <div className="max-w-4xl mx-auto mt-8">
                 <div className="flex flex-col md:flex-row gap-4 animate-fade-in">
                   <Select 
@@ -374,3 +378,4 @@ const Index = () => {
 };
 
 export default Index;
+
