@@ -252,7 +252,7 @@ const Index = () => {
                 Find Your Motorcycle's Value
               </h1>
               <p className="text-xl md:text-2xl text-gray-200 mb-8 animate-fade-in">
-                owner's manuals, service manuals, manufacturer specs, maintenance schedules, parts diagrams
+                owner manuals, service manuals, manufacturer specs, maintenance schedules, parts diagrams
               </p>
               <div className="max-w-4xl mx-auto mt-8">
                 <SearchForm
