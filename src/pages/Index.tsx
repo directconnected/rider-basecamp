@@ -249,10 +249,10 @@ const Index = () => {
           <div className="w-full px-4 z-10">
             <div className="text-center mb-12">
               <h2 className="text-4xl md:text-6xl font-bold text-white mb-4 animate-fade-in">
-               Gear Up, Connect, and Ride
+               Gear Up and Ride
               </h2>
               <p className="text-xl md:text-2xl text-gray-200 mb-8 animate-fade-in">
-                Your Home for Motorcycle Knowledge & Community.
+                Your Home for Motorcycle Knowledge and Community.
               </p>
               <div className="max-w-4xl mx-auto mt-8">
                 <SearchForm
