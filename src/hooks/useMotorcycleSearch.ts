@@ -23,21 +23,6 @@ export const useMotorcycleSearch = () => {
 
   const updateMotorcycleValue = async (motorcycle: Motorcycle) => {
     try {
-      // First, verify we can write to the database
-      const { data: testData, error: testError } = await supabase
-        .from('data_2025')
-        .select('id, msrp, current_value')
-        .eq('id', motorcycle.id)
-        .single();
-
-      if (testError) {
-        console.error('Database access error:', testError);
-        toast.error('Database access error. Please check permissions.');
-        return;
-      }
-
-      console.log('Current database record before update:', testData);
-
       if (!motorcycle.msrp) {
         console.log('No MSRP available for motorcycle:', motorcycle.id);
         return;
@@ -57,26 +42,26 @@ export const useMotorcycleSearch = () => {
 
       console.log('Attempting database update with:', {
         id: motorcycle.id,
-        msrp: msrpNumber,
-        currentValue: currentValue,
-        type: typeof currentValue
+        currentValue: currentValue
       });
 
-      // First, perform the update
+      // Use the upsert method with explicit return type
       const { error: updateError } = await supabase
         .from('data_2025')
-        .update({
+        .upsert({
+          id: motorcycle.id,
           current_value: currentValue,
           updated_at: new Date().toISOString()
-        })
-        .eq('id', motorcycle.id);
+        }, {
+          onConflict: 'id'
+        });
 
       if (updateError) {
         console.error('Update error:', updateError);
         throw new Error(`Update failed: ${updateError.message}`);
       }
 
-      // Then, fetch the updated record
+      // Verify the update with a separate query
       const { data: verifyData, error: verifyError } = await supabase
         .from('data_2025')
         .select('current_value')
@@ -90,8 +75,7 @@ export const useMotorcycleSearch = () => {
 
       console.log('Update verified:', {
         id: motorcycle.id,
-        newValue: verifyData?.current_value,
-        valueType: typeof verifyData?.current_value
+        newValue: verifyData?.current_value
       });
 
       // Update local state
