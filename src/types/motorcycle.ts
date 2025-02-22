@@ -5,7 +5,7 @@ export interface Motorcycle {
   year: string | null;
   make: string | null;
   model: string | null;
-  msrp: string | null;
+  msrp: number | null;
   current_value: number | null;
   value?: number;
 }

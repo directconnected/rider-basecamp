@@ -6,16 +6,9 @@ import { Card } from "@/components/ui/card";
 import { ArrowLeft } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import Navigation from "@/components/Navigation";
+import { Motorcycle } from "@/types/motorcycle";
 
-interface MotorcycleDetails {
-  id: number;
-  created_at: string;
-  year: string | null;
-  make: string | null;
-  model: string | null;
-  msrp: string | null;
-  current_value: number | null;
-}
+type MotorcycleDetails = Motorcycle;
 
 const MotorcycleDetails = () => {
   const { id } = useParams<{ id: string }>();
