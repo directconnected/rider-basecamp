@@ -8,16 +8,12 @@ import Footer from "@/components/layout/Footer";
 import { toast } from "sonner";
 
 interface Motorcycle {
-  motorcycle_id: number;
+  id: number;
   Year: string | null;
   Make: string | null;
   Model: string | null;
-  Category: string | null;
-  Rating: string | null;
   MSRP: string | null;
-  "Engine type": string | null;
-  "Engine details": string | null;
-  "Power (PS)": string | null;
+  Value: string | null;
   value?: number;
 }
 
@@ -41,7 +37,7 @@ const Index = () => {
     const fetchMakes = async () => {
       try {
         const { data, error } = await supabase
-          .from('motorcycles_1')
+          .from('data_2025')
           .select('Make')
           .not('Make', 'is', null);
 
@@ -147,7 +143,7 @@ const Index = () => {
       }
 
       let query = supabase
-        .from('motorcycles_1')
+        .from('data_2025')
         .select('*')
         .eq('Make', make);
 
@@ -197,7 +193,7 @@ const Index = () => {
       }
 
       let query = supabase
-        .from('motorcycles_1')
+        .from('data_2025')
         .select('*');
 
       if (searchParams.year) {
