@@ -13,7 +13,6 @@ import Auth from "@/pages/Auth";
 import MotorcycleDetails from "@/pages/MotorcycleDetails";
 import NotFound from "@/pages/NotFound";
 import Admin from "@/pages/Admin";
-import VINLookup from "@/pages/VINLookup";
 import MotorcycleRoutes from "@/pages/Routes";
 import CampingGear from "@/pages/CampingGear";
 import RidingGear from "@/pages/RidingGear";
@@ -37,7 +36,6 @@ function App() {
             <Route path="/auth" element={<Auth />} />
             <Route path="/motorcycle/:id" element={<MotorcycleDetails />} />
             <Route path="/admin" element={<Admin />} />
-            <Route path="/vin-lookup" element={<VINLookup />} />
             <Route path="/routes" element={<MotorcycleRoutes />} />
             <Route path="/camping-gear" element={<CampingGear />} />
             <Route path="/riding-gear" element={<RidingGear />} />
