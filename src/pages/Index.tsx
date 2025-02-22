@@ -71,9 +71,9 @@ const Index = () => {
                 <Link 
                   to={feature.link}
                   key={feature.title}
-                  className="block transition-transform hover:scale-105"
+                  className="block h-[200px]"
                 >
-                  <Card className="p-6 text-center hover-card">
+                  <Card className="p-6 text-center h-full flex flex-col items-center justify-center">
                     <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-theme-100 text-theme-600 mb-4">
                       <feature.icon size={24} />
                     </div>
