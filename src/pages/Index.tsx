@@ -7,6 +7,8 @@ import Features from "@/components/features/Features";
 import Footer from "@/components/layout/Footer";
 import { useMotorcycleSearch } from "@/hooks/useMotorcycleSearch";
 import { formatCurrency } from "@/utils/motorcycleCalculations";
+import { Shield, Search, Database, BarChart, Clock } from "lucide-react";
+import { Card } from "@/components/ui/card";
 
 const Index = () => {
   const {
@@ -47,6 +49,59 @@ const Index = () => {
                   onVinSearch={handleSearchByVIN}
                 />
               </div>
+            </div>
+          </div>
+        </section>
+
+        <section className="py-24 bg-white">
+          <div className="container mx-auto px-4">
+            <div className="text-center mb-16">
+              <h2 className="text-3xl font-bold mb-4">
+                Features
+              </h2>
+              <p className="text-gray-600 max-w-2xl mx-auto">
+                Everything you need to make informed decisions about motorcycles
+              </p>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-8 max-w-6xl mx-auto">
+              {[
+                {
+                  icon: Search,
+                  title: "Smart Search",
+                  description: "Find any motorcycle with our powerful search engine"
+                },
+                {
+                  icon: Database,
+                  title: "Rich Database",
+                  description: "Access comprehensive motorcycle specifications"
+                },
+                {
+                  icon: BarChart,
+                  title: "Market Analysis",
+                  description: "Get real-time market valuations"
+                },
+                {
+                  icon: Shield,
+                  title: "Trusted Data",
+                  description: "Verified by industry experts"
+                },
+                {
+                  icon: Clock,
+                  title: "Historical Trends",
+                  description: "Track price changes over time"
+                }
+              ].map((feature) => (
+                <Card 
+                  key={feature.title}
+                  className="p-6 text-center hover-card"
+                >
+                  <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-theme-100 text-theme-600 mb-4">
+                    <feature.icon size={24} />
+                  </div>
+                  <h3 className="text-lg font-bold mb-2">{feature.title}</h3>
+                  <p className="text-gray-600 text-sm">{feature.description}</p>
+                </Card>
+              ))}
             </div>
           </div>
         </section>
