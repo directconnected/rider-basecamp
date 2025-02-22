@@ -6,16 +6,13 @@ import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
 
 interface Motorcycle {
-  motorcycle_id: number;
-  Year: string | null;
-  Make: string | null;
-  Model: string | null;
-  Category: string | null;
-  Rating: string | null;
-  MSRP: string | null;
-  "Engine type": string | null;
-  "Engine details": string | null;
-  "Power (PS)": string | null;
+  id: number;
+  created_at: string;
+  year: string | null;
+  make: string | null;
+  model: string | null;
+  msrp: string | null;
+  current_value: string | null;
   value?: number;
 }
 
@@ -36,12 +33,12 @@ const SearchResults = ({ results, formatCurrency }: SearchResultsProps) => {
       <div className="container mx-auto px-6">
         <div className="grid grid-cols-5 gap-8">
           {results.map((motorcycle) => (
-            <Card key={motorcycle.motorcycle_id} className="col-span-5 lg:col-start-2 lg:col-span-3 bg-white shadow-lg hover:shadow-xl transition-shadow">
+            <Card key={motorcycle.id} className="col-span-5 lg:col-start-2 lg:col-span-3 bg-white shadow-lg hover:shadow-xl transition-shadow">
               <div className="p-6">
                 <h3 className="text-2xl font-bold mb-1">
-                  {motorcycle.Year} {motorcycle.Make}
+                  {motorcycle.year} {motorcycle.make}
                 </h3>
-                <p className="text-gray-600 text-lg mb-6">{motorcycle.Model}</p>
+                <p className="text-gray-600 text-lg mb-6">{motorcycle.model}</p>
                 
                 <div className="space-y-6 mb-6">
                   <div>
@@ -54,24 +51,13 @@ const SearchResults = ({ results, formatCurrency }: SearchResultsProps) => {
                   <div>
                     <p className="text-gray-500 text-sm">Original MSRP</p>
                     <p className="text-xl font-semibold">
-                      {formatCurrency(motorcycle.MSRP)}
+                      {formatCurrency(motorcycle.msrp)}
                     </p>
                   </div>
-
-                  {motorcycle["Engine type"] && (
-                    <div>
-                      <p className="text-gray-500 text-sm">Engine</p>
-                      <p className="text-base">{motorcycle["Engine type"]}</p>
-                    </div>
-                  )}
                 </div>
 
-                <div className="pt-4 border-t border-gray-200 flex justify-between items-center">
-                  <div className="flex items-center">
-                    <span className="text-gray-500">Category:</span>
-                    <span className="font-medium ml-2">{motorcycle.Category || 'N/A'}</span>
-                  </div>
-                  <Link to={`/motorcycle/${motorcycle.motorcycle_id}`}>
+                <div className="pt-4 border-t border-gray-200 flex justify-end">
+                  <Link to={`/motorcycle/${motorcycle.id}`}>
                     <Button className="button-gradient">
                       View Details
                       <ArrowRight className="ml-2" />
