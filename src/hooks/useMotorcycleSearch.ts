@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -63,34 +62,26 @@ export const useMotorcycleSearch = () => {
         type: typeof currentValue
       });
 
-      // Cast to numeric and ensure it's a valid number
-      const updateData = {
-        current_value: Number(currentValue),
-        updated_at: new Date().toISOString()
-      };
-
-      console.log('Update payload:', updateData);
-
-      const { data: updateResult, error: updateError } = await supabase
+      // First, perform the update
+      const { error: updateError } = await supabase
         .from('data_2025')
-        .update(updateData)
-        .eq('id', motorcycle.id)
-        .select('*')
-        .single();
+        .update({
+          current_value: currentValue,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', motorcycle.id);
 
       if (updateError) {
         console.error('Update error:', updateError);
         throw new Error(`Update failed: ${updateError.message}`);
       }
 
-      console.log('Update result:', updateResult);
-
-      // Verify the update immediately
+      // Then, fetch the updated record
       const { data: verifyData, error: verifyError } = await supabase
         .from('data_2025')
         .select('current_value')
         .eq('id', motorcycle.id)
-        .single();
+        .maybeSingle();
 
       if (verifyError) {
         console.error('Verify error:', verifyError);
