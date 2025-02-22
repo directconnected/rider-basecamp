@@ -38,10 +38,12 @@ const Index = () => {
   useEffect(() => {
     const fetchMakes = async () => {
       try {
+        console.log('Fetching makes...');
         const { data, error } = await supabase
           .from('data_2025')
           .select('make')
-          .not('make', 'is', null);
+          .not('make', 'eq', null)
+          .order('make');
 
         if (error) {
           console.error('Error fetching makes:', error);
@@ -49,10 +51,12 @@ const Index = () => {
         }
 
         if (data) {
+          console.log('Makes data:', data);
           const uniqueMakes = Array.from(new Set(data
             .map(item => item.make)
-            .filter(Boolean)))
+            .filter(Boolean))) // This removes any null or undefined values
             .sort();
+          console.log('Unique makes:', uniqueMakes);
           setMakes(uniqueMakes);
         }
       } catch (err) {
@@ -67,11 +71,13 @@ const Index = () => {
     const fetchModels = async () => {
       if (searchParams.make) {
         try {
+          console.log('Fetching models for make:', searchParams.make);
           const { data, error } = await supabase
             .from('data_2025')
             .select('model')
             .eq('make', searchParams.make)
-            .not('model', 'is', null);
+            .not('model', 'eq', null)
+            .order('model');
 
           if (error) {
             console.error('Error fetching models:', error);
@@ -79,10 +85,12 @@ const Index = () => {
           }
 
           if (data) {
+            console.log('Models data:', data);
             const uniqueModels = Array.from(new Set(data
               .map(item => item.model)
-              .filter(Boolean)))
+              .filter(Boolean))) // This removes any null or undefined values
               .sort();
+            console.log('Unique models:', uniqueModels);
             setModels(uniqueModels);
           }
         } catch (err) {
