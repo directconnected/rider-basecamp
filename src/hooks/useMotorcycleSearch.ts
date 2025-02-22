@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -23,24 +24,39 @@ export const useMotorcycleSearch = () => {
 
   const updateMotorcycleValue = async (motorcycle: Motorcycle) => {
     const calculatedValue = calculateCurrentValue(motorcycle.msrp);
+    console.log(`Calculating value for motorcycle ${motorcycle.id}:`, {
+      msrp: motorcycle.msrp,
+      calculatedValue
+    });
+
     if (calculatedValue === 0) {
+      console.log(`Skipping update for motorcycle ${motorcycle.id} - invalid calculated value`);
       return;
     }
 
     const formattedValue = `$${calculatedValue}`;
-    console.log(`Updating value for motorcycle ID ${motorcycle.id} to ${formattedValue}`);
+    console.log(`Attempting to update motorcycle ${motorcycle.id} with value ${formattedValue}`);
     
-    const { error } = await supabase
-      .from('data_2025')
-      .update({ current_value: formattedValue })
-      .eq('id', motorcycle.id);
+    try {
+      const { data, error } = await supabase
+        .from('data_2025')
+        .update({ current_value: formattedValue })
+        .eq('id', motorcycle.id)
+        .select('*')
+        .single();
 
-    if (error) {
-      console.error('Error updating current value:', error);
-      return;
+      if (error) {
+        console.error('Error updating current value:', error);
+        toast.error(`Failed to update value for motorcycle ${motorcycle.id}`);
+        return;
+      }
+
+      console.log(`Successfully updated motorcycle ${motorcycle.id}:`, data);
+      toast.success(`Updated value for ${motorcycle.make} ${motorcycle.model}`);
+    } catch (err) {
+      console.error('Exception during update:', err);
+      toast.error('Failed to update motorcycle value');
     }
-
-    console.log(`Successfully updated current value for ID ${motorcycle.id} to ${formattedValue}`);
   };
 
   const handleSearchByVIN = async (vin: string) => {
@@ -131,10 +147,14 @@ export const useMotorcycleSearch = () => {
         return;
       }
 
+      console.log('Search results:', data);
+
       const resultsWithCurrentValue = (data || []).map((motorcycle) => ({
         ...motorcycle,
         value: calculateCurrentValue(motorcycle.msrp)
       }));
+
+      console.log('Results with calculated values:', resultsWithCurrentValue);
 
       // Update current_value in the database for each result
       for (const motorcycle of resultsWithCurrentValue) {
