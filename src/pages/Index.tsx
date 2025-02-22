@@ -12,7 +12,7 @@ const Index = () => {
     {
       icon: Search,
       title: "Motorcycle Roads and Routes",
-      description: "Motorcycle Roads and Routes is a comprehensive guide for enthusiasts, showcasing the best scenic byways, thrilling twists, and hidden gems perfect for two-wheeled adventures. Explore top riding destinations, insider tips, and curated paths designed to ignite your passion for the open road."
+      description: "Top motorcycle roads, scenic routes, and riding tips."
     },
     {
       icon: Database,
