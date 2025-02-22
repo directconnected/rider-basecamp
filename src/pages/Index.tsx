@@ -11,19 +11,19 @@ const Index = () => {
   const features = [
     {
       icon: Route,
-      title: "Motorcycle Roads",
+      title: "Roads & Rides",
       description: "Top motorcycle roads, scenic routes, and riding tips.",
       link: "/routes"
     },
     {
       icon: Tent,
-      title: "Motorcycle Camping",
+      title: "Camping",
       description: "Top camping gear for bikers: compact, durable, essentials.",
       link: "/camping-gear"
     },
     {
       icon: Shield,
-      title: "Motorcycle Gear",
+      title: "Riding Gear",
       description: "Top riding gear: safety, comfort, and style for bikers.",
       link: "/riding-gear"
     },
@@ -35,9 +35,9 @@ const Index = () => {
     },
     {
       icon: Search,
-      title: "Local Dealers",
-      description: "Find trusted dealers in your area",
-      link: "/dealers"
+      title: "Motorcycle Data",
+      description: "data",
+      link: "/data"
     }
   ];
 
