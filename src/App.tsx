@@ -14,6 +14,12 @@ import MotorcycleDetails from "@/pages/MotorcycleDetails";
 import NotFound from "@/pages/NotFound";
 import Admin from "@/pages/Admin";
 import VINLookup from "@/pages/VINLookup";
+import Routes from "@/pages/Routes";
+import CampingGear from "@/pages/CampingGear";
+import RidingGear from "@/pages/RidingGear";
+import Data from "@/pages/Data";
+import Service from "@/pages/Service";
+import Dealers from "@/pages/Dealers";
 
 const queryClient = new QueryClient();
 
@@ -32,6 +38,12 @@ function App() {
             <Route path="/motorcycle/:id" element={<MotorcycleDetails />} />
             <Route path="/admin" element={<Admin />} />
             <Route path="/vin-lookup" element={<VINLookup />} />
+            <Route path="/routes" element={<Routes />} />
+            <Route path="/camping-gear" element={<CampingGear />} />
+            <Route path="/riding-gear" element={<RidingGear />} />
+            <Route path="/data" element={<Data />} />
+            <Route path="/service" element={<Service />} />
+            <Route path="/dealers" element={<Dealers />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
           <Toaster />
