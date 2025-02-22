@@ -11,33 +11,93 @@ export type Database = {
     Tables: {
       data_2025: {
         Row: {
+          clutch: string | null
+          colors: string | null
           created_at: string
+          curb_weight: string | null
           current_value: number | null
+          engine_type: string | null
+          front_brakes: string | null
+          front_suspension: string | null
+          front_tire: string | null
+          fuel_capacity: string | null
+          ground_clearance: string | null
+          height: string | null
           id: number
+          length: string | null
           make: string | null
           model: string | null
           msrp: number | null
+          rake: string | null
+          rear_brakes: string | null
+          rear_suspension: string | null
+          rear_tire: string | null
+          seat_height: string | null
+          trail: string | null
+          transmission: string | null
           updated_at: string | null
+          wheelbase: string | null
+          width: string | null
           year: string | null
         }
         Insert: {
+          clutch?: string | null
+          colors?: string | null
           created_at?: string
+          curb_weight?: string | null
           current_value?: number | null
+          engine_type?: string | null
+          front_brakes?: string | null
+          front_suspension?: string | null
+          front_tire?: string | null
+          fuel_capacity?: string | null
+          ground_clearance?: string | null
+          height?: string | null
           id?: number
+          length?: string | null
           make?: string | null
           model?: string | null
           msrp?: number | null
+          rake?: string | null
+          rear_brakes?: string | null
+          rear_suspension?: string | null
+          rear_tire?: string | null
+          seat_height?: string | null
+          trail?: string | null
+          transmission?: string | null
           updated_at?: string | null
+          wheelbase?: string | null
+          width?: string | null
           year?: string | null
         }
         Update: {
+          clutch?: string | null
+          colors?: string | null
           created_at?: string
+          curb_weight?: string | null
           current_value?: number | null
+          engine_type?: string | null
+          front_brakes?: string | null
+          front_suspension?: string | null
+          front_tire?: string | null
+          fuel_capacity?: string | null
+          ground_clearance?: string | null
+          height?: string | null
           id?: number
+          length?: string | null
           make?: string | null
           model?: string | null
           msrp?: number | null
+          rake?: string | null
+          rear_brakes?: string | null
+          rear_suspension?: string | null
+          rear_tire?: string | null
+          seat_height?: string | null
+          trail?: string | null
+          transmission?: string | null
           updated_at?: string | null
+          wheelbase?: string | null
+          width?: string | null
           year?: string | null
         }
         Relationships: []
