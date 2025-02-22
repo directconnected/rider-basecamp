@@ -1,5 +1,6 @@
+
 import { useState, useEffect } from 'react';
-import { supabase, adminClient } from "@/integrations/supabase/client";
+import { supabase } from "@/integrations/supabase/client";
 import { Motorcycle, SearchParams } from "@/types/motorcycle";
 import { calculateCurrentValue, formatCurrency } from "@/utils/motorcycleCalculations";
 import { decodeVINMake, decodeVINYear } from "@/utils/vinDecoder";
@@ -40,8 +41,8 @@ export const useMotorcycleSearch = () => {
         return null;
       }
 
-      // Check if update is needed
-      const { data: existingData, error: checkError } = await adminClient
+      // Check if update is needed using the same client
+      const { data: existingData, error: checkError } = await supabase
         .from('data_2025')
         .select('current_value')
         .eq('id', motorcycle.id)
@@ -57,7 +58,7 @@ export const useMotorcycleSearch = () => {
         return currentValue;
       }
 
-      const { error: updateError } = await adminClient
+      const { error: updateError } = await supabase
         .from('data_2025')
         .update({
           current_value: currentValue,
