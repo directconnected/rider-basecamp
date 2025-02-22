@@ -10,7 +10,30 @@ const corsHeaders = {
 const supabaseUrl = 'https://hungfeisnqbmzurpxvel.supabase.co'
 const serviceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
 
-async function searchMSRP(year: string, make: string, model: string): Promise<string | null> {
+function cleanMSRPValue(msrpString: string): number | null {
+  try {
+    // Remove any currency symbols, commas, and extra whitespace
+    const cleaned = msrpString.replace(/[$,\s]/g, '');
+    // Convert to number
+    const numericValue = parseFloat(cleaned);
+    
+    // Validate the result
+    if (isNaN(numericValue) || numericValue <= 0) {
+      console.log(`Invalid MSRP value after cleaning: ${msrpString} -> ${numericValue}`);
+      return null;
+    }
+    
+    // Round to 2 decimal places
+    const roundedValue = Math.round(numericValue * 100) / 100;
+    console.log(`Successfully cleaned MSRP: ${msrpString} -> ${roundedValue}`);
+    return roundedValue;
+  } catch (error) {
+    console.error('Error cleaning MSRP value:', error);
+    return null;
+  }
+}
+
+async function searchMSRP(year: string, make: string, model: string): Promise<number | null> {
   try {
     const apiKey = Deno.env.get('GOOGLE_SEARCH_API_KEY')
     const searchEngineId = Deno.env.get('GOOGLE_SEARCH_ENGINE_ID')
@@ -48,12 +71,16 @@ async function searchMSRP(year: string, make: string, model: string): Promise<st
       // Look for price patterns like $X,XXX or $XX,XXX
       const priceMatch = textToSearch.match(/\$\d{1,3}(?:,\d{3})*(?:\.\d{2})?/)
       if (priceMatch) {
-        console.log(`Found price in result: ${priceMatch[0]} - Source: ${item.link}`)
-        return priceMatch[0]
+        console.log(`Found raw price in result: ${priceMatch[0]} - Source: ${item.link}`)
+        const cleanedMSRP = cleanMSRPValue(priceMatch[0]);
+        if (cleanedMSRP) {
+          console.log(`Cleaned MSRP value: ${cleanedMSRP}`);
+          return cleanedMSRP;
+        }
       }
     }
 
-    console.log('No price pattern found in search results')
+    console.log('No valid price pattern found in search results')
     return null
   } catch (error) {
     console.error('Error searching for MSRP:', error)
@@ -80,7 +107,7 @@ serve(async (req) => {
       .from('data_2025')
       .select('*')
       .is('msrp', null)
-      .limit(50) // Increased from 5 to 25 motorcycles per batch
+      .limit(50)
 
     if (fetchError) {
       console.error('Error fetching motorcycles:', fetchError)
@@ -120,11 +147,14 @@ serve(async (req) => {
           motorcycle.model
         )
 
-        if (msrp) {
+        if (msrp !== null) {
           // Update the database with found MSRP
           const { error: updateError } = await supabase
             .from('data_2025')
-            .update({ msrp: msrp })
+            .update({ 
+              msrp: msrp,
+              updated_at: new Date().toISOString()
+            })
             .eq('id', motorcycle.id)
 
           if (updateError) {
@@ -134,11 +164,11 @@ serve(async (req) => {
             updatedCount++
           }
         } else {
-          console.log(`No MSRP found for motorcycle ID ${motorcycle.id}`)
+          console.log(`No valid MSRP found for motorcycle ID ${motorcycle.id}`)
         }
 
         // Add delay between requests to respect API rate limits
-        await new Promise(resolve => setTimeout(resolve, 1000)) // Reduced delay from 2000ms to 1000ms
+        await new Promise(resolve => setTimeout(resolve, 1000))
       } catch (error) {
         console.error(`Error processing motorcycle ID ${motorcycle.id}:`, error)
       }
