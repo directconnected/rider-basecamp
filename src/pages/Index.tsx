@@ -16,23 +16,23 @@ const Index = () => {
     },
     {
       icon: Database,
-      title: "Best Motorcycle Camping Gear",
-      description: "Top camping gear for bikers: compact, durable, essentials."
+      title: "Motorcycle Data",
+      description: ""
     },
     {
       icon: BarChart,
-      title: "Best Motorcycle Riding Gear",
-      description: "Top riding gear: safety, comfort, and style for bikers."
+      title: "Motorcycle Riding Gear",
+      description: ""
     },
     {
       icon: Shield,
-      title: "Trusted Data",
-      description: "Verified by industry experts"
+      title: "Motorcycle Camping Gear",
+      description: ""
     },
     {
       icon: Clock,
-      title: "Historical Trends",
-      description: "Track price changes over time"
+      title: "Motorcycle Roads & Routes",
+      description: ""
     },
     {
       icon: Users,
