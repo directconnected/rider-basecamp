@@ -1,7 +1,8 @@
 
 import React from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Home } from "lucide-react";
+import { Home, UserPlus } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 const Navigation = () => {
   const location = useLocation();
@@ -40,6 +41,16 @@ const Navigation = () => {
               }`}
             >
               Contact
+            </Link>
+            <Link to="/subscribe">
+              <Button 
+                variant="default" 
+                size="sm"
+                className="ml-4 bg-theme-500 hover:bg-theme-600"
+              >
+                <UserPlus className="mr-2 h-4 w-4" />
+                Sign Up
+              </Button>
             </Link>
           </nav>
         </div>
