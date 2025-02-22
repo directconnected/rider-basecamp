@@ -1,27 +1,13 @@
 
 import React from "react";
 import Navigation from "@/components/Navigation";
-import SearchForm from "@/components/search/SearchForm";
-import SearchResults from "@/components/search/SearchResults";
 import Footer from "@/components/layout/Footer";
-import { useMotorcycleSearch } from "@/hooks/useMotorcycleSearch";
-import { formatCurrency } from "@/utils/motorcycleCalculations";
 import { Shield, Search, Database, BarChart, Clock, Users, Wrench, Map, RefreshCw, BellRing } from "lucide-react";
 import { Card } from "@/components/ui/card";
+import { Link } from "react-router-dom";
+import { Button } from "@/components/ui/button";
 
 const Index = () => {
-  const {
-    searchParams,
-    setSearchParams,
-    searchResults,
-    isSearching,
-    years,
-    makes,
-    models,
-    handleSearch,
-    handleSearchByVIN
-  } = useMotorcycleSearch();
-
   const features = [
     {
       icon: Search,
@@ -90,16 +76,12 @@ const Index = () => {
                 Your Home for Motorcycle Knowledge and Community.
               </p>
               <div className="max-w-4xl mx-auto mt-8">
-                <SearchForm
-                  searchParams={searchParams}
-                  setSearchParams={setSearchParams}
-                  years={years}
-                  makes={makes}
-                  models={models}
-                  isSearching={isSearching}
-                  onSearch={handleSearch}
-                  onVinSearch={handleSearchByVIN}
-                />
+                <Link to="/vin-lookup">
+                  <Button className="button-gradient text-white px-8 py-6">
+                    <Search className="mr-2" />
+                    Search Motorcycles
+                  </Button>
+                </Link>
               </div>
             </div>
           </div>
@@ -132,7 +114,6 @@ const Index = () => {
           </div>
         </section>
 
-        <SearchResults results={searchResults} formatCurrency={formatCurrency} />
         <Footer />
       </main>
     </div>
