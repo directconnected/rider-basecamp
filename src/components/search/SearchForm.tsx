@@ -56,7 +56,7 @@ const SearchForm = ({
           Decode VIN
         </Button>
       </div>
-      <div className="text-white text-center my-2">- OR -</div>
+      <div className="text-gray-600 text-center my-2">- OR -</div>
       <div className="flex flex-col md:flex-row gap-4">
         <Select 
           value={searchParams.year}

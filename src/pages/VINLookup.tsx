@@ -24,28 +24,42 @@ const VINLookup = () => {
     <div className="min-h-screen flex flex-col">
       <Navigation />
       <main className="flex-1">
-        <section className="relative flex items-center justify-center overflow-hidden bg-gradient-to-b from-gray-900 to-gray-800 pt-20 pb-5">
-          <div className="absolute inset-0 bg-black/50 z-0" />
-          <div className="w-full px-4 z-10">
-            <div className="text-center mb-12">
-              <h2 className="text-4xl md:text-6xl font-bold text-white mb-4 animate-fade-in">
-                VIN Lookup
-              </h2>
-              <p className="text-xl md:text-2xl text-gray-200 mb-8 animate-fade-in">
-                Search by VIN or Use Our Advanced Search Options
+        {/* Hero Banner Section */}
+        <section className="py-24 bg-gradient-to-b from-gray-900 to-gray-800">
+          <div className="container mx-auto px-4">
+            <div className="text-center mb-16">
+              <h1 className="text-4xl md:text-5xl font-bold text-white mb-6">
+                Motorcycle VIN Lookup
+              </h1>
+              <p className="text-xl text-gray-300 max-w-2xl mx-auto">
+                Get detailed information about any motorcycle using our comprehensive database
               </p>
-              <div className="max-w-4xl mx-auto mt-8">
-                <SearchForm
-                  searchParams={searchParams}
-                  setSearchParams={setSearchParams}
-                  years={years}
-                  makes={makes}
-                  models={models}
-                  isSearching={isSearching}
-                  onSearch={handleSearch}
-                  onVinSearch={handleSearchByVIN}
-                />
+            </div>
+          </div>
+        </section>
+
+        {/* Search Section */}
+        <section className="py-12 bg-white">
+          <div className="container mx-auto px-4">
+            <div className="max-w-4xl mx-auto">
+              <div className="text-center mb-8">
+                <h2 className="text-3xl font-bold text-gray-900 mb-4">
+                  Search Your Motorcycle
+                </h2>
+                <p className="text-gray-600 mb-8">
+                  Enter your VIN or use our advanced search options
+                </p>
               </div>
+              <SearchForm
+                searchParams={searchParams}
+                setSearchParams={setSearchParams}
+                years={years}
+                makes={makes}
+                models={models}
+                isSearching={isSearching}
+                onSearch={handleSearch}
+                onVinSearch={handleSearchByVIN}
+              />
             </div>
           </div>
         </section>
