@@ -4,21 +4,11 @@ import { Link } from "react-router-dom";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
-
-interface Motorcycle {
-  id: number;
-  created_at: string;
-  year: string | null;
-  make: string | null;
-  model: string | null;
-  msrp: string | null;
-  current_value: string | null;
-  value?: number;
-}
+import { Motorcycle } from "@/types/motorcycle";
 
 interface SearchResultsProps {
   results: Motorcycle[];
-  formatCurrency: (value: string | null) => string;
+  formatCurrency: (value: string | null | number) => string;
 }
 
 const SearchResults = ({ results, formatCurrency }: SearchResultsProps) => {
