@@ -6,7 +6,7 @@ import SearchResults from "@/components/search/SearchResults";
 import Footer from "@/components/layout/Footer";
 import { useMotorcycleSearch } from "@/hooks/useMotorcycleSearch";
 import { formatCurrency } from "@/utils/motorcycleCalculations";
-import { Shield, Search, Database, BarChart, Clock, Users, Tool, Map, Refresh, BellRing } from "lucide-react";
+import { Shield, Search, Database, BarChart, Clock, Users, Wrench, Map, RefreshCw, BellRing } from "lucide-react";
 import { Card } from "@/components/ui/card";
 
 const Index = () => {
@@ -54,7 +54,7 @@ const Index = () => {
       description: "Read authentic reviews from real riders"
     },
     {
-      icon: Tool,
+      icon: Wrench,
       title: "Service History",
       description: "Track maintenance records and service intervals"
     },
@@ -64,7 +64,7 @@ const Index = () => {
       description: "Find trusted dealers in your area"
     },
     {
-      icon: Refresh,
+      icon: RefreshCw,
       title: "Regular Updates",
       description: "Stay current with latest market data"
     },
