@@ -11,8 +11,8 @@ const Index = () => {
   const features = [
     {
       icon: Search,
-      title: "Smart Search",
-      description: "Find any motorcycle with our powerful search engine"
+      title: "Motorcycle Roads and Routes",
+      description: "Motorcycle Roads and Routes is a comprehensive guide for enthusiasts, showcasing the best scenic byways, thrilling twists, and hidden gems perfect for two-wheeled adventures. Explore top riding destinations, insider tips, and curated paths designed to ignite your passion for the open road."
     },
     {
       icon: Database,
