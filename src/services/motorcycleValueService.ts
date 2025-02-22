@@ -18,26 +18,7 @@ export const updateMotorcycleValue = async (motorcycle: Motorcycle) => {
     }
 
     const currentValue = calculateCurrentValue(msrpNumber);
-    if (currentValue === 0) {
-      console.error('Could not calculate valid current value');
-      return null;
-    }
-
-    const { data: existingData, error: checkError } = await supabase
-      .from('data_2025')
-      .select('current_value')
-      .eq('id', motorcycle.id)
-      .maybeSingle();
-
-    if (checkError) {
-      console.error('Check error:', checkError);
-      return null;
-    }
-
-    if (existingData?.current_value === currentValue) {
-      console.log('No update needed for:', motorcycle.id);
-      return currentValue;
-    }
+    console.log('Attempting to update value for motorcycle:', motorcycle.id, 'New value:', currentValue);
 
     const { error: updateError } = await supabase
       .from('data_2025')
@@ -52,6 +33,7 @@ export const updateMotorcycleValue = async (motorcycle: Motorcycle) => {
       throw new Error(`Update failed: ${updateError.message}`);
     }
 
+    console.log('Successfully updated value for motorcycle:', motorcycle.id);
     toast.success(`Updated value: ${formatCurrency(currentValue)}`);
     return currentValue;
 
