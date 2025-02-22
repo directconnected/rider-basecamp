@@ -51,8 +51,8 @@ const Index = () => {
     },
     {
       icon: RefreshCw,
-      title: "Regular Updates",
-      description: "Stay current with latest market data"
+      title: "Motorcycle Data",
+      description: "VIN Lookup, Service Manuals, Owner's Manuals, Manufacturer Specs"
     },
     {
       icon: BellRing,
