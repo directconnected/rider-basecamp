@@ -33,23 +33,20 @@ function cleanMSRPValue(msrpString: string): number | null {
   }
 }
 
-async function searchMSRP(year: string, make: string, model: string): Promise<number | null> {
+async function searchSpecifications(year: string, make: string, model: string): Promise<{[key: string]: string | null}> {
   try {
     const apiKey = Deno.env.get('GOOGLE_SEARCH_API_KEY')
     const searchEngineId = Deno.env.get('GOOGLE_SEARCH_ENGINE_ID')
     
     if (!apiKey || !searchEngineId) {
-      console.error('Missing API configuration:', { 
-        hasApiKey: !!apiKey, 
-        hasSearchEngineId: !!searchEngineId 
-      })
+      console.error('Missing API configuration')
       throw new Error('Missing Google Search API configuration')
     }
 
-    const query = encodeURIComponent(`${year} ${make} ${model} motorcycle MSRP price`)
+    const query = encodeURIComponent(`${year} ${make} ${model} motorcycle specifications engine transmission suspension`)
     const url = `https://www.googleapis.com/customsearch/v1?key=${apiKey}&cx=${searchEngineId}&q=${query}`
 
-    console.log(`Searching for MSRP of: ${year} ${make} ${model}`)
+    console.log(`Searching for specifications of: ${year} ${make} ${model}`)
     const response = await fetch(url)
     const data = await response.json()
 
@@ -60,49 +57,53 @@ async function searchMSRP(year: string, make: string, model: string): Promise<nu
 
     if (!data.items || data.items.length === 0) {
       console.log('No search results found')
-      return null
+      return {}
     }
 
     console.log(`Found ${data.items.length} search results`)
 
-    // Look for price patterns in snippets and titles
-    for (const item of data.items) {
-      const textToSearch = `${item.title || ''} ${item.snippet || ''}`
-      // Look for price patterns like $X,XXX or $XX,XXX
-      const priceMatch = textToSearch.match(/\$\d{1,3}(?:,\d{3})*(?:\.\d{2})?/)
-      if (priceMatch) {
-        console.log(`Found raw price in result: ${priceMatch[0]} - Source: ${item.link}`)
-        const cleanedMSRP = cleanMSRPValue(priceMatch[0]);
-        if (cleanedMSRP) {
-          console.log(`Cleaned MSRP value: ${cleanedMSRP}`);
-          return cleanedMSRP;
-        }
+    const specs: {[key: string]: string | null} = {}
+    const searchText = data.items.map(item => `${item.title || ''} ${item.snippet || ''}`).join(' ')
+
+    // Define regex patterns for each specification
+    const patterns = {
+      engine_type: /engine:?\s*([^\.|\n]+)/i,
+      transmission: /transmission:?\s*([^\.|\n]+)/i,
+      front_suspension: /front suspension:?\s*([^\.|\n]+)/i,
+      rear_suspension: /rear suspension:?\s*([^\.|\n]+)/i,
+      front_brakes: /front brake[s]?:?\s*([^\.|\n]+)/i,
+      rear_brakes: /rear brake[s]?:?\s*([^\.|\n]+)/i,
+      wheelbase: /wheelbase:?\s*([\d\.]+\s*(?:mm|in))/i,
+      seat_height: /seat height:?\s*([\d\.]+\s*(?:mm|in))/i,
+      fuel_capacity: /fuel capacity:?\s*([\d\.]+\s*(?:l|gal))/i,
+      curb_weight: /(?:curb )?weight:?\s*([\d\.]+\s*(?:kg|lbs?))/i,
+    }
+
+    // Extract specifications using regex patterns
+    for (const [key, pattern] of Object.entries(patterns)) {
+      const match = searchText.match(pattern)
+      if (match && match[1]) {
+        specs[key] = match[1].trim()
+        console.log(`Found ${key}: ${specs[key]}`)
       }
     }
 
-    console.log('No valid price pattern found in search results')
-    return null
+    return specs
   } catch (error) {
-    console.error('Error searching for MSRP:', error)
-    return null
+    console.error('Error searching for specifications:', error)
+    return {}
   }
 }
 
 serve(async (req) => {
-  // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
-    return new Response(null, {
-      headers: corsHeaders
-    })
+    return new Response(null, { headers: corsHeaders })
   }
 
   try {
-    console.log('Starting MSRP update process')
-    
-    // Create Supabase client with service role key
+    console.log('Starting motorcycle data update process')
     const supabase = createClient(supabaseUrl, serviceRoleKey!)
     
-    // Fetch motorcycles without MSRP values
     const { data: motorcycles, error: fetchError } = await supabase
       .from('data_2025')
       .select('*')
@@ -115,56 +116,48 @@ serve(async (req) => {
     }
 
     if (!motorcycles || motorcycles.length === 0) {
-      console.log('No motorcycles found that need MSRP updates')
       return new Response(
         JSON.stringify({
           success: true,
-          message: 'No motorcycles found that need MSRP updates'
+          message: 'No motorcycles found that need updates'
         }),
-        {
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-        }
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
     }
 
     console.log(`Found ${motorcycles.length} motorcycles to process`)
 
     let updatedCount = 0
-    // Process each motorcycle
     for (const motorcycle of motorcycles) {
       try {
-        console.log(`Processing motorcycle ID ${motorcycle.id}: ${motorcycle.year} ${motorcycle.make} ${motorcycle.model}`)
-        
         if (!motorcycle.year || !motorcycle.make || !motorcycle.model) {
           console.log(`Skipping motorcycle ID ${motorcycle.id} - Missing required data`)
           continue
         }
 
-        // Search for MSRP using Google Custom Search
-        const msrp = await searchMSRP(
+        // Search for specifications
+        const specs = await searchSpecifications(
           motorcycle.year,
           motorcycle.make,
           motorcycle.model
         )
 
-        if (msrp !== null) {
-          // Update the database with found MSRP
+        // Update the database with found specifications
+        if (Object.keys(specs).length > 0) {
           const { error: updateError } = await supabase
             .from('data_2025')
             .update({ 
-              msrp: msrp,
+              ...specs,
               updated_at: new Date().toISOString()
             })
             .eq('id', motorcycle.id)
 
           if (updateError) {
-            console.error(`Error updating MSRP for ID ${motorcycle.id}:`, updateError)
+            console.error(`Error updating specifications for ID ${motorcycle.id}:`, updateError)
           } else {
-            console.log(`Successfully updated MSRP for ID ${motorcycle.id} to ${msrp}`)
+            console.log(`Successfully updated specifications for ID ${motorcycle.id}`)
             updatedCount++
           }
-        } else {
-          console.log(`No valid MSRP found for motorcycle ID ${motorcycle.id}`)
         }
 
         // Add delay between requests to respect API rate limits
@@ -177,11 +170,9 @@ serve(async (req) => {
     return new Response(
       JSON.stringify({
         success: true,
-        message: `Successfully updated ${updatedCount} out of ${motorcycles.length} motorcycles with MSRP data`
+        message: `Successfully updated ${updatedCount} out of ${motorcycles.length} motorcycles with specifications data`
       }),
-      {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-      }
+      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     )
 
   } catch (error) {
