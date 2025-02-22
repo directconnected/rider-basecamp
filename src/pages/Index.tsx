@@ -10,49 +10,64 @@ import { Button } from "@/components/ui/button";
 const Index = () => {
   const features = [
     {
-      icon: Database,
-      title: "Motorcycle Data",
-      description: ""
+      icon: Map,
+      title: "Motorcycle Roads and Routes",
+      description: "Top motorcycle roads, scenic routes, and riding tips.",
+      link: "/routes"
     },
     {
-      icon: Clock,
-      title: "Motorcycle Roads & Routes",
-      description: ""
+      icon: Database,
+      title: "Best Motorcycle Camping Gear",
+      description: "Top camping gear for bikers: compact, durable, essentials.",
+      link: "/camping-gear"
     },
     {
       icon: BarChart,
-      title: "Motorcycle Riding Gear",
-      description: ""
+      title: "Best Motorcycle Riding Gear",
+      description: "Top riding gear: safety, comfort, and style for bikers.",
+      link: "/riding-gear"
     },
     {
       icon: Shield,
-      title: "Motorcycle Camping Gear",
-      description: ""
+      title: "Trusted Data",
+      description: "Verified by industry experts",
+      link: "/data"
+    },
+    {
+      icon: Clock,
+      title: "Historical Trends",
+      description: "Track price changes over time",
+      link: "/trends"
     },
     {
       icon: Users,
       title: "Community Reviews",
-      description: "Read authentic reviews from real riders"
+      description: "Read authentic reviews from real riders",
+      link: "/reviews"
     },
     {
       icon: Wrench,
       title: "Service History",
-      description: "Track maintenance records and service intervals"
+      description: "Track maintenance records and service intervals",
+      link: "/service"
     },
     {
       icon: Search,
       title: "Local Dealers",
-      description: "Find trusted dealers in your area"
+      description: "Find trusted dealers in your area",
+      link: "/dealers"
     },
     {
       icon: RefreshCw,
-      title: "Motorcycle Data",
-      description: "VIN Lookup, Service Manuals, Owner's Manuals, Manufacturer Specs"
+      title: "Regular Updates",
+      description: "Stay current with latest market data",
+      link: "/updates"
     },
     {
       icon: BellRing,
       title: "Price Alerts",
-      description: "Get notified when prices change"
+      description: "Get notified when prices change",
+      link: "/alerts"
     }
   ];
 
@@ -83,16 +98,19 @@ const Index = () => {
             </div>
             <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-8 max-w-6xl mx-auto">
               {features.map((feature) => (
-                <Card 
+                <Link 
+                  to={feature.link}
                   key={feature.title}
-                  className="p-6 text-center hover-card"
+                  className="block transition-transform hover:scale-105"
                 >
-                  <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-theme-100 text-theme-600 mb-4">
-                    <feature.icon size={24} />
-                  </div>
-                  <h3 className="text-lg font-bold mb-2">{feature.title}</h3>
-                  <p className="text-gray-600 text-sm">{feature.description}</p>
-                </Card>
+                  <Card className="p-6 text-center hover-card">
+                    <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-theme-100 text-theme-600 mb-4">
+                      <feature.icon size={24} />
+                    </div>
+                    <h3 className="text-lg font-bold mb-2">{feature.title}</h3>
+                    <p className="text-gray-600 text-sm">{feature.description}</p>
+                  </Card>
+                </Link>
               ))}
             </div>
           </div>
