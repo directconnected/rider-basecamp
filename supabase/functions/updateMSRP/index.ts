@@ -16,6 +16,10 @@ async function searchMSRP(year: string, make: string, model: string): Promise<st
     const searchEngineId = Deno.env.get('GOOGLE_SEARCH_ENGINE_ID')
     
     if (!apiKey || !searchEngineId) {
+      console.error('Missing API configuration:', { 
+        hasApiKey: !!apiKey, 
+        hasSearchEngineId: !!searchEngineId 
+      })
       throw new Error('Missing Google Search API configuration')
     }
 
@@ -28,21 +32,28 @@ async function searchMSRP(year: string, make: string, model: string): Promise<st
 
     if (!response.ok) {
       console.error('Google Search API error:', data)
-      throw new Error('Failed to fetch search results')
+      throw new Error(`Failed to fetch search results: ${data.error?.message || 'Unknown error'}`)
     }
 
-    // Look for price patterns in snippets
-    for (const item of data.items || []) {
-      const text = item.snippet || ''
+    if (!data.items || data.items.length === 0) {
+      console.log('No search results found')
+      return null
+    }
+
+    console.log(`Found ${data.items.length} search results`)
+
+    // Look for price patterns in snippets and titles
+    for (const item of data.items) {
+      const textToSearch = `${item.title || ''} ${item.snippet || ''}`
       // Look for price patterns like $X,XXX or $XX,XXX
-      const priceMatch = text.match(/\$\d{1,3}(,\d{3})*(\.\d{2})?/)
+      const priceMatch = textToSearch.match(/\$\d{1,3}(?:,\d{3})*(?:\.\d{2})?/)
       if (priceMatch) {
-        console.log(`Found price in snippet: ${priceMatch[0]}`)
+        console.log(`Found price in result: ${priceMatch[0]} - Source: ${item.link}`)
         return priceMatch[0]
       }
     }
 
-    console.log('No MSRP found in search results')
+    console.log('No price pattern found in search results')
     return null
   } catch (error) {
     console.error('Error searching for MSRP:', error)
@@ -76,19 +87,37 @@ serve(async (req) => {
       throw fetchError
     }
 
-    console.log(`Found ${motorcycles?.length || 0} motorcycles to process`)
+    if (!motorcycles || motorcycles.length === 0) {
+      console.log('No motorcycles found that need MSRP updates')
+      return new Response(
+        JSON.stringify({
+          success: true,
+          message: 'No motorcycles found that need MSRP updates'
+        }),
+        {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        }
+      )
+    }
+
+    console.log(`Found ${motorcycles.length} motorcycles to process`)
 
     let updatedCount = 0
     // Process each motorcycle
-    for (const motorcycle of motorcycles || []) {
+    for (const motorcycle of motorcycles) {
       try {
         console.log(`Processing motorcycle ID ${motorcycle.id}: ${motorcycle.year} ${motorcycle.make} ${motorcycle.model}`)
         
+        if (!motorcycle.year || !motorcycle.make || !motorcycle.model) {
+          console.log(`Skipping motorcycle ID ${motorcycle.id} - Missing required data`)
+          continue
+        }
+
         // Search for MSRP using Google Custom Search
         const msrp = await searchMSRP(
-          motorcycle.year || '',
-          motorcycle.make || '',
-          motorcycle.model || ''
+          motorcycle.year,
+          motorcycle.make,
+          motorcycle.model
         )
 
         if (msrp) {
@@ -118,7 +147,7 @@ serve(async (req) => {
     return new Response(
       JSON.stringify({
         success: true,
-        message: `Successfully updated ${updatedCount} out of ${motorcycles?.length || 0} motorcycles with MSRP data`
+        message: `Successfully updated ${updatedCount} out of ${motorcycles.length} motorcycles with MSRP data`
       }),
       {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' }
