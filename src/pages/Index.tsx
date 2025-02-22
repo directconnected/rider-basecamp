@@ -38,8 +38,8 @@ const Index = () => {
       try {
         const { data, error } = await supabase
           .from('data_2025')
-          .select('Make')
-          .not('Make', 'is', null);
+          .select('make')
+          .not('make', 'is', null);
 
         if (error) {
           console.error('Error fetching makes:', error);
@@ -48,7 +48,7 @@ const Index = () => {
 
         if (data) {
           const uniqueMakes = Array.from(new Set(data
-            .map(item => item.Make)
+            .map(item => item.make)
             .filter(Boolean)))
             .sort();
           setMakes(uniqueMakes);
@@ -66,10 +66,10 @@ const Index = () => {
       if (searchParams.make) {
         try {
           const { data, error } = await supabase
-            .from('motorcycles_1')
-            .select('Model')
-            .eq('Make', searchParams.make)
-            .not('Model', 'is', null);
+            .from('data_2025')
+            .select('model')
+            .eq('make', searchParams.make)
+            .not('model', 'is', null);
 
           if (error) {
             console.error('Error fetching models:', error);
@@ -78,7 +78,7 @@ const Index = () => {
 
           if (data) {
             const uniqueModels = Array.from(new Set(data
-              .map(item => item.Model)
+              .map(item => item.model)
               .filter(Boolean)))
               .sort();
             setModels(uniqueModels);
@@ -145,7 +145,7 @@ const Index = () => {
       let query = supabase
         .from('data_2025')
         .select('*')
-        .eq('Make', make);
+        .eq('make', make);
 
       if (year) {
         query = query.eq('Year', year);
@@ -197,13 +197,13 @@ const Index = () => {
         .select('*');
 
       if (searchParams.year) {
-        query = query.eq('Year', searchParams.year);
+        query = query.eq('year', searchParams.year);
       }
       if (searchParams.make) {
-        query = query.eq('Make', searchParams.make);
+        query = query.eq('make', searchParams.make);
       }
       if (searchParams.model) {
-        query = query.eq('Model', searchParams.model);
+        query = query.eq('model', searchParams.model);
       }
 
       const { data, error } = await query;
