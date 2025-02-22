@@ -66,7 +66,7 @@ export const useMotorcycleSearch = () => {
       const { error: updateError } = await supabase
         .from('data_2025')
         .update({ 
-          current_value: currentValue.toString(),  // Convert to string as Supabase will handle the casting
+          current_value: currentValue,  // Keep as number
           updated_at: new Date().toISOString()
         })
         .eq('id', motorcycle.id);
