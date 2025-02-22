@@ -1,7 +1,9 @@
 
 export const calculateCurrentValue = (msrp: number | null): number => {
-  if (!msrp) return 0;
-  return Math.round(msrp * 0.6);
+  if (!msrp || isNaN(msrp)) return 0;
+  // Ensuring we're working with a valid number
+  const numericMsrp = Number(msrp);
+  return Math.round(numericMsrp * 0.6);
 };
 
 export const formatCurrency = (value: string | null | number): string => {

@@ -28,27 +28,28 @@ export const useMotorcycleSearch = () => {
       return;
     }
 
-    const calculatedValue = calculateCurrentValue(motorcycle.msrp);
-    console.log(`Calculating value for motorcycle ${motorcycle.id}:`, {
-      msrp: motorcycle.msrp,
-      calculatedValue
-    });
-
-    if (calculatedValue === 0) {
-      console.log(`Skipping update for motorcycle ${motorcycle.id} - invalid calculated value`);
-      return;
-    }
-
     try {
-      console.log(`Attempting to update motorcycle ${motorcycle.id} with value:`, calculatedValue);
-      
-      const { error } = await supabase
+      const calculatedValue = calculateCurrentValue(motorcycle.msrp);
+      console.log(`Calculating value for motorcycle ${motorcycle.id}:`, {
+        msrp: motorcycle.msrp,
+        calculatedValue
+      });
+
+      if (calculatedValue === 0) {
+        console.log(`Skipping update for motorcycle ${motorcycle.id} - invalid calculated value`);
+        return;
+      }
+
+      // First, update the database
+      const { data, error } = await supabase
         .from('data_2025')
         .update({
           current_value: calculatedValue,
           updated_at: new Date().toISOString()
         })
-        .eq('id', motorcycle.id);
+        .eq('id', motorcycle.id)
+        .select()
+        .single();
 
       if (error) {
         console.error('Error updating current value:', error);
@@ -56,17 +57,20 @@ export const useMotorcycleSearch = () => {
         return;
       }
 
-      // Update the local state with the new value
-      setSearchResults(prev => 
-        prev.map(m => 
-          m.id === motorcycle.id 
-            ? { ...m, current_value: calculatedValue, value: calculatedValue }
-            : m
-        )
-      );
+      if (data) {
+        console.log(`Database update successful for motorcycle ${motorcycle.id}:`, data);
+        
+        // Update local state only after successful database update
+        setSearchResults(prev => 
+          prev.map(m => 
+            m.id === motorcycle.id 
+              ? { ...m, current_value: calculatedValue, value: calculatedValue }
+              : m
+          )
+        );
 
-      console.log(`Successfully updated motorcycle ${motorcycle.id} with value ${calculatedValue}`);
-      toast.success(`Updated value for ${motorcycle.make} ${motorcycle.model}: ${formatCurrency(calculatedValue)}`);
+        toast.success(`Updated value for ${motorcycle.make} ${motorcycle.model}: ${formatCurrency(calculatedValue)}`);
+      }
     } catch (err) {
       console.error('Exception during update:', err);
       toast.error('Failed to update motorcycle value');
