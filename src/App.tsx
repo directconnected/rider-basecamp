@@ -1,6 +1,9 @@
 
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { Toaster } from "@/components/ui/toaster";
+import { Toaster as Sonner } from "@/components/ui/sonner";
+import { TooltipProvider } from "@/components/ui/tooltip";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import Index from "@/pages/Index";
 import About from "@/pages/About";
 import Contact from "@/pages/Contact";
@@ -12,21 +15,28 @@ import Admin from "@/pages/Admin";
 
 import "./App.css";
 
+const queryClient = new QueryClient();
+
 function App() {
   return (
-    <Router>
-      <Routes>
-        <Route path="/" element={<Index />} />
-        <Route path="/about" element={<About />} />
-        <Route path="/contact" element={<Contact />} />
-        <Route path="/advertise" element={<AdvertiseWithUs />} />
-        <Route path="/auth" element={<Auth />} />
-        <Route path="/motorcycle/:id" element={<MotorcycleDetails />} />
-        <Route path="/admin" element={<Admin />} />
-        <Route path="*" element={<NotFound />} />
-      </Routes>
-      <Toaster />
-    </Router>
+    <QueryClientProvider client={queryClient}>
+      <TooltipProvider>
+        <Router>
+          <Routes>
+            <Route path="/" element={<Index />} />
+            <Route path="/about" element={<About />} />
+            <Route path="/contact" element={<Contact />} />
+            <Route path="/advertise" element={<AdvertiseWithUs />} />
+            <Route path="/auth" element={<Auth />} />
+            <Route path="/motorcycle/:id" element={<MotorcycleDetails />} />
+            <Route path="/admin" element={<Admin />} />
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+          <Toaster />
+          <Sonner />
+        </Router>
+      </TooltipProvider>
+    </QueryClientProvider>
   );
 }
 
