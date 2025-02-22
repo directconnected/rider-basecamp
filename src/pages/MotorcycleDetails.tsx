@@ -111,9 +111,130 @@ const MotorcycleDetails = () => {
                 
                 <div>
                   <p className="text-gray-500 text-sm">Original MSRP</p>
-                  <p className="text-xl font-semibold">
+                  <p className="text-xl font-semibold mb-6">
                     {formatCurrency(motorcycle.msrp)}
                   </p>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {motorcycle.engine_type && (
+                    <div>
+                      <p className="text-gray-500 text-sm">Engine Type</p>
+                      <p className="text-base">{motorcycle.engine_type}</p>
+                    </div>
+                  )}
+
+                  {motorcycle.transmission && (
+                    <div>
+                      <p className="text-gray-500 text-sm">Transmission</p>
+                      <p className="text-base">{motorcycle.transmission}</p>
+                    </div>
+                  )}
+
+                  {motorcycle.clutch && (
+                    <div>
+                      <p className="text-gray-500 text-sm">Clutch</p>
+                      <p className="text-base">{motorcycle.clutch}</p>
+                    </div>
+                  )}
+
+                  {motorcycle.front_suspension && (
+                    <div>
+                      <p className="text-gray-500 text-sm">Front Suspension</p>
+                      <p className="text-base">{motorcycle.front_suspension}</p>
+                    </div>
+                  )}
+
+                  {motorcycle.rear_suspension && (
+                    <div>
+                      <p className="text-gray-500 text-sm">Rear Suspension</p>
+                      <p className="text-base">{motorcycle.rear_suspension}</p>
+                    </div>
+                  )}
+
+                  {motorcycle.front_brakes && (
+                    <div>
+                      <p className="text-gray-500 text-sm">Front Brakes</p>
+                      <p className="text-base">{motorcycle.front_brakes}</p>
+                    </div>
+                  )}
+
+                  {motorcycle.rear_brakes && (
+                    <div>
+                      <p className="text-gray-500 text-sm">Rear Brakes</p>
+                      <p className="text-base">{motorcycle.rear_brakes}</p>
+                    </div>
+                  )}
+
+                  {motorcycle.front_tire && (
+                    <div>
+                      <p className="text-gray-500 text-sm">Front Tire</p>
+                      <p className="text-base">{motorcycle.front_tire}</p>
+                    </div>
+                  )}
+
+                  {motorcycle.rear_tire && (
+                    <div>
+                      <p className="text-gray-500 text-sm">Rear Tire</p>
+                      <p className="text-base">{motorcycle.rear_tire}</p>
+                    </div>
+                  )}
+
+                  {motorcycle.rake && (
+                    <div>
+                      <p className="text-gray-500 text-sm">Rake</p>
+                      <p className="text-base">{motorcycle.rake}</p>
+                    </div>
+                  )}
+
+                  {motorcycle.trail && (
+                    <div>
+                      <p className="text-gray-500 text-sm">Trail</p>
+                      <p className="text-base">{motorcycle.trail}</p>
+                    </div>
+                  )}
+
+                  {motorcycle.wheelbase && (
+                    <div>
+                      <p className="text-gray-500 text-sm">Wheelbase</p>
+                      <p className="text-base">{motorcycle.wheelbase}</p>
+                    </div>
+                  )}
+
+                  {motorcycle.seat_height && (
+                    <div>
+                      <p className="text-gray-500 text-sm">Seat Height</p>
+                      <p className="text-base">{motorcycle.seat_height}</p>
+                    </div>
+                  )}
+
+                  {motorcycle.ground_clearance && (
+                    <div>
+                      <p className="text-gray-500 text-sm">Ground Clearance</p>
+                      <p className="text-base">{motorcycle.ground_clearance}</p>
+                    </div>
+                  )}
+
+                  {motorcycle.fuel_capacity && (
+                    <div>
+                      <p className="text-gray-500 text-sm">Fuel Capacity</p>
+                      <p className="text-base">{motorcycle.fuel_capacity}</p>
+                    </div>
+                  )}
+
+                  {motorcycle.curb_weight && (
+                    <div>
+                      <p className="text-gray-500 text-sm">Curb Weight</p>
+                      <p className="text-base">{motorcycle.curb_weight}</p>
+                    </div>
+                  )}
+
+                  {motorcycle.colors && (
+                    <div>
+                      <p className="text-gray-500 text-sm">Colors</p>
+                      <p className="text-base">{motorcycle.colors}</p>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
