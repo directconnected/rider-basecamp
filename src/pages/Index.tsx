@@ -73,12 +73,18 @@ const Index = () => {
                   key={feature.title}
                   className="block h-[240px]"
                 >
-                  <Card className="p-6 text-center h-full flex flex-col items-center justify-center">
-                    <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-theme-100 text-theme-600 mb-4">
-                      <feature.icon size={24} />
+                  <Card className="p-6 text-center h-full">
+                    <div className="h-full flex flex-col">
+                      <div className="flex-none flex items-center justify-center mb-4">
+                        <div className="w-12 h-12 rounded-full bg-theme-100 text-theme-600 flex items-center justify-center">
+                          <feature.icon size={24} />
+                        </div>
+                      </div>
+                      <div className="flex-1 flex flex-col justify-center">
+                        <h3 className="text-lg font-bold mb-2 line-clamp-2">{feature.title}</h3>
+                        <p className="text-gray-600 text-sm line-clamp-3">{feature.description}</p>
+                      </div>
                     </div>
-                    <h3 className="text-lg font-bold mb-2">{feature.title}</h3>
-                    <p className="text-gray-600 text-sm">{feature.description}</p>
                   </Card>
                 </Link>
               ))}
