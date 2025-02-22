@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -39,25 +38,24 @@ export const useMotorcycleSearch = () => {
       return;
     }
 
-    const formattedValue = formatCurrency(calculatedValue);
-    console.log(`Attempting to update motorcycle ${motorcycle.id} with value ${formattedValue}`);
+    console.log(`Attempting to update motorcycle ${motorcycle.id} with value ${calculatedValue}`);
     
     try {
-      const { data, error } = await supabase
+      const { error } = await supabase
         .from('data_2025')
         .update({ 
-          current_value: formattedValue,
+          current_value: calculatedValue.toString(),
           updated_at: new Date().toISOString()
         })
         .eq('id', motorcycle.id);
 
       if (error) {
         console.error('Error updating current value:', error);
-        toast.error(`Failed to update value for motorcycle ${motorcycle.id}`);
+        toast.error(`Failed to update value for motorcycle ${motorcycle.id}: ${error.message}`);
         return;
       }
 
-      console.log(`Successfully updated motorcycle ${motorcycle.id}`);
+      console.log(`Successfully updated motorcycle ${motorcycle.id} with value ${calculatedValue}`);
       toast.success(`Updated value for ${motorcycle.make} ${motorcycle.model}`);
     } catch (err) {
       console.error('Exception during update:', err);

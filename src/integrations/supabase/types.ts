@@ -17,6 +17,7 @@ export type Database = {
           make: string | null
           model: string | null
           msrp: string | null
+          updated_at: string | null
           year: string | null
         }
         Insert: {
@@ -26,6 +27,7 @@ export type Database = {
           make?: string | null
           model?: string | null
           msrp?: string | null
+          updated_at?: string | null
           year?: string | null
         }
         Update: {
@@ -35,6 +37,7 @@ export type Database = {
           make?: string | null
           model?: string | null
           msrp?: string | null
+          updated_at?: string | null
           year?: string | null
         }
         Relationships: []
