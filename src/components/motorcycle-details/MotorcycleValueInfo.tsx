@@ -53,10 +53,19 @@ export const MotorcycleValueInfo = ({ currentValue, msrp, year, make, model }: M
     }
 
     try {
-      // Convert make and model to a standardized filename format
-      const filename = `${make.toLowerCase()}_${model.toLowerCase()}_${type === 'owners' ? 'owners' : 'service'}_manual.pdf`
+      // Extract base model name by removing year and special edition text
+      const baseModel = model
+        .replace(/^\d{4}\s+/, '') // Remove year from start if present
+        .split(/\s+(?:\d{2,}(?:th|st|nd|rd)\s+Anniversary|Special\s+Edition|Limited\s+Edition)/i)[0] // Remove special edition text
+        .trim();
+
+      // Create standardized filename
+      const filename = `${make.toLowerCase()}_${baseModel.toLowerCase().replace(/\s+/g, '-')}_${type}_manual.pdf`
         .replace(/[^\w\s-]/g, '') // Remove special characters
-        .replace(/\s+/g, '-'); // Replace spaces with hyphens
+        .replace(/\s+/g, '-') // Replace spaces with hyphens
+        .replace(/-+/g, '-'); // Replace multiple consecutive hyphens with single hyphen
+
+      console.log('Attempting to download:', filename); // Debug log
 
       const { data, error } = await supabase.storage
         .from(type === 'owners' ? 'owners_manuals' : 'service_manuals')
