@@ -3,7 +3,7 @@ import React, { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, FileDown } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import Navigation from "@/components/Navigation";
 import { Motorcycle } from "@/types/motorcycle";
@@ -108,6 +108,17 @@ const MotorcycleDetails = () => {
                   make={motorcycle.make}
                 />
                 <MotorcycleSpecifications motorcycle={motorcycle} />
+                
+                <div className="flex flex-col sm:flex-row gap-4 mt-6">
+                  <Button variant="outline" className="flex-1">
+                    <FileDown className="mr-2 h-4 w-4" />
+                    Download Owner's Manual
+                  </Button>
+                  <Button variant="outline" className="flex-1">
+                    <FileDown className="mr-2 h-4 w-4" />
+                    Download Service Manual
+                  </Button>
+                </div>
               </div>
             </div>
           </Card>
