@@ -3,7 +3,7 @@ import React from "react";
 import { Link } from "react-router-dom";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, ImageOff } from "lucide-react";
 import { Motorcycle } from "@/types/motorcycle";
 
 interface SearchResultsProps {
@@ -12,6 +12,14 @@ interface SearchResultsProps {
 }
 
 const SearchResults = ({ results, formatCurrency }: SearchResultsProps) => {
+  const handleImageError = (event: React.SyntheticEvent<HTMLImageElement>) => {
+    event.currentTarget.classList.add('hidden');
+    const fallback = event.currentTarget.nextElementSibling;
+    if (fallback) {
+      fallback.classList.remove('hidden');
+    }
+  };
+
   if (results.length === 0) return null;
 
   return (
@@ -30,6 +38,32 @@ const SearchResults = ({ results, formatCurrency }: SearchResultsProps) => {
                 </h3>
                 <p className="text-gray-600 text-lg mb-6">{motorcycle.model}</p>
                 
+                <div className="relative h-48 bg-white mb-6">
+                  {motorcycle.image_url ? (
+                    <>
+                      <img
+                        src={motorcycle.image_url}
+                        alt={`${motorcycle.year} ${motorcycle.make} ${motorcycle.model}`}
+                        className="w-full h-full object-contain"
+                        onError={handleImageError}
+                      />
+                      <div className="image-fallback hidden absolute inset-0 flex items-center justify-center bg-gray-50">
+                        <div className="text-center">
+                          <ImageOff className="h-12 w-12 mx-auto text-gray-400 mb-2" />
+                          <p className="text-sm text-gray-500">Image unavailable</p>
+                        </div>
+                      </div>
+                    </>
+                  ) : (
+                    <div className="absolute inset-0 flex items-center justify-center bg-gray-50">
+                      <div className="text-center">
+                        <ImageOff className="h-12 w-12 mx-auto text-gray-400 mb-2" />
+                        <p className="text-sm text-gray-500">Image unavailable</p>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
                 <div className="space-y-6 mb-6">
                   <div>
                     <p className="text-gray-500 text-sm">Estimated Current Value</p>

@@ -24,6 +24,7 @@ export type Database = {
           ground_clearance: string | null
           height: string | null
           id: number
+          image_url: string | null
           length: string | null
           make: string | null
           model: string | null
@@ -54,6 +55,7 @@ export type Database = {
           ground_clearance?: string | null
           height?: string | null
           id?: number
+          image_url?: string | null
           length?: string | null
           make?: string | null
           model?: string | null
@@ -84,6 +86,7 @@ export type Database = {
           ground_clearance?: string | null
           height?: string | null
           id?: number
+          image_url?: string | null
           length?: string | null
           make?: string | null
           model?: string | null
