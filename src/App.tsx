@@ -20,6 +20,10 @@ import Data from "@/pages/Data";
 import Service from "@/pages/Service";
 import Dealers from "@/pages/Dealers";
 import TopRoads from "@/pages/TopRoads";
+import ScenicByways from "@/pages/ScenicByways";
+import RoutePlanning from "@/pages/RoutePlanning";
+import GpxDownloads from "@/pages/GpxDownloads";
+import FeaturedDestinations from "@/pages/FeaturedDestinations";
 
 const queryClient = new QueryClient();
 
@@ -44,6 +48,10 @@ function App() {
             <Route path="/service" element={<Service />} />
             <Route path="/dealers" element={<Dealers />} />
             <Route path="/top-roads" element={<TopRoads />} />
+            <Route path="/scenic-byways" element={<ScenicByways />} />
+            <Route path="/route-planning" element={<RoutePlanning />} />
+            <Route path="/gpx-downloads" element={<GpxDownloads />} />
+            <Route path="/featured-destinations" element={<FeaturedDestinations />} />
             <Route path="*" element={<NotFound />} />
           </RouterRoutes>
           <Toaster />
