@@ -65,7 +65,7 @@ const Navigation = () => {
                 className="ml-2"
               >
                 {isLoggedIn ? (
-                  "Logged in"
+                  "Logout"
                 ) : (
                   <>
                     <LogIn className="mr-2 h-4 w-4" />
