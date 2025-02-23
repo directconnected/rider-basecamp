@@ -43,7 +43,7 @@ serve(async (req) => {
     const { data: motorcycles, error: fetchError } = await supabase
       .from('data_2025')
       .select('id, year, make, model')
-      .is('image_url', null)
+      .or('image_url.is.null,image_url.eq.""')  // Check for both NULL and empty string
       .limit(10);
 
     if (fetchError) {
