@@ -27,12 +27,13 @@ serve(async (req) => {
 
     const supabase = createClient(supabaseUrl, supabaseKey);
 
-    // Initialize Firecrawl
+    // Initialize Firecrawl with retry mechanism
     const firecrawlApiKey = Deno.env.get('FIRECRAWL_API_KEY');
     if (!firecrawlApiKey) {
       throw new Error('Missing Firecrawl API key');
     }
 
+    console.log('Initializing Firecrawl client...');
     const firecrawl = new FirecrawlApp({
       apiKey: firecrawlApiKey
     });
@@ -43,7 +44,7 @@ serve(async (req) => {
     const { data: motorcycles, error: fetchError } = await supabase
       .from('data_2025')
       .select('id, year, make, model')
-      .or('image_url.is.null,image_url.eq.""')  // Check for both NULL and empty string
+      .or('image_url.is.null,image_url.eq.""')
       .limit(1);
 
     if (fetchError) {
@@ -61,34 +62,48 @@ serve(async (req) => {
 
     const results = [];
     for (const motorcycle of motorcycles) {
-      const searchQuery = `${motorcycle.year} ${motorcycle.make} ${motorcycle.model} motorcycle`;
-      console.log(`Searching for images of: ${searchQuery}`);
-
       try {
-        // Add a longer delay before making the request
-        await new Promise(resolve => setTimeout(resolve, 5000));
+        const searchQuery = `${motorcycle.year} ${motorcycle.make} ${motorcycle.model} motorcycle`;
+        console.log(`Searching for images of: ${searchQuery}`);
 
-        // Use the simplest possible configuration
-        const result = await firecrawl.crawlUrl(`https://www.google.com/search?q=${encodeURIComponent(searchQuery)}&tbm=isch`);
+        // Construct the URL with encoded parameters
+        const searchUrl = new URL('https://www.google.com/search');
+        searchUrl.searchParams.append('q', searchQuery);
+        searchUrl.searchParams.append('tbm', 'isch');
 
-        console.log('Firecrawl result:', result);
+        console.log(`Making request to: ${searchUrl.toString()}`);
 
-        if (result && result.data && result.data.length > 0) {
-          // Try to find a valid image URL from the response
+        // Basic fetch attempt with timeout
+        const timeoutPromise = new Promise((_, reject) => 
+          setTimeout(() => reject(new Error('Request timeout')), 10000)
+        );
+
+        const result = await Promise.race([
+          firecrawl.crawlUrl(searchUrl.toString()),
+          timeoutPromise
+        ]);
+
+        console.log('Firecrawl response received');
+
+        if (result && result.data && Array.isArray(result.data)) {
+          console.log(`Found ${result.data.length} potential images`);
+          
+          // Try to find a valid image URL
           let imageUrl = null;
           for (const item of result.data) {
-            if (item.url && (item.url.startsWith('http://') || item.url.startsWith('https://'))) {
-              imageUrl = item.url;
-              break;
-            }
-            if (item.src && (item.src.startsWith('http://') || item.src.startsWith('https://'))) {
-              imageUrl = item.src;
-              break;
+            if (typeof item === 'object' && item !== null) {
+              const potentialUrl = item.url || item.src;
+              if (potentialUrl && 
+                  typeof potentialUrl === 'string' && 
+                  (potentialUrl.startsWith('http://') || potentialUrl.startsWith('https://'))) {
+                imageUrl = potentialUrl;
+                break;
+              }
             }
           }
 
           if (imageUrl) {
-            console.log(`Found image URL for motorcycle ${motorcycle.id}: ${imageUrl}`);
+            console.log(`Found valid image URL: ${imageUrl}`);
             
             const { error: updateError } = await supabase
               .from('data_2025')
@@ -96,62 +111,55 @@ serve(async (req) => {
               .eq('id', motorcycle.id);
 
             if (updateError) {
-              console.error(`Error updating motorcycle ${motorcycle.id}: ${updateError.message}`);
-              results.push({ id: motorcycle.id, success: false, error: updateError.message });
-            } else {
-              console.log(`Successfully updated image for motorcycle ${motorcycle.id}`);
-              results.push({ id: motorcycle.id, success: true });
+              throw new Error(`Failed to update database: ${updateError.message}`);
             }
+
+            results.push({ id: motorcycle.id, success: true });
+            console.log(`Successfully updated motorcycle ${motorcycle.id}`);
           } else {
-            console.log(`No valid image URL found for motorcycle ${motorcycle.id}`);
-            results.push({ id: motorcycle.id, success: false, error: 'No valid image URL found' });
+            throw new Error('No valid image URL found in response');
           }
         } else {
-          console.log(`No results found for motorcycle ${motorcycle.id}`);
-          results.push({ id: motorcycle.id, success: false, error: 'No results found' });
+          throw new Error('Invalid response format from Firecrawl');
         }
       } catch (error) {
-        // Check for rate limit errors
-        if (error.message && error.message.toLowerCase().includes('rate limit')) {
-          console.error(`Rate limit hit for motorcycle ${motorcycle.id}: ${error.message}`);
+        console.error(`Error processing motorcycle ${motorcycle.id}:`, error);
+        
+        if (error.message?.toLowerCase().includes('rate limit')) {
           return new Response(
             JSON.stringify({ 
               error: 'Rate limit exceeded, please try again in a few minutes',
               processed: results.length,
               results 
             }),
-            { 
-              headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-              status: 429 
-            }
+            { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 429 }
           );
-        } else {
-          console.error(`Error processing motorcycle ${motorcycle.id}: ${error.message}`);
-          results.push({ id: motorcycle.id, success: false, error: error.message });
         }
+
+        results.push({ 
+          id: motorcycle.id, 
+          success: false, 
+          error: error.message || 'Unknown error occurred'
+        });
       }
     }
 
     return new Response(
       JSON.stringify({ 
         message: 'Image update process completed',
-        processed: motorcycles.length,
+        processed: results.length,
         results 
       }),
-      { 
-        headers: { 
-          ...corsHeaders, 
-          'Content-Type': 'application/json' 
-        } 
-      }
+      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
 
   } catch (error) {
-    console.error('Error in update-motorcycle-images function:', error);
+    console.error('Fatal error in update-motorcycle-images function:', error);
     return new Response(
       JSON.stringify({ 
-        error: error.message,
-        details: error.stack 
+        error: 'Internal server error',
+        details: error.message,
+        stack: error.stack
       }),
       { 
         headers: { ...corsHeaders, 'Content-Type': 'application/json' }, 
