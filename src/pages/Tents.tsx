@@ -13,6 +13,7 @@ interface Tent {
   tent_name: string;
   description: string;
   amazon_url: string;
+  image_url: string;
 }
 
 const Tents = () => {
@@ -77,6 +78,15 @@ const Tents = () => {
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
               {tents?.map((tent: Tent) => (
                 <Card key={tent.id} className="hover-card overflow-hidden">
+                  {tent.image_url && (
+                    <div className="aspect-w-16 aspect-h-9">
+                      <img
+                        src={tent.image_url}
+                        alt={tent.tent_name}
+                        className="w-full h-64 object-cover"
+                      />
+                    </div>
+                  )}
                   <CardContent className="p-6">
                     <div className="flex items-start justify-between mb-4">
                       <div>

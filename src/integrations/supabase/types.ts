@@ -239,18 +239,21 @@ export type Database = {
           amazon_url: string
           description: string
           id: number
+          image_url: string | null
           tent_name: string
         }
         Insert: {
           amazon_url: string
           description: string
           id?: number
+          image_url?: string | null
           tent_name: string
         }
         Update: {
           amazon_url?: string
           description?: string
           id?: number
+          image_url?: string | null
           tent_name?: string
         }
         Relationships: []
