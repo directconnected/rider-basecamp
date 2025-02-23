@@ -14,7 +14,7 @@ const Subscribe = () => {
   const plans = [
     {
       title: "Basic",
-      price: "9.99",
+      price: "10.00",
       priceId: "price_1QvlKaCXT3Oz0sc73x23FLQ2",
       features: [
         "Basic motorcycle valuations",
@@ -24,7 +24,7 @@ const Subscribe = () => {
     },
     {
       title: "Pro",
-      price: "19.99",
+      price: "20.00",
       priceId: "price_1QvlLRCXT3Oz0sc7KBXQlgPT",
       features: [
         "Advanced motorcycle valuations",
@@ -36,7 +36,7 @@ const Subscribe = () => {
     },
     {
       title: "Enterprise",
-      price: "49.99",
+      price: "30.00",
       priceId: "price_1QvlLcCXT3Oz0sc7AhZJKdvz",
       features: [
         "Custom API access",
