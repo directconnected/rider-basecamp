@@ -87,14 +87,14 @@ const Tents = () => {
               {tents?.map((tent: Tent) => (
                 <Card key={tent.id} className="hover-card overflow-hidden flex flex-col">
                   {tent.image_url && (
-                    <div className="relative h-48 bg-gray-100">
+                    <div className="relative h-48 bg-white">
                       <img
                         src={tent.image_url}
                         alt={tent.tent_name}
                         className="w-full h-full object-contain"
                         onError={handleImageError}
                       />
-                      <div className="image-fallback hidden absolute inset-0 flex items-center justify-center bg-gray-100">
+                      <div className="image-fallback hidden absolute inset-0 flex items-center justify-center bg-white">
                         <div className="text-center">
                           <ImageOff className="h-12 w-12 mx-auto text-gray-400 mb-2" />
                           <p className="text-sm text-gray-500">Image unavailable</p>
