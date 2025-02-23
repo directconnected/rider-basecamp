@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -105,6 +106,7 @@ const MotorcycleDetails = () => {
                   msrp={motorcycle.msrp} 
                   year={motorcycle.year}
                   make={motorcycle.make}
+                  model={motorcycle.model}
                 />
                 <MotorcycleSpecifications motorcycle={motorcycle} />
               </div>
