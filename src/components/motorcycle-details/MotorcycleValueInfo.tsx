@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -99,20 +98,16 @@ export const MotorcycleValueInfo = ({ currentValue, msrp, year, make, model }: M
 
       console.log('Successfully got signed URL:', data.signedUrl);
 
-      const link = document.createElement('a');
-      link.href = data.signedUrl;
-      link.download = filename;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
+      // Open PDF in new window instead of downloading
+      window.open(data.signedUrl, '_blank');
 
-      toast.success("Download started!", {
-        description: `Downloading ${type} manual for ${make} ${model}`
+      toast.success("Manual opened!", {
+        description: `Opening ${type} manual for ${make} ${model}`
       });
     } catch (error) {
       console.error('Download error:', error);
-      toast.error("Download failed", {
-        description: "There was an error downloading the manual."
+      toast.error("Failed to open manual", {
+        description: "There was an error accessing the manual."
       });
     }
   };
@@ -181,7 +176,7 @@ export const MotorcycleValueInfo = ({ currentValue, msrp, year, make, model }: M
             onClick={() => handleManualDownload('owners')}
           >
             <FileDown className="mr-2 h-4 w-4" />
-            Download Owner's Manual
+            View Owner's Manual
           </Button>
           <Button 
             variant="outline" 
@@ -189,7 +184,7 @@ export const MotorcycleValueInfo = ({ currentValue, msrp, year, make, model }: M
             onClick={() => handleManualDownload('service')}
           >
             <FileDown className="mr-2 h-4 w-4" />
-            Download Service Manual
+            View Service Manual
           </Button>
         </div>
       </div>
