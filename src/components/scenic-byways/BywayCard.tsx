@@ -27,13 +27,9 @@ const BywayCard: React.FC<BywayCardProps> = ({
       </CardHeader>
       <div className="px-6">
         <img
-          src={byway.image_url || getFallbackImage(byway.state)}
+          src={getFallbackImage(byway.state)}
           alt={byway.byway_name}
           className="w-full h-48 object-cover rounded-md mb-4"
-          onError={(e) => {
-            const img = e.target as HTMLImageElement;
-            img.src = getFallbackImage(byway.state);
-          }}
         />
       </div>
       <CardContent>
