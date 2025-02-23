@@ -9,8 +9,8 @@ import Footer from "@/components/layout/Footer";
 const features = [
   {
     icon: Map,
-    title: "Popular Routes",
-    description: "Discover the most popular motorcycle routes across the country.",
+    title: "Popular Roads",
+    description: "Discover the most popular motorcycle roads across the country.",
     link: "/top-roads"
   },
   {
@@ -18,6 +18,12 @@ const features = [
     title: "Scenic Byways",
     description: "Explore America's most scenic motorcycle roads and byways.",
     link: "/scenic-byways"
+  },
+  {
+    icon: Star,
+    title: "Featured Destinations",
+    description: "Must-visit destinations for motorcycle enthusiasts.",
+    link: "/featured-destinations"
   },
   {
     icon: Compass,
@@ -31,12 +37,6 @@ const features = [
     description: "Download GPX files for your favorite routes.",
     link: "/gpx-downloads"
   },
-  {
-    icon: Star,
-    title: "Featured Destinations",
-    description: "Must-visit destinations for motorcycle enthusiasts.",
-    link: "/featured-destinations"
-  }
 ];
 
 const Destinations = () => {
