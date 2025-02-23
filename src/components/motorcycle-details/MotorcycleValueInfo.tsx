@@ -66,12 +66,13 @@ export const MotorcycleValueInfo = ({ currentValue, msrp, year, make, model }: M
         
       console.log('Base model after cleanup:', baseModel);
 
-      // Create standardized filename with proper extension format
-      let filename = `${make.toLowerCase()}_${baseModel.toLowerCase()}_${type}_manual.pdf`
-        .replace(/[^\w\s-]/g, '') // Remove special characters
-        .replace(/\s+/g, '-') // Replace spaces with hyphens
-        .replace(/-+/g, '-') // Replace multiple consecutive hyphens with single hyphen
-        .replace('manual.pdf', 'manual.pdf'); // Ensure proper extension format
+      // Create filename components separately to ensure proper format
+      const makeSlug = make.toLowerCase().replace(/[^\w\s-]/g, '').replace(/\s+/g, '-');
+      const modelSlug = baseModel.toLowerCase().replace(/[^\w\s-]/g, '').replace(/\s+/g, '-');
+      
+      // Construct filename with explicit parts
+      let filename = `${makeSlug}_${modelSlug}_${type}_manual.pdf`
+        .replace(/-+/g, '-'); // Clean up any consecutive hyphens
         
       // For Gold Wing models, ensure correct formatting
       filename = filename.replace('gold-wing', 'goldwing');
