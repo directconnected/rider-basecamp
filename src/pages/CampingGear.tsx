@@ -1,9 +1,11 @@
+
 import React from "react";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/layout/Footer";
 import { Card } from "@/components/ui/card";
 import { Tent, Backpack, Compass, Flame } from "lucide-react";
 import Breadcrumbs from "@/components/Breadcrumbs";
+import { Link } from "react-router-dom";
 
 const CampingGear = () => {
   return (
@@ -41,7 +43,8 @@ const CampingGear = () => {
                   { 
                     icon: Tent,
                     title: "Tents & Shelters",
-                    description: "Lightweight, compact options"
+                    description: "Lightweight, compact options",
+                    link: "/tents"
                   },
                   {
                     icon: Backpack,
@@ -59,11 +62,17 @@ const CampingGear = () => {
                     description: "Compact camp kitchens"
                   }
                 ].map((item) => (
-                  <Card key={item.title} className="p-6 text-center hover-card">
-                    <item.icon className="w-8 h-8 mx-auto mb-4 text-theme-600" />
-                    <h3 className="font-bold mb-2">{item.title}</h3>
-                    <p className="text-gray-600">{item.description}</p>
-                  </Card>
+                  <Link 
+                    key={item.title}
+                    to={item.link || "#"}
+                    className="block"
+                  >
+                    <Card className="p-6 text-center hover-card">
+                      <item.icon className="w-8 h-8 mx-auto mb-4 text-theme-600" />
+                      <h3 className="font-bold mb-2">{item.title}</h3>
+                      <p className="text-gray-600">{item.description}</p>
+                    </Card>
+                  </Link>
                 ))}
               </div>
             </div>

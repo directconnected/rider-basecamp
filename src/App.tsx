@@ -29,6 +29,7 @@ import Documentation from "@/pages/Documentation";
 import Support from "@/pages/Support";
 import TermsOfService from "@/pages/TermsOfService";
 import PrivacyPolicy from "@/pages/PrivacyPolicy";
+import Tents from "@/pages/Tents";
 
 const queryClient = new QueryClient();
 
@@ -62,6 +63,7 @@ function App() {
             <Route path="/support" element={<Support />} />
             <Route path="/terms" element={<TermsOfService />} />
             <Route path="/privacy" element={<PrivacyPolicy />} />
+            <Route path="/tents" element={<Tents />} />
             <Route path="*" element={<NotFound />} />
           </RouterRoutes>
           <Toaster />
