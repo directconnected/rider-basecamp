@@ -12,7 +12,21 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 
-const routeConfig = {
+interface BaseRouteConfig {
+  label: string;
+}
+
+interface ChildRouteConfig extends BaseRouteConfig {
+  parent: string;
+}
+
+interface ParentRouteConfig extends BaseRouteConfig {
+  parent?: never;
+}
+
+type RouteConfig = ChildRouteConfig | ParentRouteConfig;
+
+const routeConfig: Record<string, RouteConfig> = {
   'top-roads': {
     parent: 'destinations',
     label: 'Top Roads'
@@ -55,19 +69,22 @@ const routeConfig = {
 
 const getBreadcrumbs = (pathname: string) => {
   const paths = pathname.split('/').filter(Boolean);
-  const breadcrumbs = [];
+  const breadcrumbs: Array<{ label: string; url: string }> = [];
   
   for (let i = 0; i < paths.length; i++) {
     const path = paths[i];
-    const config = routeConfig[path as keyof typeof routeConfig];
+    const config = routeConfig[path];
     
     if (config) {
-      // If this route has a parent, add it first
-      if (config.parent && !paths.includes(config.parent)) {
-        breadcrumbs.push({
-          label: routeConfig[config.parent as keyof typeof routeConfig].label,
-          url: `/${config.parent}`
-        });
+      // Check if this route has a parent and it's a child route
+      if ('parent' in config && config.parent && !paths.includes(config.parent)) {
+        const parentConfig = routeConfig[config.parent];
+        if (parentConfig) {
+          breadcrumbs.push({
+            label: parentConfig.label,
+            url: `/${config.parent}`
+          });
+        }
       }
       
       // Add the current route
