@@ -1,11 +1,27 @@
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Home, UserPlus } from "lucide-react";
+import { Home, UserPlus, LogIn } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { supabase } from "@/integrations/supabase/client";
 
 const Navigation = () => {
   const location = useLocation();
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  useEffect(() => {
+    // Check initial auth state
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setIsLoggedIn(!!session);
+    });
+
+    // Listen for auth state changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setIsLoggedIn(!!session);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
 
   return (
     <header className="bg-gray-900 border-b border-gray-800">
@@ -50,6 +66,22 @@ const Navigation = () => {
               >
                 <UserPlus className="mr-2 h-4 w-4" />
                 Sign Up
+              </Button>
+            </Link>
+            <Link to="/auth">
+              <Button 
+                variant="outline" 
+                size="sm"
+                className="ml-2"
+              >
+                {isLoggedIn ? (
+                  "Logged in"
+                ) : (
+                  <>
+                    <LogIn className="mr-2 h-4 w-4" />
+                    Login
+                  </>
+                )}
               </Button>
             </Link>
           </nav>
