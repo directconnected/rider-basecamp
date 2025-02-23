@@ -2,11 +2,44 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { Card } from "@/components/ui/card";
-import { Map } from "lucide-react";
+import { Map, Route, Compass, FileDown, Star } from "lucide-react";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/layout/Footer";
 
-const Routes = () => {
+const features = [
+  {
+    icon: Map,
+    title: "Popular Routes",
+    description: "Discover the most popular motorcycle routes across the country.",
+    link: "/top-roads"
+  },
+  {
+    icon: Route,
+    title: "Scenic Byways",
+    description: "Explore America's most scenic motorcycle roads and byways.",
+    link: "/scenic-byways"
+  },
+  {
+    icon: Compass,
+    title: "Route Planning",
+    description: "Plan your next adventure with our route planning tools.",
+    link: "/route-planning"
+  },
+  {
+    icon: FileDown,
+    title: "GPX Downloads",
+    description: "Download GPX files for your favorite routes.",
+    link: "/gpx-downloads"
+  },
+  {
+    icon: Star,
+    title: "Featured Destinations",
+    description: "Must-visit destinations for motorcycle enthusiasts.",
+    link: "/featured-destinations"
+  }
+];
+
+const Destinations = () => {
   return (
     <div className="min-h-screen flex flex-col">
       <Navigation />
@@ -24,9 +57,8 @@ const Routes = () => {
             </div>
           </div>
         </section>
-      </main>
 
-      <section className="py-24 bg-white">
+        <section className="py-24 bg-white">
           <div className="container mx-auto px-4">
             <div className="text-center mb-16">
               <h2 className="text-3xl font-bold mb-4">
@@ -58,10 +90,11 @@ const Routes = () => {
             </div>
           </div>
         </section>
+      </main>
 
       <Footer />
     </div>
   );
 };
 
-export default Routes;
+export default Destinations;
