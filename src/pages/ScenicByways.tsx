@@ -58,19 +58,8 @@ const getFallbackImage = (state: string) => {
   return `https://images.unsplash.com/${fallbackImages[index]}?auto=format&fit=crop&w=800&h=400`;
 };
 
-const getImageUrl = (imagePath: string | null) => {
-  if (!imagePath) return null;
-  
-  if (imagePath.startsWith('http')) {
-    return imagePath;
-  }
-  
-  const { data: { publicUrl } } = supabase
-    .storage
-    .from('scenic-byways')
-    .getPublicUrl(imagePath);
-    
-  return publicUrl;
+const getImageUrl = (url: string | null) => {
+  return url || null;
 };
 
 const ScenicByways = () => {
