@@ -12,7 +12,7 @@ const Index = () => {
     {
       icon: Route,
       title: "Destinations",
-      description: "Top motorcycle roads, routes, destinations.",
+      description: "Top motorcycle roads, routes, destinations & GPX files.",
       link: "/routes"
     },
     {
