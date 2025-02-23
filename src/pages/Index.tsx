@@ -11,7 +11,7 @@ const Index = () => {
   const features = [
     {
       icon: Route,
-      title: "Roads, Routes & Destinations",
+      title: "Destinations",
       description: "Top motorcycle roads, routes, destinations.",
       link: "/routes"
     },
@@ -24,7 +24,7 @@ const Index = () => {
     {
       icon: Shield,
       title: "Riding Gear",
-      description: "Top riding gear & latest news.",
+      description: "Top riding gear for motorcycle riders & latest news.",
       link: "/riding-gear"
     },
     {
