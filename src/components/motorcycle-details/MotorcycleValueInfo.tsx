@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { calculateCurrentValue, MotorcycleCondition } from "@/utils/motorcycleCalculations";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -18,7 +18,12 @@ interface MotorcycleValueInfoProps {
 export const MotorcycleValueInfo = ({ currentValue, msrp, year, make, model }: MotorcycleValueInfoProps) => {
   const [mileage, setMileage] = useState<string>("");
   const [condition, setCondition] = useState<MotorcycleCondition>("good");
-  const [calculatedValue, setCalculatedValue] = useState<number | null>(currentValue);
+  const [calculatedValue, setCalculatedValue] = useState<number | null>(null);
+
+  // Initialize calculated value when component mounts or when currentValue changes
+  useEffect(() => {
+    setCalculatedValue(currentValue);
+  }, [currentValue]);
 
   const handleCalculate = () => {
     if (!msrp) {
@@ -33,14 +38,28 @@ export const MotorcycleValueInfo = ({ currentValue, msrp, year, make, model }: M
       return;
     }
 
-    const newValue = calculateCurrentValue(msrp, year ? parseInt(year) : null, {
-      mileage: numericMileage,
-      condition,
-      make: make || undefined
-    });
+    try {
+      const newValue = calculateCurrentValue(msrp, year ? parseInt(year) : null, {
+        mileage: numericMileage,
+        condition,
+        make: make || undefined
+      });
 
-    setCalculatedValue(newValue);
-    toast.success("Value recalculated based on mileage and condition");
+      console.log('Calculated new value:', {
+        msrp,
+        year,
+        mileage: numericMileage,
+        condition,
+        make,
+        newValue
+      });
+
+      setCalculatedValue(newValue);
+      toast.success("Value recalculated based on mileage and condition");
+    } catch (error) {
+      console.error('Error calculating value:', error);
+      toast.error("Failed to calculate value");
+    }
   };
 
   const handleManualDownload = async (type: 'owners' | 'service' | 'quickstart') => {
