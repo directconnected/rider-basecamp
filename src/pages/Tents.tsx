@@ -5,31 +5,54 @@ import Footer from "@/components/layout/Footer";
 import { Card, CardContent } from "@/components/ui/card";
 import { TentTree } from "lucide-react";
 import Breadcrumbs from "@/components/Breadcrumbs";
+import { supabase } from "@/integrations/supabase/client";
+import { useQuery } from "@tanstack/react-query";
+
+interface Tent {
+  id: number;
+  tent_name: string;
+  description: string;
+  amazon_url: string;
+}
 
 const Tents = () => {
-  const tents = [
-    {
-      name: "Ultralight Solo Tent",
-      price: "$299",
-      description: "Perfect for motorcycle camping, weighs only 2.8 lbs",
-      features: ["Single person", "Waterproof", "Quick setup", "Compact when packed"],
-      image: "https://images.unsplash.com/photo-1472396961693-142e6e269027"
-    },
-    {
-      name: "Adventure Duo Tent",
-      price: "$399",
-      description: "Spacious 2-person tent ideal for extended trips",
-      features: ["Two person", "All-season", "Multiple ventilation points", "Large vestibule"],
-      image: "https://images.unsplash.com/photo-1465146344425-f00d5f5c8f07"
-    },
-    {
-      name: "Moto-Camper Pro",
-      price: "$449",
-      description: "Premium motorcycle camping tent with garage area",
-      features: ["Motorcycle coverage", "Weather resistant", "Tool storage", "Easy assembly"],
-      image: "https://images.unsplash.com/photo-1509316975850-ff9c5deb0cd9"
+  const { data: tents, isLoading, error } = useQuery({
+    queryKey: ['tents'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('tents')
+        .select('*');
+      
+      if (error) throw error;
+      return data;
     }
-  ];
+  });
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex flex-col">
+        <Navigation />
+        <Breadcrumbs />
+        <main className="flex-1 flex items-center justify-center">
+          <div className="text-xl">Loading tents...</div>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen flex flex-col">
+        <Navigation />
+        <Breadcrumbs />
+        <main className="flex-1 flex items-center justify-center">
+          <div className="text-xl text-red-500">Error loading tents</div>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -52,32 +75,24 @@ const Tents = () => {
         <section className="py-24">
           <div className="container mx-auto px-4">
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {tents.map((tent, index) => (
-                <Card key={index} className="hover-card overflow-hidden">
-                  <div className="aspect-w-16 aspect-h-9">
-                    <img
-                      src={tent.image}
-                      alt={tent.name}
-                      className="w-full h-64 object-cover"
-                    />
-                  </div>
+              {tents?.map((tent: Tent) => (
+                <Card key={tent.id} className="hover-card overflow-hidden">
                   <CardContent className="p-6">
                     <div className="flex items-start justify-between mb-4">
                       <div>
-                        <h3 className="text-xl font-bold mb-2">{tent.name}</h3>
-                        <div className="text-theme-600 font-semibold">{tent.price}</div>
+                        <h3 className="text-xl font-bold mb-2">{tent.tent_name}</h3>
                       </div>
                       <TentTree className="h-6 w-6 text-theme-600" />
                     </div>
                     <p className="text-gray-600 mb-4">{tent.description}</p>
-                    <ul className="space-y-2">
-                      {tent.features.map((feature, featureIndex) => (
-                        <li key={featureIndex} className="text-sm text-gray-600 flex items-center gap-2">
-                          <span className="w-1.5 h-1.5 bg-theme-600 rounded-full" />
-                          {feature}
-                        </li>
-                      ))}
-                    </ul>
+                    <a 
+                      href={tent.amazon_url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-block bg-theme-600 text-white px-4 py-2 rounded hover:bg-theme-700 transition-colors"
+                    >
+                      View on Amazon
+                    </a>
                   </CardContent>
                 </Card>
               ))}
