@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+
+import React, { useState, useEffect } from "react";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/layout/Footer";
 import { Route } from "lucide-react";
@@ -13,6 +14,7 @@ import {
 import Breadcrumbs from "@/components/Breadcrumbs";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 interface ScenicByway {
   byway_name: string;
@@ -58,12 +60,25 @@ const getFallbackImage = (state: string) => {
   return `https://images.unsplash.com/${fallbackImages[index]}?auto=format&fit=crop&w=800&h=400`;
 };
 
+const verifyImageUrl = async (url: string): Promise<boolean> => {
+  try {
+    const response = await fetch(url, { method: 'HEAD' });
+    const contentType = response.headers.get('content-type');
+    return response.ok && contentType?.startsWith('image/');
+  } catch (error) {
+    console.error(`Error verifying image URL (${url}):`, error);
+    return false;
+  }
+};
+
 const getImageUrl = (url: string | null) => {
   return url || null;
 };
 
 const ScenicByways = () => {
   const [selectedState, setSelectedState] = useState<string>("all");
+  const [verifiedUrls, setVerifiedUrls] = useState<{ [key: string]: boolean }>({});
+  const { toast } = useToast();
 
   const { data: scenicByways, isLoading } = useQuery({
     queryKey: ["scenic-byways"],
@@ -77,6 +92,38 @@ const ScenicByways = () => {
       return data as ScenicByway[];
     },
   });
+
+  useEffect(() => {
+    const verifyImages = async () => {
+      if (!scenicByways) return;
+
+      const verificationResults: { [key: string]: boolean } = {};
+      let invalidCount = 0;
+
+      for (const byway of scenicByways) {
+        if (byway.image_url) {
+          const isValid = await verifyImageUrl(byway.image_url);
+          verificationResults[byway.image_url] = isValid;
+          if (!isValid) {
+            invalidCount++;
+            console.log(`Invalid image URL for ${byway.byway_name}: ${byway.image_url}`);
+          }
+        }
+      }
+
+      setVerifiedUrls(verificationResults);
+      
+      if (invalidCount > 0) {
+        toast({
+          title: "Image Verification Results",
+          description: `Found ${invalidCount} invalid image URLs. Check console for details.`,
+          variant: "destructive",
+        });
+      }
+    };
+
+    verifyImages();
+  }, [scenicByways, toast]);
 
   const filteredByways = selectedState === "all"
     ? scenicByways
@@ -137,7 +184,11 @@ const ScenicByways = () => {
                     </CardHeader>
                     <div className="px-6">
                       <img
-                        src={getImageUrl(byway.image_url) || getFallbackImage(byway.state)}
+                        src={
+                          byway.image_url && verifiedUrls[byway.image_url]
+                            ? byway.image_url
+                            : getFallbackImage(byway.state)
+                        }
                         alt={byway.byway_name}
                         className="w-full h-48 object-cover rounded-md mb-4"
                         onError={(e) => {
