@@ -1,6 +1,8 @@
+
 import React from 'react';
 import Navigation from "@/components/Navigation";
 import UpdateMSRP from "@/components/admin/UpdateMSRP";
+import UpdateDescriptions from "@/components/admin/UpdateDescriptions";
 import DataScraper from "@/components/admin/DataScraper";
 import Breadcrumbs from "@/components/Breadcrumbs";
 
@@ -18,7 +20,10 @@ const Admin = () => {
             
             <div className="bg-white rounded-lg shadow-md p-6">
               <h2 className="text-xl font-semibold mb-4">Database Management</h2>
-              <UpdateMSRP />
+              <div className="space-y-4">
+                <UpdateMSRP />
+                <UpdateDescriptions />
+              </div>
             </div>
           </div>
         </div>
