@@ -5,7 +5,7 @@ import Footer from "@/components/layout/Footer";
 import { Map, Search, Database, BarChart, Clock, Users, Wrench, Route, Shield, Tent } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Link } from "react-router-dom";
-import { Button } from "@/components/ui/button";
+import Breadcrumbs from "@/components/Breadcrumbs";
 
 const Index = () => {
   const features = [
@@ -44,6 +44,7 @@ const Index = () => {
   return (
     <div className="min-h-screen flex flex-col">
       <Navigation />
+      <Breadcrumbs />
       <main className="flex-1">
         <section className="relative flex items-center justify-center overflow-hidden bg-gradient-to-b from-gray-900 to-gray-800 pt-20 pb-5">
           <div className="absolute inset-0 bg-black/50 z-0" />
