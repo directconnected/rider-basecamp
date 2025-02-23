@@ -1,9 +1,6 @@
 
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { createClient } from '@supabase/supabase-js';
-
-const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
-const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.7.1'
 
 const descriptions: Record<string, string> = {
   "Acadia All-American Road": "The 40-mile Acadia All-American Road is one of the most scenic routes in Maine, winding through Acadia National Park. It offers stunning views of the Atlantic coastline, granite cliffs, and pristine forests. The road includes the 27-mile Park Loop Road, offering access to the park's major attractions including Thunder Hole, Sand Beach, and Cadillac Mountain.",
@@ -37,9 +34,17 @@ const descriptions: Record<string, string> = {
   "Trail Ridge Road": "This 48-mile route through Colorado's Rocky Mountain National Park is the highest continuous paved road in the United States, reaching an elevation of 12,183 feet. The road offers spectacular views of the Rocky Mountains, alpine wildflower meadows, and opportunities to view wildlife like elk and bighorn sheep."
 };
 
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+}
+
 serve(async (req) => {
   try {
-    const supabase = createClient(supabaseUrl, supabaseServiceKey);
+    const supabase = createClient(
+      Deno.env.get('SUPABASE_URL')!,
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
+    );
     
     // Get existing byways
     const { data: byways, error: fetchError } = await supabase
@@ -68,7 +73,7 @@ serve(async (req) => {
         message: 'Descriptions updated successfully' 
       }),
       { 
-        headers: { 'Content-Type': 'application/json' },
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         status: 200 
       }
     );
@@ -80,7 +85,7 @@ serve(async (req) => {
         error: error.message 
       }),
       { 
-        headers: { 'Content-Type': 'application/json' },
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         status: 500 
       }
     );
