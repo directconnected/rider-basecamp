@@ -35,8 +35,8 @@ serve(async (req) => {
     if (type === 'routes') {
       searchQuery = '"best motorcycle route" OR "motorcycle road" OR "scenic motorcycle ride"';
     } else if (type === 'gear') {
-      // Add 2025 to the search query for gear
-      searchQuery = '2025 ("motorcycle gear review" OR "best motorcycle equipment" OR "motorcycle protective gear")';
+      // Updated search query for 2025 gear
+      searchQuery = '"best motorcycle gear 2025"';
     } else {
       return new Response(
         JSON.stringify({ error: 'Invalid type specified' }), 
