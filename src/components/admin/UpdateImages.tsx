@@ -9,6 +9,8 @@ const UpdateImages = () => {
 
   const updateMotorcycleImages = async () => {
     try {
+      console.log('Starting image update process...');
+      
       const { data, error } = await supabase.functions.invoke('update-motorcycle-images');
       
       if (error) {
@@ -21,12 +23,13 @@ const UpdateImages = () => {
         return;
       }
 
+      console.log('Function response:', data);
+      
       toast({
         title: "Success",
-        description: "Image update process started successfully",
+        description: data?.message || "Image update process started successfully",
       });
       
-      console.log('Function response:', data);
     } catch (error) {
       console.error('Error:', error);
       toast({
