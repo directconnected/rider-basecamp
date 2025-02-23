@@ -207,18 +207,21 @@ export type Database = {
       scenic_byways: {
         Row: {
           byway_name: string
+          description: string | null
           designation: string
           length_miles: string | null
           state: string
         }
         Insert: {
           byway_name: string
+          description?: string | null
           designation: string
           length_miles?: string | null
           state: string
         }
         Update: {
           byway_name?: string
+          description?: string | null
           designation?: string
           length_miles?: string | null
           state?: string

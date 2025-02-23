@@ -20,6 +20,7 @@ interface ScenicByway {
   state: string;
   length_miles: string | null;
   designation: string;
+  description: string | null;
 }
 
 const stateAbbreviations: { [key: string]: string } = {
@@ -121,18 +122,27 @@ const ScenicByways = () => {
                       </CardTitle>
                     </CardHeader>
                     <CardContent>
-                      <div className="space-y-2">
-                        <p className="text-gray-600">
-                          <span className="font-medium">State:</span> {getFullStateName(byway.state)}
-                        </p>
-                        {byway.length_miles && (
+                      <div className="space-y-4">
+                        <div className="space-y-2">
                           <p className="text-gray-600">
-                            <span className="font-medium">Length:</span> {byway.length_miles} miles
+                            <span className="font-medium">State:</span> {getFullStateName(byway.state)}
                           </p>
+                          {byway.length_miles && (
+                            <p className="text-gray-600">
+                              <span className="font-medium">Length:</span> {byway.length_miles} miles
+                            </p>
+                          )}
+                          <p className="text-gray-600">
+                            <span className="font-medium">Designation:</span> {byway.designation}
+                          </p>
+                        </div>
+                        {byway.description && (
+                          <div>
+                            <p className="text-sm text-gray-600 leading-relaxed">
+                              {byway.description}
+                            </p>
+                          </div>
                         )}
-                        <p className="text-gray-600">
-                          <span className="font-medium">Designation:</span> {byway.designation}
-                        </p>
                       </div>
                     </CardContent>
                   </Card>
