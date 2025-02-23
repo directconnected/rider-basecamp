@@ -31,9 +31,9 @@ serve(async (req) => {
     console.log(`Starting search for type: ${type}`);
     
     if (type === 'routes') {
-      // More generic search query
-      const searchQuery = 'site:motorcycleroads.com motorcycle route';
-      const searchUrl = `https://www.googleapis.com/customsearch/v1?key=${GOOGLE_SEARCH_API_KEY}&cx=${GOOGLE_SEARCH_ENGINE_ID}&q=${encodeURIComponent(searchQuery)}&num=10`;
+      // Broader search for motorcycle routes
+      const searchQuery = '"best motorcycle route" OR "motorcycle road" OR "scenic motorcycle ride"';
+      const searchUrl = `https://www.googleapis.com/customsearch/v1?key=${GOOGLE_SEARCH_API_KEY}&cx=${GOOGLE_SEARCH_ENGINE_ID}&q=${encodeURIComponent(searchQuery)}&num=25`;
 
       console.log('Making Google Search API request with URL:', searchUrl);
       const response = await fetch(searchUrl);
@@ -70,9 +70,24 @@ serve(async (req) => {
 
       const routes = data.items.map(item => {
         console.log('Processing route item:', JSON.stringify(item, null, 2));
+        let location = 'Unknown';
+        
+        // Try to extract location from the snippet or title
+        const snippetParts = item.snippet?.split(/[,-]/) || [];
+        const titleParts = item.title?.split(/[,-]/) || [];
+        
+        // Look for location patterns in both snippet and title
+        const possibleLocation = [...snippetParts, ...titleParts].find(part => 
+          part && part.trim().match(/[A-Z][a-z]+(?: [A-Z][a-z]+)*/)
+        );
+        
+        if (possibleLocation) {
+          location = possibleLocation.trim();
+        }
+
         return {
           title: item.title,
-          location: item.snippet?.split(' - ')?.[0] ?? 'Unknown',
+          location: location,
           link: item.link
         };
       });
@@ -104,9 +119,9 @@ serve(async (req) => {
     }
     
     if (type === 'gear') {
-      // More generic search query
-      const searchQuery = 'site:revzilla.com "motorcycle helmets" OR "motorcycle jacket"';
-      const searchUrl = `https://www.googleapis.com/customsearch/v1?key=${GOOGLE_SEARCH_API_KEY}&cx=${GOOGLE_SEARCH_ENGINE_ID}&q=${encodeURIComponent(searchQuery)}&num=10`;
+      // Broader search for motorcycle gear
+      const searchQuery = '"motorcycle gear review" OR "best motorcycle equipment" OR "motorcycle protective gear" OR "motorcycle helmet review" OR "motorcycle jacket review"';
+      const searchUrl = `https://www.googleapis.com/customsearch/v1?key=${GOOGLE_SEARCH_API_KEY}&cx=${GOOGLE_SEARCH_ENGINE_ID}&q=${encodeURIComponent(searchQuery)}&num=25`;
 
       console.log('Making Google Search API request with URL:', searchUrl);
       const response = await fetch(searchUrl);
@@ -143,9 +158,17 @@ serve(async (req) => {
 
       const gear = data.items.map(item => {
         console.log('Processing gear item:', JSON.stringify(item, null, 2));
+        // Try to extract price from snippet or metadata
+        let price = null;
+        const priceMatch = item.snippet?.match(/\$\d+(?:\.\d{2})?/) || 
+                          item.title?.match(/\$\d+(?:\.\d{2})?/);
+        if (priceMatch) {
+          price = priceMatch[0];
+        }
+
         return {
           title: item.title,
-          price: item.pagemap?.offer?.[0]?.price ?? null,
+          price: price,
           link: item.link,
           type: 'riding'
         };
