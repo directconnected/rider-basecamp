@@ -234,6 +234,27 @@ export type Database = {
         }
         Relationships: []
       }
+      tents: {
+        Row: {
+          amazon_url: string
+          description: string
+          id: number
+          tent_name: string
+        }
+        Insert: {
+          amazon_url: string
+          description: string
+          id?: number
+          tent_name: string
+        }
+        Update: {
+          amazon_url?: string
+          description?: string
+          id?: number
+          tent_name?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
