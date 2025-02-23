@@ -21,7 +21,7 @@ const features = [
   },
   {
     icon: Star,
-    title: "Featured Destinations",
+    title: "Destinations",
     description: "Must-visit destinations for motorcycle enthusiasts.",
     link: "/featured-destinations"
   },
