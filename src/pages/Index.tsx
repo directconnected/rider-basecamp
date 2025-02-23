@@ -71,7 +71,7 @@ const Index = () => {
                 <Link 
                   to={feature.link}
                   key={feature.title}
-                  className="block h-[240px]"
+                  className="block h-[300px]"
                 >
                   <Card className="p-6 text-center h-full">
                     <div className="h-full flex flex-col">
