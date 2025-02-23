@@ -61,26 +61,30 @@ const scenicRoadImages = [
   'https://images.unsplash.com/photo-1506905925346-21bda4d32df4', // Dramatic mountain pass
 ];
 
-const getImageUrl = (imageUrl: string | null) => {
-  // Generate a consistent index based on the byway name to always get the same image
-  const getConsistentIndex = (str: string) => {
-    let hash = 0;
-    for (let i = 0; i < str.length; i++) {
-      hash = ((hash << 5) - hash) + str.charCodeAt(i);
-      hash = hash & hash; // Convert to 32-bit integer
-    }
-    return Math.abs(hash) % scenicRoadImages.length;
+const getImageUrl = (imageUrl: string | null, bywayName: string) => {
+  const generateSearchTerms = (name: string) => {
+    // Remove common words and add scenic terms
+    const commonWords = ['byway', 'scenic', 'road', 'highway', 'trail'];
+    const terms = name
+      .toLowerCase()
+      .split(' ')
+      .filter(word => !commonWords.includes(word))
+      .join(' ');
+    
+    const searchTerms = `scenic ${terms} landscape`;
+    return encodeURIComponent(searchTerms);
   };
 
   if (!imageUrl) {
-    // Use the first image as default
-    return scenicRoadImages[0];
+    // Use Unsplash search API with the byway name
+    const searchTerms = generateSearchTerms(bywayName);
+    return `https://source.unsplash.com/1600x900/?${searchTerms}`;
   }
 
   if (imageUrl.startsWith('http')) {
-    // For external URLs, use a consistent fallback image based on the URL
-    const index = getConsistentIndex(imageUrl);
-    return scenicRoadImages[index];
+    // If external URL fails, use Unsplash search as fallback
+    const searchTerms = generateSearchTerms(bywayName);
+    return `https://source.unsplash.com/1600x900/?${searchTerms}`;
   }
 
   // For Supabase storage URLs
@@ -162,12 +166,12 @@ const ScenicByways = () => {
                     </CardHeader>
                     <div className="px-6">
                       <img
-                        src={getImageUrl(byway.image_url)}
+                        src={getImageUrl(byway.image_url, byway.byway_name)}
                         alt={byway.byway_name}
                         className="w-full h-48 object-cover rounded-md mb-4"
                         onError={(e) => {
-                          const index = Math.floor(Math.random() * scenicRoadImages.length);
-                          e.currentTarget.src = scenicRoadImages[index];
+                          const searchTerms = encodeURIComponent('scenic landscape road');
+                          e.currentTarget.src = `https://source.unsplash.com/1600x900/?${searchTerms}`;
                         }}
                       />
                     </div>
