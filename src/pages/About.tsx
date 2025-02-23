@@ -17,7 +17,7 @@ const About = () => {
           <div className="container mx-auto px-4">
             <div className="text-center mb-16">
               <h1 className="text-4xl md:text-5xl font-bold text-white mb-6">
-                About Moto Values
+                About Rider Basecamp
               </h1>
               <p className="text-xl text-gray-300 max-w-2xl mx-auto">
                 Your trusted partner in motorcycle valuations since 2020
@@ -32,10 +32,10 @@ const About = () => {
             <div className="grid md:grid-cols-2 gap-12 items-center max-w-6xl mx-auto">
               <div>
                 <h2 className="text-3xl font-bold mb-6">
-                  The Leading Platform for Motorcycle Valuations
+                  The Leading Platform for All Things Motorcycle
                 </h2>
                 <p className="text-gray-600 mb-6">
-                  At Moto Values, we're passionate about providing accurate, real-time motorcycle valuations to enthusiasts, dealers, and collectors worldwide. Our platform combines advanced analytics with extensive market data to deliver precise valuations you can trust.
+                  At Rider Basecamp, we're passionate about providing accurate, real-time motorcycle valuations to enthusiasts, dealers, and collectors worldwide. Our platform combines advanced analytics with extensive market data to deliver precise valuations you can trust.
                 </p>
                 <p className="text-gray-600">
                   Founded by motorcycle enthusiasts, we understand the importance of having reliable valuation data when making buying or selling decisions. Our team of experts continuously updates our database and refines our valuation algorithms to ensure you get the most accurate estimates.
