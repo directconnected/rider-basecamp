@@ -2,6 +2,7 @@
 import React from 'react';
 import Navigation from "@/components/Navigation";
 import UpdateMSRP from "@/components/admin/UpdateMSRP";
+import DataScraper from "@/components/admin/DataScraper";
 
 const Admin = () => {
   return (
@@ -11,9 +12,13 @@ const Admin = () => {
         <div className="max-w-4xl mx-auto">
           <h1 className="text-3xl font-bold mb-8">Admin Dashboard</h1>
           
-          <div className="bg-white rounded-lg shadow-md p-6">
-            <h2 className="text-xl font-semibold mb-4">Database Management</h2>
-            <UpdateMSRP />
+          <div className="space-y-6">
+            <DataScraper />
+            
+            <div className="bg-white rounded-lg shadow-md p-6">
+              <h2 className="text-xl font-semibold mb-4">Database Management</h2>
+              <UpdateMSRP />
+            </div>
           </div>
         </div>
       </main>
