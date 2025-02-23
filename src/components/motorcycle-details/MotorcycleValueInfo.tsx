@@ -4,6 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
 import { calculateCurrentValue, formatCurrency, MotorcycleCondition } from "@/utils/motorcycleCalculations";
+import { FileDown } from "lucide-react";
 import { toast } from "sonner";
 
 interface MotorcycleValueInfoProps {
@@ -94,6 +95,20 @@ export const MotorcycleValueInfo = ({ currentValue, msrp, year, make }: Motorcyc
         <Button onClick={handleCalculate} className="w-full">
           Recalculate Value
         </Button>
+      </div>
+
+      <div className="pt-4 border-t">
+        <h4 className="font-medium mb-4">Documentation</h4>
+        <div className="flex flex-col sm:flex-row gap-4">
+          <Button variant="outline" className="flex-1">
+            <FileDown className="mr-2 h-4 w-4" />
+            Download Owner's Manual
+          </Button>
+          <Button variant="outline" className="flex-1">
+            <FileDown className="mr-2 h-4 w-4" />
+            Download Service Manual
+          </Button>
+        </div>
       </div>
     </div>
   );
