@@ -16,6 +16,10 @@ serve(async (req) => {
   const GOOGLE_SEARCH_ENGINE_ID = Deno.env.get('GOOGLE_SEARCH_ENGINE_ID');
 
   if (!GOOGLE_SEARCH_API_KEY || !GOOGLE_SEARCH_ENGINE_ID) {
+    console.error('Missing API configuration:', {
+      hasApiKey: !!GOOGLE_SEARCH_API_KEY,
+      hasEngineId: !!GOOGLE_SEARCH_ENGINE_ID
+    });
     return new Response(
       JSON.stringify({ error: 'Google Search API configuration is missing' }),
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
@@ -30,19 +34,53 @@ serve(async (req) => {
       const searchQuery = 'site:motorcycleroads.com "motorcycle route" "great ride"';
       const searchUrl = `https://www.googleapis.com/customsearch/v1?key=${GOOGLE_SEARCH_API_KEY}&cx=${GOOGLE_SEARCH_ENGINE_ID}&q=${encodeURIComponent(searchQuery)}`;
 
+      console.log('Making Google Search API request...');
       const response = await fetch(searchUrl);
-      const data = await response.json();
-      console.log('Found search results:', data.items?.length ?? 0);
-
-      if (!data.items) {
-        throw new Error('No search results found');
+      console.log('Search API response status:', response.status);
+      
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('Google Search API error:', {
+          status: response.status,
+          statusText: response.statusText,
+          response: errorText
+        });
+        throw new Error(`Google Search API error: ${response.status} ${response.statusText}`);
       }
 
-      const routes = data.items.map(item => ({
-        title: item.title,
-        location: item.snippet?.split(' - ')?.[0] ?? 'Unknown',
-        link: item.link
-      }));
+      const data = await response.json();
+      console.log('Search API response:', {
+        hasItems: !!data.items,
+        itemCount: data.items?.length ?? 0,
+        error: data.error
+      });
+
+      if (data.error) {
+        console.error('Google API returned error:', data.error);
+        throw new Error(`Google API error: ${data.error.message}`);
+      }
+
+      if (!data.items || data.items.length === 0) {
+        console.log('No search results found');
+        return new Response(JSON.stringify({ success: true, count: 0 }), {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
+
+      const routes = data.items.map(item => {
+        console.log('Processing route:', {
+          title: item.title,
+          snippet: item.snippet,
+          link: item.link
+        });
+        return {
+          title: item.title,
+          location: item.snippet?.split(' - ')?.[0] ?? 'Unknown',
+          link: item.link
+        };
+      });
+
+      console.log(`Processed ${routes.length} routes`);
 
       if (routes.length > 0) {
         const supabase = createClient(
@@ -50,8 +88,13 @@ serve(async (req) => {
           Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
         );
         
+        console.log('Inserting routes into database...');
         const { error } = await supabase.from('routes').insert(routes);
-        if (error) throw error;
+        if (error) {
+          console.error('Database insertion error:', error);
+          throw error;
+        }
+        console.log('Successfully inserted routes');
       }
 
       return new Response(JSON.stringify({ success: true, count: routes.length }), {
@@ -63,20 +106,54 @@ serve(async (req) => {
       const searchQuery = 'site:revzilla.com "motorcycle gear" "product details"';
       const searchUrl = `https://www.googleapis.com/customsearch/v1?key=${GOOGLE_SEARCH_API_KEY}&cx=${GOOGLE_SEARCH_ENGINE_ID}&q=${encodeURIComponent(searchQuery)}`;
 
+      console.log('Making Google Search API request for gear...');
       const response = await fetch(searchUrl);
-      const data = await response.json();
-      console.log('Found search results:', data.items?.length ?? 0);
-
-      if (!data.items) {
-        throw new Error('No search results found');
+      console.log('Search API response status:', response.status);
+      
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('Google Search API error:', {
+          status: response.status,
+          statusText: response.statusText,
+          response: errorText
+        });
+        throw new Error(`Google Search API error: ${response.status} ${response.statusText}`);
       }
 
-      const gear = data.items.map(item => ({
-        title: item.title,
-        price: item.pagemap?.offer?.[0]?.price ?? null,
-        link: item.link,
-        type: 'riding'
-      }));
+      const data = await response.json();
+      console.log('Search API response:', {
+        hasItems: !!data.items,
+        itemCount: data.items?.length ?? 0,
+        error: data.error
+      });
+
+      if (data.error) {
+        console.error('Google API returned error:', data.error);
+        throw new Error(`Google API error: ${data.error.message}`);
+      }
+
+      if (!data.items || data.items.length === 0) {
+        console.log('No gear search results found');
+        return new Response(JSON.stringify({ success: true, count: 0 }), {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
+
+      const gear = data.items.map(item => {
+        console.log('Processing gear item:', {
+          title: item.title,
+          price: item.pagemap?.offer?.[0]?.price,
+          link: item.link
+        });
+        return {
+          title: item.title,
+          price: item.pagemap?.offer?.[0]?.price ?? null,
+          link: item.link,
+          type: 'riding'
+        };
+      });
+
+      console.log(`Processed ${gear.length} gear items`);
 
       if (gear.length > 0) {
         const supabase = createClient(
@@ -84,8 +161,13 @@ serve(async (req) => {
           Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
         );
         
+        console.log('Inserting gear into database...');
         const { error } = await supabase.from('gear').insert(gear);
-        if (error) throw error;
+        if (error) {
+          console.error('Database insertion error:', error);
+          throw error;
+        }
+        console.log('Successfully inserted gear');
       }
 
       return new Response(JSON.stringify({ success: true, count: gear.length }), {
@@ -102,7 +184,7 @@ serve(async (req) => {
     console.error('Search error:', error);
     return new Response(JSON.stringify({ 
       error: error.message,
-      stack: error.stack 
+      details: error.stack 
     }), {
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
