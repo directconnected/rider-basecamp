@@ -30,6 +30,7 @@ export interface Motorcycle {
   fuel_capacity: string | null;
   curb_weight: string | null;
   colors: string | null;
+  image_url: string | null;
 }
 
 export interface SearchParams {
