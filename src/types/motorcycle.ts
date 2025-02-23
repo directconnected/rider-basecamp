@@ -8,6 +8,8 @@ export interface Motorcycle {
   msrp: number | null;
   current_value: number | null;
   value?: number;
+  mileage?: number | null;
+  condition?: 'excellent' | 'good' | 'fair' | 'poor' | null;
   engine_type: string | null;
   transmission: string | null;
   clutch: string | null;

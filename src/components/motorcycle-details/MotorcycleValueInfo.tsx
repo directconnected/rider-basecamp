@@ -1,26 +1,99 @@
 
-import { formatCurrency } from "@/utils/motorcycleCalculations";
+import { useState } from "react";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
+import { calculateCurrentValue, formatCurrency, MotorcycleCondition } from "@/utils/motorcycleCalculations";
+import { toast } from "sonner";
 
 interface MotorcycleValueInfoProps {
   currentValue: number | null;
   msrp: number | null;
+  year?: string | null;
+  make?: string | null;
 }
 
-export const MotorcycleValueInfo = ({ currentValue, msrp }: MotorcycleValueInfoProps) => {
+export const MotorcycleValueInfo = ({ currentValue, msrp, year, make }: MotorcycleValueInfoProps) => {
+  const [mileage, setMileage] = useState<string>("");
+  const [condition, setCondition] = useState<MotorcycleCondition>("good");
+  const [calculatedValue, setCalculatedValue] = useState<number | null>(currentValue);
+
+  const handleCalculate = () => {
+    if (!msrp) {
+      toast.error("MSRP is required for calculation");
+      return;
+    }
+
+    const numericMileage = mileage ? parseInt(mileage, 10) : undefined;
+    
+    if (mileage && isNaN(numericMileage!)) {
+      toast.error("Please enter a valid mileage number");
+      return;
+    }
+
+    const newValue = calculateCurrentValue(msrp, year ? parseInt(year) : null, {
+      mileage: numericMileage,
+      condition,
+      make: make || undefined
+    });
+
+    setCalculatedValue(newValue);
+    toast.success("Value recalculated based on mileage and condition");
+  };
+
   return (
-    <div className="space-y-6 mb-6">
+    <div className="space-y-6">
       <div>
-        <p className="text-gray-500 text-sm">Estimated Current Value</p>
-        <p className="text-3xl font-bold text-theme-600">
-          {formatCurrency(currentValue)}
-        </p>
+        <h3 className="text-lg font-semibold mb-4">Value Information</h3>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <p className="text-gray-500 text-sm">Original MSRP</p>
+            <p className="text-xl font-semibold">{formatCurrency(msrp)}</p>
+          </div>
+          <div>
+            <p className="text-gray-500 text-sm">Estimated Value</p>
+            <p className="text-2xl font-bold text-theme-600">
+              {formatCurrency(calculatedValue)}
+            </p>
+          </div>
+        </div>
       </div>
-      
-      <div>
-        <p className="text-gray-500 text-sm">Original MSRP</p>
-        <p className="text-xl font-semibold mb-6">
-          {formatCurrency(msrp)}
-        </p>
+
+      <div className="space-y-4">
+        <h4 className="font-medium">Adjust Value Estimate</h4>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="space-y-2">
+            <label htmlFor="mileage" className="text-sm text-gray-600">
+              Current Mileage
+            </label>
+            <Input
+              id="mileage"
+              type="number"
+              placeholder="Enter current mileage"
+              value={mileage}
+              onChange={(e) => setMileage(e.target.value)}
+            />
+          </div>
+          <div className="space-y-2">
+            <label className="text-sm text-gray-600">
+              Condition
+            </label>
+            <Select value={condition} onValueChange={(value: MotorcycleCondition) => setCondition(value)}>
+              <SelectTrigger>
+                <SelectValue placeholder="Select condition" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="excellent">Excellent</SelectItem>
+                <SelectItem value="good">Good</SelectItem>
+                <SelectItem value="fair">Fair</SelectItem>
+                <SelectItem value="poor">Poor</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+        <Button onClick={handleCalculate} className="w-full">
+          Recalculate Value
+        </Button>
       </div>
     </div>
   );
