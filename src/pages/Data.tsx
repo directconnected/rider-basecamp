@@ -62,51 +62,6 @@ const Data = () => {
           </div>
         </section>
 
-        <section className="py-24 bg-white">
-          <div className="container mx-auto px-4">
-            <div className="grid md:grid-cols-2 gap-12 items-center max-w-6xl mx-auto">
-              <div>
-                <h2 className="text-3xl font-bold mb-6">
-                  Data-Driven Insights
-                </h2>
-                <p className="text-gray-600 mb-6">
-                  Access comprehensive motorcycle data, including market trends, pricing analysis, and performance metrics. Make informed decisions with our detailed analytics and expert insights.
-                </p>
-              </div>
-              <div className="grid grid-cols-2 gap-6">
-                {[
-                  {
-                    icon: Database,
-                    title: "Market Data",
-                    description: "Real-time pricing"
-                  },
-                  {
-                    icon: BarChart2,
-                    title: "Analytics",
-                    description: "Performance metrics"
-                  },
-                  {
-                    icon: TrendingUp,
-                    title: "Trends",
-                    description: "Market movements"
-                  },
-                  {
-                    icon: FileText,
-                    title: "Reports",
-                    description: "Detailed analysis"
-                  }
-                ].map((item) => (
-                  <Card key={item.title} className="p-6 text-center hover-card">
-                    <item.icon className="w-8 h-8 mx-auto mb-4 text-theme-600" />
-                    <h3 className="font-bold mb-2">{item.title}</h3>
-                    <p className="text-gray-600">{item.description}</p>
-                  </Card>
-                ))}
-              </div>
-            </div>
-          </div>
-        </section>
-
       </main>
 
       <Footer />
