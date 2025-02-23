@@ -14,6 +14,7 @@ import MotorcycleDetails from "@/pages/MotorcycleDetails";
 import NotFound from "@/pages/NotFound";
 import Admin from "@/pages/Admin";
 import AdminLogin from "@/pages/AdminLogin";
+import AdminSignup from "@/pages/AdminSignup";
 import ProtectedAdminRoute from "@/components/admin/ProtectedAdminRoute";
 import Destinations from "@/pages/Destinations";
 import CampingGear from "@/pages/CampingGear";
@@ -49,6 +50,14 @@ function App() {
             <Route path="/auth" element={<Auth />} />
             <Route path="/motorcycle/:id" element={<MotorcycleDetails />} />
             <Route path="/admin/login" element={<AdminLogin />} />
+            <Route 
+              path="/admin/signup" 
+              element={
+                <ProtectedAdminRoute>
+                  <AdminSignup />
+                </ProtectedAdminRoute>
+              } 
+            />
             <Route 
               path="/admin" 
               element={
