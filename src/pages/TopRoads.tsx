@@ -54,7 +54,16 @@ const TopRoads = () => {
             ) : (
               <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
                 {roads?.map((road) => (
-                  <Card key={road.id} className="hover-card">
+                  <Card key={road.id} className="hover-card overflow-hidden">
+                    {road.image && (
+                      <div className="relative h-48 w-full">
+                        <img
+                          src={road.image}
+                          alt={road.name}
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                    )}
                     <CardHeader>
                       <CardTitle className="flex items-center gap-2">
                         <Map className="h-5 w-5 text-theme-600" />
