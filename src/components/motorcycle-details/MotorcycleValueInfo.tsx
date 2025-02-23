@@ -1,11 +1,11 @@
+
 import { useState } from "react";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
-import { calculateCurrentValue, formatCurrency, MotorcycleCondition } from "@/utils/motorcycleCalculations";
-import { FileDown } from "lucide-react";
+import { calculateCurrentValue, MotorcycleCondition } from "@/utils/motorcycleCalculations";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { ValueDisplay } from "./value-info/ValueDisplay";
+import { ValueAdjustment } from "./value-info/ValueAdjustment";
+import { DocumentationSection } from "./value-info/DocumentationSection";
 
 interface MotorcycleValueInfoProps {
   currentValue: number | null;
@@ -128,104 +128,17 @@ export const MotorcycleValueInfo = ({ currentValue, msrp, year, make, model }: M
 
   return (
     <div className="space-y-6">
-      <div>
-        <h3 className="text-lg font-semibold mb-4">Value Information</h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <p className="text-gray-500 text-sm">Original MSRP</p>
-            <p className="text-xl font-semibold">{formatCurrency(msrp)}</p>
-          </div>
-          <div>
-            <p className="text-gray-500 text-sm">Estimated Value</p>
-            <p className="text-2xl font-bold text-theme-600">
-              {formatCurrency(calculatedValue)}
-            </p>
-          </div>
-        </div>
-      </div>
-
-      <div className="space-y-4">
-        <h4 className="font-medium">Adjust Value Estimate</h4>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="space-y-2">
-            <label htmlFor="motorcycle-mileage" className="text-sm text-gray-600">
-              Current Mileage
-            </label>
-            <Input
-              id="motorcycle-mileage"
-              name="motorcycle-mileage"
-              type="number"
-              placeholder="Enter current mileage"
-              value={mileage}
-              onChange={(e) => setMileage(e.target.value)}
-            />
-          </div>
-          <div className="space-y-2">
-            <label htmlFor="motorcycle-condition" className="text-sm text-gray-600">
-              Condition
-            </label>
-            <Select 
-              value={condition} 
-              onValueChange={(value: MotorcycleCondition) => setCondition(value)}
-              name="motorcycle-condition"
-            >
-              <SelectTrigger id="motorcycle-condition">
-                <SelectValue placeholder="Select condition" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="excellent">Excellent</SelectItem>
-                <SelectItem value="good">Good</SelectItem>
-                <SelectItem value="fair">Fair</SelectItem>
-                <SelectItem value="poor">Poor</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-        </div>
-        <Button 
-          onClick={handleCalculate} 
-          className="w-full"
-          id="recalculate-button"
-          name="recalculate"
-        >
-          Recalculate Value
-        </Button>
-      </div>
-
-      <div className="pt-4 border-t">
-        <h4 className="font-medium mb-4">Documentation</h4>
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          <Button 
-            variant="outline" 
-            className="flex-1"
-            onClick={() => handleManualDownload('owners')}
-            id="owners-manual-button"
-            name="owners-manual"
-          >
-            <FileDown className="mr-2 h-4 w-4" />
-            View Owner's Manual
-          </Button>
-          <Button 
-            variant="outline" 
-            className="flex-1"
-            onClick={() => handleManualDownload('service')}
-            id="service-manual-button"
-            name="service-manual"
-          >
-            <FileDown className="mr-2 h-4 w-4" />
-            View Service Manual
-          </Button>
-          <Button 
-            variant="outline" 
-            className="flex-1"
-            onClick={() => handleManualDownload('quickstart')}
-            id="quickstart-guide-button"
-            name="quickstart-guide"
-          >
-            <FileDown className="mr-2 h-4 w-4" />
-            View Quickstart Guide
-          </Button>
-        </div>
-      </div>
+      <ValueDisplay msrp={msrp} calculatedValue={calculatedValue} />
+      
+      <ValueAdjustment
+        mileage={mileage}
+        condition={condition}
+        onMileageChange={setMileage}
+        onConditionChange={setCondition}
+        onCalculate={handleCalculate}
+      />
+      
+      <DocumentationSection onManualDownload={handleManualDownload} />
     </div>
   );
 };
