@@ -49,6 +49,12 @@ const getFullStateName = (stateAbbr: string) => {
   return stateAbbreviations[stateAbbr.toUpperCase()] || stateAbbr;
 };
 
+const getImageUrl = (imageUrl: string | null) => {
+  if (!imageUrl) return null;
+  if (imageUrl.startsWith('http')) return imageUrl;
+  return `${supabase.storage.from('scenic-byways').getPublicUrl(imageUrl).data.publicUrl}`;
+};
+
 const ScenicByways = () => {
   const [selectedState, setSelectedState] = useState<string>("all");
 
@@ -125,9 +131,13 @@ const ScenicByways = () => {
                     {byway.image_url && (
                       <div className="px-6">
                         <img
-                          src={byway.image_url}
+                          src={getImageUrl(byway.image_url)}
                           alt={byway.byway_name}
                           className="w-full h-48 object-cover rounded-md mb-4"
+                          onError={(e) => {
+                            console.log(`Failed to load image for ${byway.byway_name}:`, byway.image_url);
+                            e.currentTarget.style.display = 'none';
+                          }}
                         />
                       </div>
                     )}
