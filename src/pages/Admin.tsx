@@ -5,6 +5,7 @@ import UpdateMSRP from "@/components/admin/UpdateMSRP";
 import UpdateDescriptions from "@/components/admin/UpdateDescriptions";
 import DataScraper from "@/components/admin/DataScraper";
 import UpdateImages from "@/components/admin/UpdateImages";
+import UpdateManuals from "@/components/admin/UpdateManuals";
 import Breadcrumbs from "@/components/Breadcrumbs";
 
 const Admin = () => {
@@ -25,6 +26,7 @@ const Admin = () => {
                 <UpdateMSRP />
                 <UpdateDescriptions />
                 <UpdateImages />
+                <UpdateManuals />
               </div>
             </div>
           </div>
