@@ -8,18 +8,18 @@ export const capitalizeWords = (str: string) => {
 
 export const getFallbackImage = (byway: string) => {
   const fallbackImages = [
-    'photo-1470071459604-3b5ec3a7fe05', // mountain road
-    'photo-1472396961693-142e6e269027', // forest road
-    'photo-1433086966358-54859d0ed716', // scenic forest
-    'photo-1509316975850-ff9c5deb0cd9', // desert road
+    'photo-1542332213-31f87348057f', // mountain road
+    'photo-1605048388166-c1f369958b63', // forest road
+    'photo-1506965827514-ae0b5846a40f', // scenic road
+    'photo-1517825738774-7de9915bed53', // desert road
     'photo-1482938289607-e9573fc25ebb', // mountain vista
     'photo-1544198365-f5d60b6d8190', // coastal road
-    'photo-1552849397-776c5356d821', // canyon road
-    'photo-1552083375-1447ce886485', // rural road
-    'photo-1551969014-7d2c4cddf0b6', // sunrise road
-    'photo-1549216963-72c182964972', // mountain pass
+    'photo-1580403318832-c714b87ca186', // canyon road
+    'photo-1496275068113-fff8c90750d1', // rural road
+    'photo-1498598457418-36ef20772bb9', // sunrise road
+    'photo-1510253687831-0f982d7862fc', // mountain pass
     'photo-1517524008697-84bbe3c3fd98', // forest trail
-    'photo-1516822669470-74b7c5c37b63', // desert vista
+    'photo-1569931359394-aa01c50c0e98', // desert vista
     'photo-1534447677768-be436bb09401', // ocean road
     'photo-1527489377706-5bf97e608852', // mountain valley
     'photo-1508739773434-c26b3d09e071', // scenic overlook
