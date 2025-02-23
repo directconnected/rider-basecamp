@@ -4,22 +4,22 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
-import { useToast } from "@/components/ui/use-toast";
+import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 
 const Auth = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [fullName, setFullName] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [isSignUp, setIsSignUp] = useState(false);
   const navigate = useNavigate();
-  const { toast } = useToast();
 
   useEffect(() => {
     // Check if user is already logged in
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session) {
-        navigate("/");
+        navigate("/dashboard");
       }
     });
   }, [navigate]);
@@ -29,37 +29,37 @@ const Auth = () => {
     setIsLoading(true);
 
     try {
-      const { error } = isSignUp
-        ? await supabase.auth.signUp({
-            email,
-            password,
-          })
-        : await supabase.auth.signInWithPassword({
-            email,
-            password,
-          });
+      if (isSignUp) {
+        const { data: { user }, error: signUpError } = await supabase.auth.signUp({
+          email,
+          password,
+          options: {
+            data: {
+              full_name: fullName,
+            }
+          }
+        });
 
-      if (error) {
-        toast({
-          variant: "destructive",
-          title: "Error",
-          description: error.message,
-        });
+        if (signUpError) throw signUpError;
+
+        if (user) {
+          toast.success("Account created! Please check your email to verify your account.");
+          navigate("/dashboard");
+        }
       } else {
-        toast({
-          title: isSignUp ? "Account created!" : "Welcome back!",
-          description: isSignUp
-            ? "Please check your email to verify your account."
-            : "Successfully signed in.",
+        const { error: signInError } = await supabase.auth.signInWithPassword({
+          email,
+          password,
         });
-        navigate("/");
+
+        if (signInError) throw signInError;
+
+        toast.success("Successfully signed in");
+        navigate("/dashboard");
       }
     } catch (error) {
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "An unexpected error occurred.",
-      });
+      console.error("Auth error:", error);
+      toast.error(error.message || "An unexpected error occurred");
     } finally {
       setIsLoading(false);
     }
@@ -72,6 +72,17 @@ const Auth = () => {
           {isSignUp ? "Create an Account" : "Welcome Back"}
         </h1>
         <form onSubmit={handleSubmit} className="space-y-4">
+          {isSignUp && (
+            <div>
+              <Input
+                type="text"
+                placeholder="Full Name"
+                value={fullName}
+                onChange={(e) => setFullName(e.target.value)}
+                required={isSignUp}
+              />
+            </div>
+          )}
           <div>
             <Input
               type="email"
@@ -92,7 +103,7 @@ const Auth = () => {
           </div>
           <Button
             type="submit"
-            className="w-full button-gradient text-white"
+            className="w-full"
             disabled={isLoading}
           >
             {isLoading
@@ -106,7 +117,7 @@ const Auth = () => {
           <button
             type="button"
             onClick={() => setIsSignUp(!isSignUp)}
-            className="text-theme-600 hover:text-theme-700"
+            className="text-sm text-gray-600 hover:text-gray-900"
           >
             {isSignUp
               ? "Already have an account? Sign in"

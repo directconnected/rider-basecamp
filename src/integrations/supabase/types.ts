@@ -140,18 +140,24 @@ export type Database = {
           created_at: string
           full_name: string | null
           id: string
+          subscription_period_end: string | null
+          subscription_status: string | null
           updated_at: string
         }
         Insert: {
           created_at?: string
           full_name?: string | null
           id: string
+          subscription_period_end?: string | null
+          subscription_status?: string | null
           updated_at?: string
         }
         Update: {
           created_at?: string
           full_name?: string | null
           id?: string
+          subscription_period_end?: string | null
+          subscription_status?: string | null
           updated_at?: string
         }
         Relationships: []

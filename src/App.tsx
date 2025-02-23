@@ -10,6 +10,7 @@ import Contact from "@/pages/Contact";
 import AdvertiseWithUs from "@/pages/AdvertiseWithUs";
 import Subscribe from "@/pages/Subscribe";
 import Auth from "@/pages/Auth";
+import Dashboard from "@/pages/Dashboard";
 import MotorcycleDetails from "@/pages/MotorcycleDetails";
 import NotFound from "@/pages/NotFound";
 import Admin from "@/pages/Admin";
@@ -48,6 +49,7 @@ function App() {
             <Route path="/advertise" element={<AdvertiseWithUs />} />
             <Route path="/subscribe" element={<Subscribe />} />
             <Route path="/auth" element={<Auth />} />
+            <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/motorcycle/:id" element={<MotorcycleDetails />} />
             <Route path="/admin/login" element={<AdminLogin />} />
             <Route 
