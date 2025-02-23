@@ -65,12 +65,11 @@ serve(async (req) => {
       console.log(`Searching for images of: ${searchQuery}`);
 
       try {
-        // Use the correct Firecrawl API configuration
+        // Updated configuration according to v1 API
         const result = await firecrawl.crawlUrl(`https://www.google.com/search?q=${encodeURIComponent(searchQuery)}&tbm=isch`, {
           limit: 1,
-          formats: ['html'],
           scrapeOptions: {
-            imageMaxResults: 1
+            selectors: ['img']
           }
         });
 
@@ -78,9 +77,9 @@ serve(async (req) => {
 
         if (result.success && result.data && result.data.length > 0) {
           // Find first valid image URL from the scraped data
-          const imageUrl = result.data[0].images?.[0];
+          const imageUrl = result.data[0].src;
 
-          if (imageUrl) {
+          if (imageUrl && (imageUrl.startsWith('http://') || imageUrl.startsWith('https://'))) {
             console.log(`Found image URL for motorcycle ${motorcycle.id}: ${imageUrl}`);
             
             const { error: updateError } = await supabase
