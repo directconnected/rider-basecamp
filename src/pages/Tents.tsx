@@ -85,13 +85,13 @@ const Tents = () => {
           <div className="container mx-auto px-4">
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
               {tents?.map((tent: Tent) => (
-                <Card key={tent.id} className="hover-card overflow-hidden">
+                <Card key={tent.id} className="hover-card overflow-hidden flex flex-col">
                   {tent.image_url && (
-                    <div className="relative aspect-w-16 aspect-h-9 bg-gray-100">
+                    <div className="relative h-48 bg-gray-100">
                       <img
                         src={tent.image_url}
                         alt={tent.tent_name}
-                        className="w-full h-64 object-cover"
+                        className="w-full h-full object-contain"
                         onError={handleImageError}
                       />
                       <div className="image-fallback hidden absolute inset-0 flex items-center justify-center bg-gray-100">
@@ -102,14 +102,14 @@ const Tents = () => {
                       </div>
                     </div>
                   )}
-                  <CardContent className="p-6">
+                  <CardContent className="p-6 flex-1 flex flex-col">
                     <div className="flex items-start justify-between mb-4">
                       <div>
                         <h3 className="text-xl font-bold mb-2">{tent.tent_name}</h3>
                       </div>
                       <TentTree className="h-6 w-6 text-theme-600" />
                     </div>
-                    <p className="text-gray-600 mb-4">{tent.description}</p>
+                    <p className="text-gray-600 mb-4 flex-1">{tent.description}</p>
                     <a 
                       href={tent.amazon_url}
                       target="_blank"
