@@ -60,11 +60,14 @@ export const MotorcycleValueInfo = ({ currentValue, msrp, year, make, model }: M
         .trim();
 
       // Create standardized filename
-      const filename = `${make.toLowerCase()}_${baseModel.toLowerCase().replace(/\s+/g, '-')}_${type}_manual.pdf`
+      let filename = `${make.toLowerCase()}_${baseModel.toLowerCase()}_${type}_manual.pdf`
         .replace(/[^\w\s-]/g, '') // Remove special characters
         .replace(/\s+/g, '-') // Replace spaces with hyphens
         .replace(/-+/g, '-'); // Replace multiple consecutive hyphens with single hyphen
-
+        
+      // For Gold Wing models, ensure correct formatting
+      filename = filename.replace('gold-wing', 'goldwing');
+      
       console.log('Attempting to download:', filename); // Debug log
 
       const { data, error } = await supabase.storage
