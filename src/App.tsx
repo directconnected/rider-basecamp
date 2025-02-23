@@ -45,7 +45,7 @@ function App() {
             <Route path="*" element={<NotFound />} />
           </RouterRoutes>
           <Toaster />
-          <Sonner />
+          <Sonner position="top-center" />
         </Router>
       </TooltipProvider>
     </QueryClientProvider>
