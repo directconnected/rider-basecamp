@@ -66,11 +66,12 @@ export const MotorcycleValueInfo = ({ currentValue, msrp, year, make, model }: M
         
       console.log('Base model after cleanup:', baseModel);
 
-      // Create standardized filename
+      // Create standardized filename with proper extension format
       let filename = `${make.toLowerCase()}_${baseModel.toLowerCase()}_${type}_manual.pdf`
         .replace(/[^\w\s-]/g, '') // Remove special characters
         .replace(/\s+/g, '-') // Replace spaces with hyphens
-        .replace(/-+/g, '-'); // Replace multiple consecutive hyphens with single hyphen
+        .replace(/-+/g, '-') // Replace multiple consecutive hyphens with single hyphen
+        .replace('manual.pdf', 'manual.pdf'); // Ensure proper extension format
         
       // For Gold Wing models, ensure correct formatting
       filename = filename.replace('gold-wing', 'goldwing');
@@ -80,7 +81,7 @@ export const MotorcycleValueInfo = ({ currentValue, msrp, year, make, model }: M
 
       const { data, error } = await supabase.storage
         .from(type === 'owners' ? 'owners_manuals' : 'service_manuals')
-        .createSignedUrl(filename, 60); // URL valid for 60 seconds
+        .createSignedUrl(filename, 60);
 
       if (error) {
         console.error('Error getting download URL:', error);
@@ -97,7 +98,6 @@ export const MotorcycleValueInfo = ({ currentValue, msrp, year, make, model }: M
 
       console.log('Successfully got signed URL:', data.signedUrl);
 
-      // Create a temporary link and trigger the download
       const link = document.createElement('a');
       link.href = data.signedUrl;
       link.download = filename;
