@@ -48,7 +48,7 @@ const getFullStateName = (stateAbbr: string) => {
 };
 
 const ScenicByways = () => {
-  const [selectedState, setSelectedState] = useState<string>("");
+  const [selectedState, setSelectedState] = useState<string>("all");
 
   const { data: scenicByways, isLoading } = useQuery({
     queryKey: ["scenic-byways"],
@@ -63,9 +63,9 @@ const ScenicByways = () => {
     },
   });
 
-  const filteredByways = selectedState
-    ? scenicByways?.filter(byway => getFullStateName(byway.state) === selectedState)
-    : scenicByways;
+  const filteredByways = selectedState === "all"
+    ? scenicByways
+    : scenicByways?.filter(byway => getFullStateName(byway.state) === selectedState);
 
   const uniqueStates = Array.from(new Set(scenicByways?.map(byway => getFullStateName(byway.state)) || [])).sort();
 
@@ -98,7 +98,7 @@ const ScenicByways = () => {
                   <SelectValue placeholder="Filter by state" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All States</SelectItem>
+                  <SelectItem value="all">All States</SelectItem>
                   {uniqueStates.map((state) => (
                     <SelectItem key={state} value={state}>
                       {state}
