@@ -31,10 +31,11 @@ serve(async (req) => {
     console.log(`Starting search for type: ${type}`);
     
     if (type === 'routes') {
-      const searchQuery = 'site:motorcycleroads.com "motorcycle route" "great ride"';
-      const searchUrl = `https://www.googleapis.com/customsearch/v1?key=${GOOGLE_SEARCH_API_KEY}&cx=${GOOGLE_SEARCH_ENGINE_ID}&q=${encodeURIComponent(searchQuery)}`;
+      // More generic search query
+      const searchQuery = 'site:motorcycleroads.com motorcycle route';
+      const searchUrl = `https://www.googleapis.com/customsearch/v1?key=${GOOGLE_SEARCH_API_KEY}&cx=${GOOGLE_SEARCH_ENGINE_ID}&q=${encodeURIComponent(searchQuery)}&num=10`;
 
-      console.log('Making Google Search API request...');
+      console.log('Making Google Search API request with URL:', searchUrl);
       const response = await fetch(searchUrl);
       console.log('Search API response status:', response.status);
       
@@ -49,30 +50,22 @@ serve(async (req) => {
       }
 
       const data = await response.json();
-      console.log('Search API response:', {
-        hasItems: !!data.items,
-        itemCount: data.items?.length ?? 0,
-        error: data.error
-      });
-
+      console.log('Full Google API response:', JSON.stringify(data, null, 2));
+      
       if (data.error) {
         console.error('Google API returned error:', data.error);
         throw new Error(`Google API error: ${data.error.message}`);
       }
 
       if (!data.items || data.items.length === 0) {
-        console.log('No search results found');
+        console.log('No search results found. Search info:', data.searchInformation);
         return new Response(JSON.stringify({ success: true, count: 0 }), {
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         });
       }
 
       const routes = data.items.map(item => {
-        console.log('Processing route:', {
-          title: item.title,
-          snippet: item.snippet,
-          link: item.link
-        });
+        console.log('Processing route item:', JSON.stringify(item, null, 2));
         return {
           title: item.title,
           location: item.snippet?.split(' - ')?.[0] ?? 'Unknown',
@@ -80,7 +73,7 @@ serve(async (req) => {
         };
       });
 
-      console.log(`Processed ${routes.length} routes`);
+      console.log(`Processed ${routes.length} routes:`, routes);
 
       if (routes.length > 0) {
         const supabase = createClient(
@@ -103,10 +96,11 @@ serve(async (req) => {
     }
     
     if (type === 'gear') {
-      const searchQuery = 'site:revzilla.com "motorcycle gear" "product details"';
-      const searchUrl = `https://www.googleapis.com/customsearch/v1?key=${GOOGLE_SEARCH_API_KEY}&cx=${GOOGLE_SEARCH_ENGINE_ID}&q=${encodeURIComponent(searchQuery)}`;
+      // More generic search query
+      const searchQuery = 'site:revzilla.com motorcycle gear';
+      const searchUrl = `https://www.googleapis.com/customsearch/v1?key=${GOOGLE_SEARCH_API_KEY}&cx=${GOOGLE_SEARCH_ENGINE_ID}&q=${encodeURIComponent(searchQuery)}&num=10`;
 
-      console.log('Making Google Search API request for gear...');
+      console.log('Making Google Search API request with URL:', searchUrl);
       const response = await fetch(searchUrl);
       console.log('Search API response status:', response.status);
       
@@ -121,11 +115,7 @@ serve(async (req) => {
       }
 
       const data = await response.json();
-      console.log('Search API response:', {
-        hasItems: !!data.items,
-        itemCount: data.items?.length ?? 0,
-        error: data.error
-      });
+      console.log('Full Google API response:', JSON.stringify(data, null, 2));
 
       if (data.error) {
         console.error('Google API returned error:', data.error);
@@ -133,18 +123,14 @@ serve(async (req) => {
       }
 
       if (!data.items || data.items.length === 0) {
-        console.log('No gear search results found');
+        console.log('No gear search results found. Search info:', data.searchInformation);
         return new Response(JSON.stringify({ success: true, count: 0 }), {
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         });
       }
 
       const gear = data.items.map(item => {
-        console.log('Processing gear item:', {
-          title: item.title,
-          price: item.pagemap?.offer?.[0]?.price,
-          link: item.link
-        });
+        console.log('Processing gear item:', JSON.stringify(item, null, 2));
         return {
           title: item.title,
           price: item.pagemap?.offer?.[0]?.price ?? null,
@@ -153,7 +139,7 @@ serve(async (req) => {
         };
       });
 
-      console.log(`Processed ${gear.length} gear items`);
+      console.log(`Processed ${gear.length} gear items:`, gear);
 
       if (gear.length > 0) {
         const supabase = createClient(
