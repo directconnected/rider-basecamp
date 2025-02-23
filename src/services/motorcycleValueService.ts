@@ -1,7 +1,7 @@
 
 import { supabase } from "@/integrations/supabase/client";
 import { Motorcycle } from "@/types/motorcycle";
-import { calculateCurrentValue, formatCurrency } from "@/utils/motorcycleCalculations";
+import { calculateCurrentValue } from "@/utils/motorcycleCalculations";
 import { toast } from "sonner";
 
 export const updateMotorcycleValue = async (motorcycle: Motorcycle) => {
@@ -43,7 +43,6 @@ export const updateMotorcycleValue = async (motorcycle: Motorcycle) => {
     }
 
     console.log('Update successful. New record:', updatedData);
-    toast.success(`Updated value: ${formatCurrency(currentValue)}`);
     return currentValue;
 
   } catch (error) {
