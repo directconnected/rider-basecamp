@@ -44,7 +44,7 @@ serve(async (req) => {
       .from('data_2025')
       .select('id, year, make, model')
       .or('image_url.is.null,image_url.eq.""')  // Check for both NULL and empty string
-      .limit(10);
+      .limit(3); // Reduced limit to avoid rate limiting
 
     if (fetchError) {
       throw new Error(`Error fetching motorcycles: ${fetchError.message}`);
@@ -65,7 +65,9 @@ serve(async (req) => {
       console.log(`Searching for images of: ${searchQuery}`);
 
       try {
-        // Simplified configuration for v1 API
+        // Add longer delay between requests to handle rate limiting
+        await new Promise(resolve => setTimeout(resolve, 2000));
+
         const result = await firecrawl.crawlUrl(`https://www.google.com/search?q=${encodeURIComponent(searchQuery)}&tbm=isch`, {
           limit: 1
         });
@@ -100,12 +102,21 @@ serve(async (req) => {
           results.push({ id: motorcycle.id, success: false, error: 'No results found' });
         }
       } catch (error) {
-        console.error(`Error processing motorcycle ${motorcycle.id}: ${error.message}`);
-        results.push({ id: motorcycle.id, success: false, error: error.message });
+        // Check for rate limit errors
+        if (error.message && error.message.includes('rate limit')) {
+          console.error(`Rate limit hit for motorcycle ${motorcycle.id}: ${error.message}`);
+          results.push({ 
+            id: motorcycle.id, 
+            success: false, 
+            error: 'Rate limit exceeded, please try again later'
+          });
+          // Break the loop if we hit rate limit
+          break;
+        } else {
+          console.error(`Error processing motorcycle ${motorcycle.id}: ${error.message}`);
+          results.push({ id: motorcycle.id, success: false, error: error.message });
+        }
       }
-
-      // Add a small delay between requests to avoid rate limiting
-      await new Promise(resolve => setTimeout(resolve, 1000));
     }
 
     return new Response(
