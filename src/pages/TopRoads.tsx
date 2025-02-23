@@ -13,11 +13,19 @@ const TopRoads = () => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("roads")
-        .select("*")
-        .order("name");
+        .select("*");
       
       if (error) throw error;
-      return data;
+
+      // Sort by the numeric prefix in the name
+      return data.sort((a, b) => {
+        const getNumber = (str: string) => {
+          const match = str.match(/^(\d+)\./);
+          return match ? parseInt(match[1]) : 0;
+        };
+        
+        return getNumber(a.name) - getNumber(b.name);
+      });
     },
   });
 
