@@ -45,7 +45,10 @@ export const MotorcycleValueInfo = ({ currentValue, msrp, year, make, model }: M
   };
 
   const handleManualDownload = async (type: 'owners' | 'service') => {
+    console.log('Download attempt started with:', { make, model, type });
+
     if (!make || !model) {
+      console.log('Missing make or model:', { make, model });
       toast.error("Unable to find manual", {
         description: "Motorcycle make and model information is missing"
       });
@@ -53,11 +56,15 @@ export const MotorcycleValueInfo = ({ currentValue, msrp, year, make, model }: M
     }
 
     try {
+      console.log('Original model name:', model);
+      
       // Extract base model name by removing year and special edition text
       const baseModel = model
         .replace(/^\d{4}\s+/, '') // Remove year from start if present
         .split(/\s+(?:\d{2,}(?:th|st|nd|rd)\s+Anniversary|Special\s+Edition|Limited\s+Edition)/i)[0] // Remove special edition text
         .trim();
+        
+      console.log('Base model after cleanup:', baseModel);
 
       // Create standardized filename
       let filename = `${make.toLowerCase()}_${baseModel.toLowerCase()}_${type}_manual.pdf`
@@ -68,7 +75,8 @@ export const MotorcycleValueInfo = ({ currentValue, msrp, year, make, model }: M
       // For Gold Wing models, ensure correct formatting
       filename = filename.replace('gold-wing', 'goldwing');
       
-      console.log('Attempting to download:', filename); // Debug log
+      console.log('Attempting to download:', filename);
+      console.log('Storage bucket:', type === 'owners' ? 'owners_manuals' : 'service_manuals');
 
       const { data, error } = await supabase.storage
         .from(type === 'owners' ? 'owners_manuals' : 'service_manuals')
@@ -76,12 +84,18 @@ export const MotorcycleValueInfo = ({ currentValue, msrp, year, make, model }: M
 
       if (error) {
         console.error('Error getting download URL:', error);
-        console.error('Error message:', error.message);
+        console.error('Error details:', {
+          error: error.message,
+          filename,
+          bucket: type === 'owners' ? 'owners_manuals' : 'service_manuals'
+        });
         toast.error(`Unable to download ${type} manual`, {
           description: "The manual may not be available yet."
         });
         return;
       }
+
+      console.log('Successfully got signed URL:', data.signedUrl);
 
       // Create a temporary link and trigger the download
       const link = document.createElement('a');
