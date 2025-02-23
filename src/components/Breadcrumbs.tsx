@@ -59,11 +59,27 @@ const routeConfig: Record<string, RouteConfig> = {
   'camping-gear': {
     label: 'Camping Gear'
   },
+  'tents': {
+    parent: 'camping-gear',
+    label: 'Tents'
+  },
   'riding-gear': {
     label: 'Riding Gear'
   },
   'admin': {
     label: 'Admin'
+  },
+  'blog': {
+    label: 'Blog'
+  },
+  'docs': {
+    label: 'Documentation'
+  },
+  'terms': {
+    label: 'Terms of Service'
+  },
+  'privacy': {
+    label: 'Privacy Policy'
   }
 };
 
