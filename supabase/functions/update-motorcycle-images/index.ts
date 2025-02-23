@@ -65,19 +65,16 @@ serve(async (req) => {
       console.log(`Searching for images of: ${searchQuery}`);
 
       try {
-        // Updated configuration according to v1 API
+        // Simplified configuration for v1 API
         const result = await firecrawl.crawlUrl(`https://www.google.com/search?q=${encodeURIComponent(searchQuery)}&tbm=isch`, {
-          limit: 1,
-          scrapeOptions: {
-            selectors: ['img']
-          }
+          limit: 1
         });
 
         console.log('Firecrawl result:', result);
 
         if (result.success && result.data && result.data.length > 0) {
           // Find first valid image URL from the scraped data
-          const imageUrl = result.data[0].src;
+          const imageUrl = result.data[0].url || result.data[0].src;
 
           if (imageUrl && (imageUrl.startsWith('http://') || imageUrl.startsWith('https://'))) {
             console.log(`Found image URL for motorcycle ${motorcycle.id}: ${imageUrl}`);
