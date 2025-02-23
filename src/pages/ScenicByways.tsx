@@ -21,6 +21,7 @@ interface ScenicByway {
   length_miles: string | null;
   designation: string;
   description: string | null;
+  image_url: string | null;
 }
 
 const stateAbbreviations: { [key: string]: string } = {
@@ -121,6 +122,15 @@ const ScenicByways = () => {
                         {capitalizeWords(byway.byway_name)}
                       </CardTitle>
                     </CardHeader>
+                    {byway.image_url && (
+                      <div className="px-6">
+                        <img
+                          src={byway.image_url}
+                          alt={byway.byway_name}
+                          className="w-full h-48 object-cover rounded-md mb-4"
+                        />
+                      </div>
+                    )}
                     <CardContent>
                       <div className="space-y-4">
                         <div className="space-y-2">

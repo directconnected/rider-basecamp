@@ -209,6 +209,7 @@ export type Database = {
           byway_name: string
           description: string | null
           designation: string
+          image_url: string | null
           length_miles: string | null
           state: string
         }
@@ -216,6 +217,7 @@ export type Database = {
           byway_name: string
           description?: string | null
           designation: string
+          image_url?: string | null
           length_miles?: string | null
           state: string
         }
@@ -223,6 +225,7 @@ export type Database = {
           byway_name?: string
           description?: string | null
           designation?: string
+          image_url?: string | null
           length_miles?: string | null
           state?: string
         }
