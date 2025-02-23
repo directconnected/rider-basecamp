@@ -1,13 +1,83 @@
-
 import React from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Shield, Search, Database, BarChart, Lock } from "lucide-react";
 import Navigation from "@/components/Navigation";
-import { Link } from "react-router-dom";
-import { Input } from "@/components/ui/input";
+import { Link, useNavigate } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 const Subscribe = () => {
+  const navigate = useNavigate();
+
+  const plans = [
+    {
+      title: "Basic",
+      price: "9.99",
+      priceId: "price_basic", // Replace with your Stripe price ID
+      features: [
+        "Basic motorcycle valuations",
+        "Limited search functionality",
+        "Email support",
+      ],
+    },
+    {
+      title: "Pro",
+      price: "19.99",
+      priceId: "price_pro", // Replace with your Stripe price ID
+      features: [
+        "Advanced motorcycle valuations",
+        "Full search capabilities",
+        "Historical price data",
+        "Priority support",
+      ],
+      highlighted: true,
+    },
+    {
+      title: "Enterprise",
+      price: "49.99",
+      priceId: "price_enterprise", // Replace with your Stripe price ID
+      features: [
+        "Custom API access",
+        "Bulk valuations",
+        "Market analysis tools",
+        "24/7 dedicated support",
+      ],
+    },
+  ];
+
+  const handleSubscribe = async (priceId: string) => {
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (!session) {
+        navigate("/auth");
+        return;
+      }
+
+      const response = await fetch(
+        'https://hungfeisnqbmzurpxvel.functions.supabase.co/create-checkout',
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${session.access_token}`,
+          },
+          body: JSON.stringify({ priceId }),
+        }
+      );
+
+      const { url, error } = await response.json();
+      
+      if (error) throw new Error(error);
+      if (url) window.location.href = url;
+      
+    } catch (error) {
+      console.error('Error:', error);
+      toast.error('Failed to start checkout process');
+    }
+  };
+
   return (
     <div className="min-h-screen flex flex-col">
       <Navigation />
@@ -68,38 +138,7 @@ const Subscribe = () => {
               </p>
             </div>
             <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
-              {[
-                {
-                  title: "Basic",
-                  price: "9.99",
-                  features: [
-                    "Basic motorcycle valuations",
-                    "Limited search functionality",
-                    "Email support",
-                  ],
-                },
-                {
-                  title: "Pro",
-                  price: "19.99",
-                  features: [
-                    "Advanced motorcycle valuations",
-                    "Full search capabilities",
-                    "Historical price data",
-                    "Priority support",
-                  ],
-                  highlighted: true,
-                },
-                {
-                  title: "Enterprise",
-                  price: "49.99",
-                  features: [
-                    "Custom API access",
-                    "Bulk valuations",
-                    "Market analysis tools",
-                    "24/7 dedicated support",
-                  ],
-                },
-              ].map((plan) => (
+              {plans.map((plan) => (
                 <Card 
                   key={plan.title}
                   className={`p-8 text-center hover-card ${
@@ -122,14 +161,13 @@ const Subscribe = () => {
                       </li>
                     ))}
                   </ul>
-                  <Link to="/auth">
-                    <Button 
-                      className={plan.highlighted ? "button-gradient w-full text-white" : "w-full"}
-                      variant={plan.highlighted ? "default" : "outline"}
-                    >
-                      Subscribe Now
-                    </Button>
-                  </Link>
+                  <Button 
+                    className={plan.highlighted ? "button-gradient w-full text-white" : "w-full"}
+                    variant={plan.highlighted ? "default" : "outline"}
+                    onClick={() => handleSubscribe(plan.priceId)}
+                  >
+                    Subscribe Now
+                  </Button>
                 </Card>
               ))}
             </div>
