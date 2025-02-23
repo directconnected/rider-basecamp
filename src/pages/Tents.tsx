@@ -1,9 +1,9 @@
 
-import React from "react";
+import React, { useState } from "react";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/layout/Footer";
 import { Card, CardContent } from "@/components/ui/card";
-import { TentTree } from "lucide-react";
+import { TentTree, ImageOff } from "lucide-react";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
@@ -28,6 +28,14 @@ const Tents = () => {
       return data;
     }
   });
+
+  const handleImageError = (e: React.SyntheticEvent<HTMLImageElement>) => {
+    e.currentTarget.style.display = 'none';
+    const fallbackDiv = e.currentTarget.parentElement?.querySelector('.image-fallback');
+    if (fallbackDiv) {
+      fallbackDiv.classList.remove('hidden');
+    }
+  };
 
   if (isLoading) {
     return (
@@ -79,12 +87,19 @@ const Tents = () => {
               {tents?.map((tent: Tent) => (
                 <Card key={tent.id} className="hover-card overflow-hidden">
                   {tent.image_url && (
-                    <div className="aspect-w-16 aspect-h-9">
+                    <div className="relative aspect-w-16 aspect-h-9 bg-gray-100">
                       <img
                         src={tent.image_url}
                         alt={tent.tent_name}
                         className="w-full h-64 object-cover"
+                        onError={handleImageError}
                       />
+                      <div className="image-fallback hidden absolute inset-0 flex items-center justify-center bg-gray-100">
+                        <div className="text-center">
+                          <ImageOff className="h-12 w-12 mx-auto text-gray-400 mb-2" />
+                          <p className="text-sm text-gray-500">Image unavailable</p>
+                        </div>
+                      </div>
                     </div>
                   )}
                   <CardContent className="p-6">
