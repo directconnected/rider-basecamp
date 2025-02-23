@@ -62,22 +62,22 @@ const getFallbackImage = (state: string) => {
 
 const verifyImageUrl = async (url: string): Promise<boolean> => {
   try {
-    const response = await fetch(url, { method: 'HEAD' });
-    const contentType = response.headers.get('content-type');
-    return response.ok && contentType?.startsWith('image/');
+    const img = new Image();
+    return new Promise((resolve) => {
+      img.onload = () => resolve(true);
+      img.onerror = () => resolve(false);
+      img.src = url;
+    });
   } catch (error) {
     console.error(`Error verifying image URL (${url}):`, error);
     return false;
   }
 };
 
-const getImageUrl = (url: string | null) => {
-  return url || null;
-};
-
 const ScenicByways = () => {
   const [selectedState, setSelectedState] = useState<string>("all");
   const [verifiedUrls, setVerifiedUrls] = useState<{ [key: string]: boolean }>({});
+  const [isVerifying, setIsVerifying] = useState(false);
   const { toast } = useToast();
 
   const { data: scenicByways, isLoading } = useQuery({
@@ -96,6 +96,7 @@ const ScenicByways = () => {
   useEffect(() => {
     const verifyImages = async () => {
       if (!scenicByways) return;
+      setIsVerifying(true);
 
       const verificationResults: { [key: string]: boolean } = {};
       let invalidCount = 0;
@@ -112,12 +113,13 @@ const ScenicByways = () => {
       }
 
       setVerifiedUrls(verificationResults);
+      setIsVerifying(false);
       
       if (invalidCount > 0) {
         toast({
           title: "Image Verification Results",
-          description: `Found ${invalidCount} invalid image URLs. Check console for details.`,
-          variant: "destructive",
+          description: `Found ${invalidCount} invalid image URLs. Using fallback images where needed.`,
+          variant: "default",
         });
       }
     };
@@ -170,8 +172,10 @@ const ScenicByways = () => {
               </Select>
             </div>
 
-            {isLoading ? (
-              <div className="text-center text-gray-600">Loading scenic byways...</div>
+            {isLoading || isVerifying ? (
+              <div className="text-center text-gray-600">
+                {isLoading ? "Loading scenic byways..." : "Verifying images..."}
+              </div>
             ) : (
               <div className="grid gap-6 md:grid-cols-2">
                 {filteredByways?.map((byway, index) => (
