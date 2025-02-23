@@ -140,6 +140,8 @@ export type Database = {
           created_at: string
           full_name: string | null
           id: string
+          stripe_customer_id: string | null
+          subscription_id: string | null
           subscription_period_end: string | null
           subscription_status: string | null
           updated_at: string
@@ -148,6 +150,8 @@ export type Database = {
           created_at?: string
           full_name?: string | null
           id: string
+          stripe_customer_id?: string | null
+          subscription_id?: string | null
           subscription_period_end?: string | null
           subscription_status?: string | null
           updated_at?: string
@@ -156,6 +160,8 @@ export type Database = {
           created_at?: string
           full_name?: string | null
           id?: string
+          stripe_customer_id?: string | null
+          subscription_id?: string | null
           subscription_period_end?: string | null
           subscription_status?: string | null
           updated_at?: string
@@ -242,6 +248,47 @@ export type Database = {
           state?: string
         }
         Relationships: []
+      }
+      subscriptions: {
+        Row: {
+          created_at: string
+          id: string
+          period_end: string | null
+          period_start: string | null
+          price_id: string
+          status: string
+          subscription_id: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          period_end?: string | null
+          period_start?: string | null
+          price_id: string
+          status: string
+          subscription_id: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          period_end?: string | null
+          period_start?: string | null
+          price_id?: string
+          status?: string
+          subscription_id?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "subscriptions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       tents: {
         Row: {
