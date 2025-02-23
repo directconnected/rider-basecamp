@@ -36,7 +36,7 @@ const Index = () => {
     {
       icon: Search,
       title: "Motorcycle Data",
-      description: "Owner's manuals, service manuals, VIN lookup & motorcycle data.",
+      description: "Owner's manuals, service manuals, VIN lookup & data.",
       link: "/data"
     }
   ];
