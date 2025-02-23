@@ -1,10 +1,35 @@
 
-import React from "react";
+import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { toast } from "sonner";
 
 const Footer = () => {
+  const [email, setEmail] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleSubscribe = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!email) {
+      toast.error("Please enter your email address");
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      // Here you would typically make an API call to handle the subscription
+      console.log("Subscribing email:", email);
+      toast.success("Thank you for subscribing!");
+      setEmail(""); // Clear the input after successful subscription
+    } catch (error) {
+      toast.error("Failed to subscribe. Please try again.");
+      console.error("Subscription error:", error);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   return (
     <footer className="bg-gray-900 text-white py-12 border-t border-gray-800">
       <div className="px-4">
@@ -37,15 +62,23 @@ const Footer = () => {
           <div className="text-left">
             <h3 className="font-bold text-lg mb-4">Newsletter</h3>
             <p className="text-gray-400 mb-4">Stay updated with our latest news.</p>
-            <div className="flex gap-2">
+            <form onSubmit={handleSubscribe} className="flex gap-2">
               <Input 
+                type="email"
                 placeholder="Enter your email" 
                 className="bg-gray-800 border-gray-700"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                aria-label="Email subscription"
               />
-              <Button className="button-gradient">
-                Subscribe
+              <Button 
+                type="submit" 
+                className="button-gradient"
+                disabled={isSubmitting}
+              >
+                {isSubmitting ? "..." : "Subscribe"}
               </Button>
-            </div>
+            </form>
           </div>
         </div>
         <div className="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400">
