@@ -13,6 +13,8 @@ import Auth from "@/pages/Auth";
 import MotorcycleDetails from "@/pages/MotorcycleDetails";
 import NotFound from "@/pages/NotFound";
 import Admin from "@/pages/Admin";
+import AdminLogin from "@/pages/AdminLogin";
+import ProtectedAdminRoute from "@/components/admin/ProtectedAdminRoute";
 import Destinations from "@/pages/Destinations";
 import CampingGear from "@/pages/CampingGear";
 import RidingGear from "@/pages/RidingGear";
@@ -46,7 +48,15 @@ function App() {
             <Route path="/subscribe" element={<Subscribe />} />
             <Route path="/auth" element={<Auth />} />
             <Route path="/motorcycle/:id" element={<MotorcycleDetails />} />
-            <Route path="/admin" element={<Admin />} />
+            <Route path="/admin/login" element={<AdminLogin />} />
+            <Route 
+              path="/admin" 
+              element={
+                <ProtectedAdminRoute>
+                  <Admin />
+                </ProtectedAdminRoute>
+              } 
+            />
             <Route path="/destinations" element={<Destinations />} />
             <Route path="/camping-gear" element={<CampingGear />} />
             <Route path="/riding-gear" element={<RidingGear />} />
