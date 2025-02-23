@@ -1,12 +1,13 @@
 
 import React, { useEffect, useState } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Home, LogIn } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 
 const Navigation = () => {
   const location = useLocation();
+  const navigate = useNavigate();
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   useEffect(() => {
@@ -22,6 +23,13 @@ const Navigation = () => {
 
     return () => subscription.unsubscribe();
   }, []);
+
+  const handleAuthClick = async () => {
+    if (isLoggedIn) {
+      await supabase.auth.signOut();
+      navigate('/');
+    }
+  };
 
   return (
     <header className="bg-gray-900 border-b border-gray-800">
@@ -58,22 +66,27 @@ const Navigation = () => {
             >
               Contact
             </Link>
-            <Link to="/auth">
+            {isLoggedIn ? (
               <Button 
                 variant="outline" 
                 size="sm"
                 className="ml-2"
+                onClick={handleAuthClick}
               >
-                {isLoggedIn ? (
-                  "Logout"
-                ) : (
-                  <>
-                    <LogIn className="mr-2 h-4 w-4" />
-                    Login
-                  </>
-                )}
+                Logout
               </Button>
-            </Link>
+            ) : (
+              <Link to="/auth">
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  className="ml-2"
+                >
+                  <LogIn className="mr-2 h-4 w-4" />
+                  Login
+                </Button>
+              </Link>
+            )}
           </nav>
         </div>
       </div>
