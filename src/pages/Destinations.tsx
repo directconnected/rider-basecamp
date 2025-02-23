@@ -16,26 +16,11 @@ const Routes = () => {
           <div className="container mx-auto px-4">
             <div className="text-center mb-16">
               <h1 className="text-4xl md:text-5xl font-bold text-white mb-6">
-                Motorcycle Destinations
+                Find Your Perfect Ride
               </h1>
               <p className="text-xl text-gray-300 max-w-2xl mx-auto">
-                Discover the best motorcycle roads and scenic routes
+                Explore curated routes from experienced riders, complete with turn-by-turn directions, points of interest, and rider tips. From scenic mountain passes to coastal highways, find the perfect route for your next adventure.
               </p>
-            </div>
-          </div>
-        </section>
-
-        <section className="py-24">
-          <div className="container mx-auto px-4">
-            <div className="grid md:grid-cols-2 gap-12 items-center max-w-6xl mx-auto">
-              <div>
-                <h2 className="text-3xl font-bold mb-6">
-                  Find Your Perfect Ride
-                </h2>
-                <p className="text-gray-600 mb-6">
-                  Explore curated routes from experienced riders, complete with turn-by-turn directions, points of interest, and rider tips. From scenic mountain passes to coastal highways, find the perfect route for your next adventure.
-                </p>
-              </div>
             </div>
           </div>
         </section>
