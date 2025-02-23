@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/layout/Footer";
@@ -49,21 +48,8 @@ const getFullStateName = (stateAbbr: string) => {
   return stateAbbreviations[stateAbbr.toUpperCase()] || stateAbbr;
 };
 
-// Collection of reliable Unsplash scenic road images
-const scenicRoadImages = [
-  'https://images.unsplash.com/photo-1472396961693-142e6e269027', // Mountain road with deer
-  'https://images.unsplash.com/photo-1433086966358-54859d0ed716', // Bridge and waterfalls
-  'https://images.unsplash.com/photo-1482938289607-e9573fc25ebb', // River between mountains
-  'https://images.unsplash.com/photo-1501785888041-af3ef285b470', // Mountain range road
-  'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b', // Mountain vista
-  'https://images.unsplash.com/photo-1486047275635-fc8d7f31c3f4', // Winding forest road
-  'https://images.unsplash.com/photo-1517524008697-84bbe3c3fd98', // Desert highway
-  'https://images.unsplash.com/photo-1506905925346-21bda4d32df4', // Dramatic mountain pass
-];
-
-const getImageUrl = (imageUrl: string | null, bywayName: string) => {
-  const generateSearchTerms = (name: string) => {
-    // Remove common words and add scenic terms
+const getImageUrl = (imageUrl: string | null, bywayName: string, state: string) => {
+  const generateSearchTerms = (name: string, state: string) => {
     const commonWords = ['byway', 'scenic', 'road', 'highway', 'trail'];
     const terms = name
       .toLowerCase()
@@ -71,24 +57,12 @@ const getImageUrl = (imageUrl: string | null, bywayName: string) => {
       .filter(word => !commonWords.includes(word))
       .join(' ');
     
-    const searchTerms = `scenic ${terms} landscape`;
+    const searchTerms = `scenic ${terms} ${state} landscape`;
     return encodeURIComponent(searchTerms);
   };
 
-  if (!imageUrl) {
-    // Use Unsplash search API with the byway name
-    const searchTerms = generateSearchTerms(bywayName);
-    return `https://source.unsplash.com/1600x900/?${searchTerms}`;
-  }
-
-  if (imageUrl.startsWith('http')) {
-    // If external URL fails, use Unsplash search as fallback
-    const searchTerms = generateSearchTerms(bywayName);
-    return `https://source.unsplash.com/1600x900/?${searchTerms}`;
-  }
-
-  // For Supabase storage URLs
-  return `${supabase.storage.from('scenic-byways').getPublicUrl(imageUrl).data.publicUrl}`;
+  const searchTerms = generateSearchTerms(bywayName, getFullStateName(state));
+  return `https://source.unsplash.com/1600x900/?${searchTerms}`;
 };
 
 const ScenicByways = () => {
@@ -166,11 +140,11 @@ const ScenicByways = () => {
                     </CardHeader>
                     <div className="px-6">
                       <img
-                        src={getImageUrl(byway.image_url, byway.byway_name)}
+                        src={getImageUrl(byway.image_url, byway.byway_name, byway.state)}
                         alt={byway.byway_name}
                         className="w-full h-48 object-cover rounded-md mb-4"
                         onError={(e) => {
-                          const searchTerms = encodeURIComponent('scenic landscape road');
+                          const searchTerms = encodeURIComponent(`scenic landscape ${getFullStateName(byway.state)}`);
                           e.currentTarget.src = `https://source.unsplash.com/1600x900/?${searchTerms}`;
                         }}
                       />
