@@ -6,6 +6,7 @@ import { corsHeaders } from '../_shared/cors.ts';
 const SITE_URL = Deno.env.get('SITE_URL') || 'http://localhost:5173';
 
 Deno.serve(async (req) => {
+  // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders });
   }
@@ -17,6 +18,7 @@ Deno.serve(async (req) => {
       throw new Error('No authorization header');
     }
 
+    // Get user from Supabase auth
     const supabase = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_ANON_KEY') ?? '',
@@ -71,6 +73,7 @@ Deno.serve(async (req) => {
       status: 200,
     });
   } catch (error) {
+    console.error('Error:', error);
     return new Response(JSON.stringify({ error: error.message }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       status: 400,
