@@ -33,7 +33,7 @@ serve(async (req) => {
     let searchQuery, searchResults;
     
     if (type === 'routes') {
-      searchQuery = '"best motorcycle route" OR "motorcycle road" OR "scenic motorcycle ride"';
+      searchQuery = '"best motorcycle routes 2025"';
     } else if (type === 'gear') {
       // Updated search query for 2025 gear
       searchQuery = '"best motorcycle gear 2025"';
