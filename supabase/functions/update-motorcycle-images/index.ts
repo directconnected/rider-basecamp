@@ -44,7 +44,7 @@ serve(async (req) => {
       .from('data_2025')
       .select('id, year, make, model')
       .or('image_url.is.null,image_url.eq.""')  // Check for both NULL and empty string
-      .limit(1); // Process only one motorcycle at a time
+      .limit(1);
 
     if (fetchError) {
       throw new Error(`Error fetching motorcycles: ${fetchError.message}`);
@@ -68,21 +68,26 @@ serve(async (req) => {
         // Add a longer delay before making the request
         await new Promise(resolve => setTimeout(resolve, 5000));
 
-        const result = await firecrawl.crawlUrl(`https://www.google.com/search?q=${encodeURIComponent(searchQuery)}&tbm=isch`, {
-          limit: 1,
-          scrapeOptions: {
-            selector: 'img'
-          }
-        });
+        // Use the simplest possible configuration
+        const result = await firecrawl.crawlUrl(`https://www.google.com/search?q=${encodeURIComponent(searchQuery)}&tbm=isch`);
 
         console.log('Firecrawl result:', result);
 
-        if (result.success && result.data && result.data.length > 0) {
-          // Find first valid image URL from the scraped data
-          const imageData = result.data[0];
-          const imageUrl = imageData.url || imageData.src || (imageData.attributes && imageData.attributes.src);
+        if (result && result.data && result.data.length > 0) {
+          // Try to find a valid image URL from the response
+          let imageUrl = null;
+          for (const item of result.data) {
+            if (item.url && (item.url.startsWith('http://') || item.url.startsWith('https://'))) {
+              imageUrl = item.url;
+              break;
+            }
+            if (item.src && (item.src.startsWith('http://') || item.src.startsWith('https://'))) {
+              imageUrl = item.src;
+              break;
+            }
+          }
 
-          if (imageUrl && (imageUrl.startsWith('http://') || imageUrl.startsWith('https://'))) {
+          if (imageUrl) {
             console.log(`Found image URL for motorcycle ${motorcycle.id}: ${imageUrl}`);
             
             const { error: updateError } = await supabase
@@ -117,7 +122,7 @@ serve(async (req) => {
             }),
             { 
               headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-              status: 429 // Too Many Requests
+              status: 429 
             }
           );
         } else {
