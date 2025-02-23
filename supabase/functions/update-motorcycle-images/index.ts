@@ -44,7 +44,7 @@ serve(async (req) => {
       .from('data_2025')
       .select('id, year, make, model')
       .or('image_url.is.null,image_url.eq.""')  // Check for both NULL and empty string
-      .limit(3); // Reduced limit to avoid rate limiting
+      .limit(1); // Process only one motorcycle at a time
 
     if (fetchError) {
       throw new Error(`Error fetching motorcycles: ${fetchError.message}`);
@@ -65,18 +65,22 @@ serve(async (req) => {
       console.log(`Searching for images of: ${searchQuery}`);
 
       try {
-        // Add longer delay between requests to handle rate limiting
-        await new Promise(resolve => setTimeout(resolve, 2000));
+        // Add a longer delay before making the request
+        await new Promise(resolve => setTimeout(resolve, 5000));
 
         const result = await firecrawl.crawlUrl(`https://www.google.com/search?q=${encodeURIComponent(searchQuery)}&tbm=isch`, {
-          limit: 1
+          limit: 1,
+          scrapeOptions: {
+            selector: 'img'
+          }
         });
 
         console.log('Firecrawl result:', result);
 
         if (result.success && result.data && result.data.length > 0) {
           // Find first valid image URL from the scraped data
-          const imageUrl = result.data[0].url || result.data[0].src;
+          const imageData = result.data[0];
+          const imageUrl = imageData.url || imageData.src || (imageData.attributes && imageData.attributes.src);
 
           if (imageUrl && (imageUrl.startsWith('http://') || imageUrl.startsWith('https://'))) {
             console.log(`Found image URL for motorcycle ${motorcycle.id}: ${imageUrl}`);
@@ -103,15 +107,19 @@ serve(async (req) => {
         }
       } catch (error) {
         // Check for rate limit errors
-        if (error.message && error.message.includes('rate limit')) {
+        if (error.message && error.message.toLowerCase().includes('rate limit')) {
           console.error(`Rate limit hit for motorcycle ${motorcycle.id}: ${error.message}`);
-          results.push({ 
-            id: motorcycle.id, 
-            success: false, 
-            error: 'Rate limit exceeded, please try again later'
-          });
-          // Break the loop if we hit rate limit
-          break;
+          return new Response(
+            JSON.stringify({ 
+              error: 'Rate limit exceeded, please try again in a few minutes',
+              processed: results.length,
+              results 
+            }),
+            { 
+              headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+              status: 429 // Too Many Requests
+            }
+          );
         } else {
           console.error(`Error processing motorcycle ${motorcycle.id}: ${error.message}`);
           results.push({ id: motorcycle.id, success: false, error: error.message });
