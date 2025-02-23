@@ -59,7 +59,11 @@ serve(async (req) => {
 
       if (!data.items || data.items.length === 0) {
         console.log('No search results found. Search info:', data.searchInformation);
-        return new Response(JSON.stringify({ success: true, count: 0 }), {
+        return new Response(JSON.stringify({ 
+          success: true, 
+          count: 0,
+          searchInfo: data.searchInformation 
+        }), {
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         });
       }
@@ -90,14 +94,18 @@ serve(async (req) => {
         console.log('Successfully inserted routes');
       }
 
-      return new Response(JSON.stringify({ success: true, count: routes.length }), {
+      return new Response(JSON.stringify({ 
+        success: true, 
+        count: routes.length,
+        routes: routes 
+      }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
     
     if (type === 'gear') {
       // More generic search query
-      const searchQuery = 'site:revzilla.com motorcycle gear';
+      const searchQuery = 'site:revzilla.com "motorcycle helmets" OR "motorcycle jacket"';
       const searchUrl = `https://www.googleapis.com/customsearch/v1?key=${GOOGLE_SEARCH_API_KEY}&cx=${GOOGLE_SEARCH_ENGINE_ID}&q=${encodeURIComponent(searchQuery)}&num=10`;
 
       console.log('Making Google Search API request with URL:', searchUrl);
@@ -124,7 +132,11 @@ serve(async (req) => {
 
       if (!data.items || data.items.length === 0) {
         console.log('No gear search results found. Search info:', data.searchInformation);
-        return new Response(JSON.stringify({ success: true, count: 0 }), {
+        return new Response(JSON.stringify({ 
+          success: true, 
+          count: 0,
+          searchInfo: data.searchInformation 
+        }), {
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         });
       }
@@ -156,7 +168,11 @@ serve(async (req) => {
         console.log('Successfully inserted gear');
       }
 
-      return new Response(JSON.stringify({ success: true, count: gear.length }), {
+      return new Response(JSON.stringify({ 
+        success: true, 
+        count: gear.length,
+        gear: gear 
+      }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
