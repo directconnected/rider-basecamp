@@ -208,19 +208,19 @@ export type Database = {
         Row: {
           byway_name: string
           designation: string
-          length_miles: number | null
+          length_miles: string | null
           state: string
         }
         Insert: {
           byway_name: string
           designation: string
-          length_miles?: number | null
+          length_miles?: string | null
           state: string
         }
         Update: {
           byway_name?: string
           designation?: string
-          length_miles?: number | null
+          length_miles?: string | null
           state?: string
         }
         Relationships: []

@@ -15,6 +15,31 @@ interface ScenicByway {
   designation: string;
 }
 
+const stateAbbreviations: { [key: string]: string } = {
+  AL: "Alabama", AK: "Alaska", AZ: "Arizona", AR: "Arkansas", CA: "California",
+  CO: "Colorado", CT: "Connecticut", DE: "Delaware", FL: "Florida", GA: "Georgia",
+  HI: "Hawaii", ID: "Idaho", IL: "Illinois", IN: "Indiana", IA: "Iowa",
+  KS: "Kansas", KY: "Kentucky", LA: "Louisiana", ME: "Maine", MD: "Maryland",
+  MA: "Massachusetts", MI: "Michigan", MN: "Minnesota", MS: "Mississippi",
+  MO: "Missouri", MT: "Montana", NE: "Nebraska", NV: "Nevada", NH: "New Hampshire",
+  NJ: "New Jersey", NM: "New Mexico", NY: "New York", NC: "North Carolina",
+  ND: "North Dakota", OH: "Ohio", OK: "Oklahoma", OR: "Oregon", PA: "Pennsylvania",
+  RI: "Rhode Island", SC: "South Carolina", SD: "South Dakota", TN: "Tennessee",
+  TX: "Texas", UT: "Utah", VT: "Vermont", VA: "Virginia", WA: "Washington",
+  WV: "West Virginia", WI: "Wisconsin", WY: "Wyoming"
+};
+
+const capitalizeWords = (str: string) => {
+  return str
+    .split(' ')
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+    .join(' ');
+};
+
+const getFullStateName = (stateAbbr: string) => {
+  return stateAbbreviations[stateAbbr.toUpperCase()] || stateAbbr;
+};
+
 const ScenicByways = () => {
   const { data: scenicByways, isLoading } = useQuery({
     queryKey: ["scenic-byways"],
@@ -58,13 +83,13 @@ const ScenicByways = () => {
                     <CardHeader>
                       <CardTitle className="flex items-center gap-2">
                         <Route className="h-5 w-5 text-theme-600" />
-                        {byway.byway_name}
+                        {capitalizeWords(byway.byway_name)}
                       </CardTitle>
                     </CardHeader>
                     <CardContent>
                       <div className="space-y-2">
                         <p className="text-gray-600">
-                          <span className="font-medium">State:</span> {byway.state}
+                          <span className="font-medium">State:</span> {getFullStateName(byway.state)}
                         </p>
                         {byway.length_miles && (
                           <p className="text-gray-600">
