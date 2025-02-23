@@ -1,14 +1,15 @@
-
 import React from "react";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/layout/Footer";
 import { Card } from "@/components/ui/card";
 import { Tent, Backpack, Compass, Flame } from "lucide-react";
+import Breadcrumbs from "@/components/Breadcrumbs";
 
 const CampingGear = () => {
   return (
     <div className="min-h-screen flex flex-col">
       <Navigation />
+      <Breadcrumbs />
       
       <main className="flex-1">
         <section className="py-24 bg-gradient-to-b from-gray-900 to-gray-800">

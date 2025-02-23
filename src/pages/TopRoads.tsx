@@ -1,4 +1,3 @@
-
 import React from "react";
 import { useQuery } from "@tanstack/react-query";
 import Navigation from "@/components/Navigation";
@@ -6,6 +5,7 @@ import Footer from "@/components/layout/Footer";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Map } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import Breadcrumbs from "@/components/Breadcrumbs";
 
 const TopRoads = () => {
   const { data: roads, isLoading } = useQuery({
@@ -17,7 +17,6 @@ const TopRoads = () => {
       
       if (error) throw error;
 
-      // Sort by the numeric prefix in the name
       return data.sort((a, b) => {
         const getNumber = (str: string) => {
           const match = str.match(/^(\d+)\./);
@@ -32,7 +31,7 @@ const TopRoads = () => {
   return (
     <div className="min-h-screen flex flex-col">
       <Navigation />
-      
+      <Breadcrumbs />
       <main className="flex-1">
         <section className="py-24 bg-gradient-to-b from-gray-900 to-gray-800">
           <div className="container mx-auto px-4">

@@ -1,13 +1,14 @@
-
 import React from 'react';
 import Navigation from "@/components/Navigation";
 import UpdateMSRP from "@/components/admin/UpdateMSRP";
 import DataScraper from "@/components/admin/DataScraper";
+import Breadcrumbs from "@/components/Breadcrumbs";
 
 const Admin = () => {
   return (
     <div className="min-h-screen flex flex-col">
       <Navigation />
+      <Breadcrumbs />
       <main className="flex-1 container mx-auto px-4 py-8">
         <div className="max-w-4xl mx-auto">
           <h1 className="text-3xl font-bold mb-8">Admin Dashboard</h1>

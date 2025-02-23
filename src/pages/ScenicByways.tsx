@@ -1,9 +1,9 @@
-
 import React from "react";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/layout/Footer";
 import { Route } from "lucide-react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import Breadcrumbs from "@/components/Breadcrumbs";
 
 const scenicRoutes = [
   {
@@ -36,7 +36,7 @@ const ScenicByways = () => {
   return (
     <div className="min-h-screen flex flex-col">
       <Navigation />
-      
+      <Breadcrumbs />
       <main className="flex-1">
         <section className="py-24 bg-gradient-to-b from-gray-900 to-gray-800">
           <div className="container mx-auto px-4">

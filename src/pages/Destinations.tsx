@@ -1,10 +1,10 @@
-
 import React from "react";
 import { Link } from "react-router-dom";
 import { Card } from "@/components/ui/card";
 import { Map, Route, Compass, FileDown, Star } from "lucide-react";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/layout/Footer";
+import Breadcrumbs from "@/components/Breadcrumbs";
 
 const features = [
   {
@@ -43,6 +43,7 @@ const Destinations = () => {
   return (
     <div className="min-h-screen flex flex-col">
       <Navigation />
+      <Breadcrumbs />
       
       <main className="flex-1">
         <section className="py-24 bg-gradient-to-b from-gray-900 to-gray-800">
