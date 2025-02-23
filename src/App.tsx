@@ -24,6 +24,11 @@ import ScenicByways from "@/pages/ScenicByways";
 import RoutePlanning from "@/pages/RoutePlanning";
 import GpxDownloads from "@/pages/GpxDownloads";
 import FeaturedDestinations from "@/pages/FeaturedDestinations";
+import Blog from "@/pages/Blog";
+import Documentation from "@/pages/Documentation";
+import Support from "@/pages/Support";
+import TermsOfService from "@/pages/TermsOfService";
+import PrivacyPolicy from "@/pages/PrivacyPolicy";
 
 const queryClient = new QueryClient();
 
@@ -52,6 +57,11 @@ function App() {
             <Route path="/route-planning" element={<RoutePlanning />} />
             <Route path="/gpx-downloads" element={<GpxDownloads />} />
             <Route path="/featured-destinations" element={<FeaturedDestinations />} />
+            <Route path="/blog" element={<Blog />} />
+            <Route path="/docs" element={<Documentation />} />
+            <Route path="/support" element={<Support />} />
+            <Route path="/terms" element={<TermsOfService />} />
+            <Route path="/privacy" element={<PrivacyPolicy />} />
             <Route path="*" element={<NotFound />} />
           </RouterRoutes>
           <Toaster />

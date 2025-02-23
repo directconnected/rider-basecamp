@@ -1,3 +1,4 @@
+
 import React from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -30,11 +31,12 @@ const Footer = () => {
               <li><Link to="/docs" className="text-gray-400 hover:text-theme-400 transition-colors">Documentation</Link></li>
               <li><Link to="/support" className="text-gray-400 hover:text-theme-400 transition-colors">Support</Link></li>
               <li><Link to="/terms" className="text-gray-400 hover:text-theme-400 transition-colors">Terms of Service</Link></li>
+              <li><Link to="/privacy" className="text-gray-400 hover:text-theme-400 transition-colors">Privacy Policy</Link></li>
             </ul>
           </div>
           <div className="text-left">
             <h3 className="font-bold text-lg mb-4">Newsletter</h3>
-            <p className="text-gray-400 mb-4">Stay updated with our latest valuations.</p>
+            <p className="text-gray-400 mb-4">Stay updated with our latest news.</p>
             <div className="flex gap-2">
               <Input 
                 placeholder="Enter your email" 
