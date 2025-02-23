@@ -4,6 +4,7 @@ import Navigation from "@/components/Navigation";
 import UpdateMSRP from "@/components/admin/UpdateMSRP";
 import UpdateDescriptions from "@/components/admin/UpdateDescriptions";
 import DataScraper from "@/components/admin/DataScraper";
+import UpdateImages from "@/components/admin/UpdateImages";
 import Breadcrumbs from "@/components/Breadcrumbs";
 
 const Admin = () => {
@@ -23,6 +24,7 @@ const Admin = () => {
               <div className="space-y-4">
                 <UpdateMSRP />
                 <UpdateDescriptions />
+                <UpdateImages />
               </div>
             </div>
           </div>
