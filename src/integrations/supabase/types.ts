@@ -204,6 +204,27 @@ export type Database = {
         }
         Relationships: []
       }
+      scenic_byways: {
+        Row: {
+          byway_name: string
+          designation: string
+          length_miles: number | null
+          state: string
+        }
+        Insert: {
+          byway_name: string
+          designation: string
+          length_miles?: number | null
+          state: string
+        }
+        Update: {
+          byway_name?: string
+          designation?: string
+          length_miles?: number | null
+          state?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
