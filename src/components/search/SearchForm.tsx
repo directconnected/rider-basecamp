@@ -41,6 +41,8 @@ const SearchForm = ({
       <div className="flex flex-col md:flex-row gap-4">
         <Input
           type="text"
+          id="vin-input"
+          name="vin"
           placeholder="Enter VIN (17 characters)"
           value={searchParams.vin}
           onChange={(e) => setSearchParams(prev => ({ ...prev, vin: e.target.value.toUpperCase() }))}
@@ -61,8 +63,9 @@ const SearchForm = ({
         <Select 
           value={searchParams.year}
           onValueChange={(value) => setSearchParams(prev => ({ ...prev, year: value, model: '' }))}
+          name="year"
         >
-          <SelectTrigger className="bg-white">
+          <SelectTrigger className="bg-white" id="year-select">
             <SelectValue placeholder="Select Year" />
           </SelectTrigger>
           <SelectContent>
@@ -76,8 +79,9 @@ const SearchForm = ({
         <Select 
           value={searchParams.make}
           onValueChange={(value) => setSearchParams(prev => ({ ...prev, make: value, model: '' }))}
+          name="make"
         >
-          <SelectTrigger className="bg-white">
+          <SelectTrigger className="bg-white" id="make-select">
             <SelectValue placeholder="Select Make" />
           </SelectTrigger>
           <SelectContent>
@@ -92,8 +96,9 @@ const SearchForm = ({
           value={searchParams.model}
           onValueChange={(value) => setSearchParams(prev => ({ ...prev, model: value }))}
           disabled={!searchParams.make}
+          name="model"
         >
-          <SelectTrigger className="bg-white">
+          <SelectTrigger className="bg-white" id="model-select">
             <SelectValue placeholder="Select Model" />
           </SelectTrigger>
           <SelectContent>
