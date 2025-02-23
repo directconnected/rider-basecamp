@@ -53,6 +53,8 @@ const SearchForm = ({
           className="button-gradient text-white px-8 py-6"
           onClick={() => onVinSearch(searchParams.vin)}
           disabled={isSearching || (searchParams.vin.length > 0 && searchParams.vin.length !== 17)}
+          id="vin-search-button"
+          name="vin-search"
         >
           <ScanBarcode className="mr-2" />
           Decode VIN
@@ -113,6 +115,8 @@ const SearchForm = ({
           className="button-gradient text-white px-8 py-6"
           onClick={onSearch}
           disabled={isSearching}
+          id="search-button"
+          name="search"
         >
           <Search className="mr-2" />
           Search
