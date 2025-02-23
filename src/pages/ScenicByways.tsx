@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/layout/Footer";
@@ -48,9 +49,41 @@ const getFullStateName = (stateAbbr: string) => {
   return stateAbbreviations[stateAbbr.toUpperCase()] || stateAbbr;
 };
 
+// Collection of reliable Unsplash scenic road images
+const scenicRoadImages = [
+  'https://images.unsplash.com/photo-1472396961693-142e6e269027', // Mountain road with deer
+  'https://images.unsplash.com/photo-1433086966358-54859d0ed716', // Bridge and waterfalls
+  'https://images.unsplash.com/photo-1482938289607-e9573fc25ebb', // River between mountains
+  'https://images.unsplash.com/photo-1501785888041-af3ef285b470', // Mountain range road
+  'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b', // Mountain vista
+  'https://images.unsplash.com/photo-1486047275635-fc8d7f31c3f4', // Winding forest road
+  'https://images.unsplash.com/photo-1517524008697-84bbe3c3fd98', // Desert highway
+  'https://images.unsplash.com/photo-1506905925346-21bda4d32df4', // Dramatic mountain pass
+];
+
 const getImageUrl = (imageUrl: string | null) => {
-  if (!imageUrl) return 'https://images.unsplash.com/photo-1472396961693-142e6e269027';
-  if (imageUrl.startsWith('http')) return imageUrl;
+  // Generate a consistent index based on the byway name to always get the same image
+  const getConsistentIndex = (str: string) => {
+    let hash = 0;
+    for (let i = 0; i < str.length; i++) {
+      hash = ((hash << 5) - hash) + str.charCodeAt(i);
+      hash = hash & hash; // Convert to 32-bit integer
+    }
+    return Math.abs(hash) % scenicRoadImages.length;
+  };
+
+  if (!imageUrl) {
+    // Use the first image as default
+    return scenicRoadImages[0];
+  }
+
+  if (imageUrl.startsWith('http')) {
+    // For external URLs, use a consistent fallback image based on the URL
+    const index = getConsistentIndex(imageUrl);
+    return scenicRoadImages[index];
+  }
+
+  // For Supabase storage URLs
   return `${supabase.storage.from('scenic-byways').getPublicUrl(imageUrl).data.publicUrl}`;
 };
 
@@ -133,7 +166,8 @@ const ScenicByways = () => {
                         alt={byway.byway_name}
                         className="w-full h-48 object-cover rounded-md mb-4"
                         onError={(e) => {
-                          e.currentTarget.src = 'https://images.unsplash.com/photo-1472396961693-142e6e269027';
+                          const index = Math.floor(Math.random() * scenicRoadImages.length);
+                          e.currentTarget.src = scenicRoadImages[index];
                         }}
                       />
                     </div>
