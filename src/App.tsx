@@ -19,6 +19,7 @@ import RidingGear from "@/pages/RidingGear";
 import Data from "@/pages/Data";
 import Service from "@/pages/Service";
 import Dealers from "@/pages/Dealers";
+import TopRoads from "@/pages/TopRoads";
 
 const queryClient = new QueryClient();
 
@@ -42,6 +43,7 @@ function App() {
             <Route path="/data" element={<Data />} />
             <Route path="/service" element={<Service />} />
             <Route path="/dealers" element={<Dealers />} />
+            <Route path="/top-roads" element={<TopRoads />} />
             <Route path="*" element={<NotFound />} />
           </RouterRoutes>
           <Toaster />
