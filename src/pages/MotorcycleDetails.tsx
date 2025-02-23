@@ -104,6 +104,8 @@ const MotorcycleDetails = () => {
                 <MotorcycleValueInfo 
                   currentValue={motorcycle.current_value} 
                   msrp={motorcycle.msrp} 
+                  year={motorcycle.year}
+                  make={motorcycle.make}
                 />
                 <MotorcycleSpecifications motorcycle={motorcycle} />
               </div>
