@@ -1,3 +1,4 @@
+
 import React from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -14,7 +15,7 @@ const Subscribe = () => {
     {
       title: "Basic",
       price: "9.99",
-      priceId: "price_basic", // Replace with your Stripe price ID
+      priceId: "prod_RpQAQMVlK2FvCS", // Updated Basic plan price ID
       features: [
         "Basic motorcycle valuations",
         "Limited search functionality",
@@ -24,7 +25,7 @@ const Subscribe = () => {
     {
       title: "Pro",
       price: "19.99",
-      priceId: "price_pro", // Replace with your Stripe price ID
+      priceId: "price_pro", // Replace with your Pro plan price ID
       features: [
         "Advanced motorcycle valuations",
         "Full search capabilities",
@@ -36,7 +37,7 @@ const Subscribe = () => {
     {
       title: "Enterprise",
       price: "49.99",
-      priceId: "price_enterprise", // Replace with your Stripe price ID
+      priceId: "price_enterprise", // Replace with your Enterprise plan price ID
       features: [
         "Custom API access",
         "Bulk valuations",
