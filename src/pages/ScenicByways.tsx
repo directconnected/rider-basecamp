@@ -1,38 +1,34 @@
+
 import React from "react";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/layout/Footer";
 import { Route } from "lucide-react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import Breadcrumbs from "@/components/Breadcrumbs";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 
-const scenicRoutes = [
-  {
-    id: 1,
-    name: "Blue Ridge Parkway",
-    description: "469 miles of scenic road connecting Shenandoah National Park to Great Smoky Mountains National Park.",
-    state: "North Carolina & Virginia"
-  },
-  {
-    id: 2,
-    name: "Pacific Coast Highway",
-    description: "655 miles of stunning coastal views along California's rugged coastline.",
-    state: "California"
-  },
-  {
-    id: 3,
-    name: "Going-to-the-Sun Road",
-    description: "50 miles of breathtaking views through Glacier National Park.",
-    state: "Montana"
-  },
-  {
-    id: 4,
-    name: "Beartooth Highway",
-    description: "68 miles of switchbacks and stunning mountain vistas.",
-    state: "Montana & Wyoming"
-  }
-];
+interface ScenicByway {
+  byway_name: string;
+  state: string;
+  length_miles: number | null;
+  designation: string;
+}
 
 const ScenicByways = () => {
+  const { data: scenicByways, isLoading } = useQuery({
+    queryKey: ["scenic-byways"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("scenic_byways")
+        .select("*")
+        .order("byway_name");
+      
+      if (error) throw error;
+      return data as ScenicByway[];
+    },
+  });
+
   return (
     <div className="min-h-screen flex flex-col">
       <Navigation />
@@ -53,22 +49,37 @@ const ScenicByways = () => {
 
         <section className="py-24">
           <div className="container mx-auto px-4">
-            <div className="grid gap-6 md:grid-cols-2">
-              {scenicRoutes.map((route) => (
-                <Card key={route.id}>
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <Route className="h-5 w-5 text-theme-600" />
-                      {route.name}
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-gray-600 mb-2">{route.description}</p>
-                    <p className="text-sm text-gray-500">{route.state}</p>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
+            {isLoading ? (
+              <div className="text-center text-gray-600">Loading scenic byways...</div>
+            ) : (
+              <div className="grid gap-6 md:grid-cols-2">
+                {scenicByways?.map((byway, index) => (
+                  <Card key={index} className="hover-card">
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Route className="h-5 w-5 text-theme-600" />
+                        {byway.byway_name}
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-2">
+                        <p className="text-gray-600">
+                          <span className="font-medium">State:</span> {byway.state}
+                        </p>
+                        {byway.length_miles && (
+                          <p className="text-gray-600">
+                            <span className="font-medium">Length:</span> {byway.length_miles} miles
+                          </p>
+                        )}
+                        <p className="text-gray-600">
+                          <span className="font-medium">Designation:</span> {byway.designation}
+                        </p>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            )}
           </div>
         </section>
       </main>
