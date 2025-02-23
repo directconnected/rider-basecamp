@@ -12,20 +12,73 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 
+const routeConfig = {
+  'top-roads': {
+    parent: 'destinations',
+    label: 'Top Roads'
+  },
+  'scenic-byways': {
+    parent: 'destinations',
+    label: 'Scenic Byways'
+  },
+  'gpx-downloads': {
+    parent: 'destinations',
+    label: 'GPX Downloads'
+  },
+  'featured-destinations': {
+    parent: 'destinations',
+    label: 'Featured Destinations'
+  },
+  'route-planning': {
+    parent: 'destinations',
+    label: 'Route Planning'
+  },
+  'destinations': {
+    label: 'Destinations'
+  },
+  'data': {
+    label: 'Motorcycle Data'
+  },
+  'service': {
+    label: 'Service Records'
+  },
+  'camping-gear': {
+    label: 'Camping Gear'
+  },
+  'riding-gear': {
+    label: 'Riding Gear'
+  },
+  'admin': {
+    label: 'Admin'
+  }
+};
+
 const getBreadcrumbs = (pathname: string) => {
   const paths = pathname.split('/').filter(Boolean);
+  const breadcrumbs = [];
   
-  return paths.map((path, index) => {
-    const url = `/${paths.slice(0, index + 1).join('/')}`;
-    const label = path.split('-')
-      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-      .join(' ');
+  for (let i = 0; i < paths.length; i++) {
+    const path = paths[i];
+    const config = routeConfig[path as keyof typeof routeConfig];
     
-    return {
-      label,
-      url
-    };
-  });
+    if (config) {
+      // If this route has a parent, add it first
+      if (config.parent && !paths.includes(config.parent)) {
+        breadcrumbs.push({
+          label: routeConfig[config.parent as keyof typeof routeConfig].label,
+          url: `/${config.parent}`
+        });
+      }
+      
+      // Add the current route
+      breadcrumbs.push({
+        label: config.label,
+        url: `/${paths.slice(0, i + 1).join('/')}`
+      });
+    }
+  }
+  
+  return breadcrumbs;
 };
 
 const Breadcrumbs = () => {
