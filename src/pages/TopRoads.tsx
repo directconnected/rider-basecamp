@@ -48,9 +48,7 @@ const TopRoads = () => {
 
       if (error) {
         console.error('Error getting download URL:', error);
-        console.error('Error code:', error.code);  // Log error code
         console.error('Error message:', error.message);  // Log error message
-        console.error('Error details:', error.details);  // Log error details
         toast.error("Unable to download GPX file", {
           description: "The file may not be available yet."
         });
