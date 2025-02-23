@@ -153,6 +153,24 @@ export type Database = {
         }
         Relationships: []
       }
+      roads: {
+        Row: {
+          description: string
+          id: number
+          name: string
+        }
+        Insert: {
+          description: string
+          id?: number
+          name: string
+        }
+        Update: {
+          description?: string
+          id?: number
+          name?: string
+        }
+        Relationships: []
+      }
       routes: {
         Row: {
           created_at: string | null
