@@ -11,32 +11,32 @@ const Index = () => {
   const features = [
     {
       icon: Route,
-      title: "Roads & Rides",
-      description: "Top motorcycle roads, scenic routes, and riding tips.",
+      title: "Roads, Routes & Destinations",
+      description: "Top motorcycle roads, routes, destinations.",
       link: "/routes"
     },
     {
       icon: Tent,
-      title: "Camping",
-      description: "Top camping gear for bikers: compact, durable, essentials.",
+      title: "Camping Gear",
+      description: "Top camping gear for motorcycle campers & latest news.",
       link: "/camping-gear"
     },
     {
       icon: Shield,
       title: "Riding Gear",
-      description: "Top riding gear: safety, comfort, and style for bikers.",
+      description: "Top riding gear & latest news.",
       link: "/riding-gear"
     },
     {
       icon: Wrench,
       title: "Service Records",
-      description: "Track maintenance records and service intervals",
+      description: "Track maintenance records and service intervals.",
       link: "/service"
     },
     {
       icon: Search,
       title: "Motorcycle Data",
-      description: "data",
+      description: "Manufacturer data, owner's manuals, service manuals, VIN & search data.",
       link: "/data"
     }
   ];
