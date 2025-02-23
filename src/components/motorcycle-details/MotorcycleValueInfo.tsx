@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -134,11 +135,12 @@ export const MotorcycleValueInfo = ({ currentValue, msrp, year, make, model }: M
         <h4 className="font-medium">Adjust Value Estimate</h4>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="space-y-2">
-            <label htmlFor="mileage" className="text-sm text-gray-600">
+            <label htmlFor="motorcycle-mileage" className="text-sm text-gray-600">
               Current Mileage
             </label>
             <Input
-              id="mileage"
+              id="motorcycle-mileage"
+              name="motorcycle-mileage"
               type="number"
               placeholder="Enter current mileage"
               value={mileage}
@@ -146,11 +148,15 @@ export const MotorcycleValueInfo = ({ currentValue, msrp, year, make, model }: M
             />
           </div>
           <div className="space-y-2">
-            <label className="text-sm text-gray-600">
+            <label htmlFor="motorcycle-condition" className="text-sm text-gray-600">
               Condition
             </label>
-            <Select value={condition} onValueChange={(value: MotorcycleCondition) => setCondition(value)}>
-              <SelectTrigger>
+            <Select 
+              value={condition} 
+              onValueChange={(value: MotorcycleCondition) => setCondition(value)}
+              name="motorcycle-condition"
+            >
+              <SelectTrigger id="motorcycle-condition">
                 <SelectValue placeholder="Select condition" />
               </SelectTrigger>
               <SelectContent>
@@ -162,7 +168,12 @@ export const MotorcycleValueInfo = ({ currentValue, msrp, year, make, model }: M
             </Select>
           </div>
         </div>
-        <Button onClick={handleCalculate} className="w-full">
+        <Button 
+          onClick={handleCalculate} 
+          className="w-full"
+          id="recalculate-button"
+          name="recalculate"
+        >
           Recalculate Value
         </Button>
       </div>
@@ -174,6 +185,8 @@ export const MotorcycleValueInfo = ({ currentValue, msrp, year, make, model }: M
             variant="outline" 
             className="flex-1"
             onClick={() => handleManualDownload('owners')}
+            id="owners-manual-button"
+            name="owners-manual"
           >
             <FileDown className="mr-2 h-4 w-4" />
             View Owner's Manual
@@ -182,6 +195,8 @@ export const MotorcycleValueInfo = ({ currentValue, msrp, year, make, model }: M
             variant="outline" 
             className="flex-1"
             onClick={() => handleManualDownload('service')}
+            id="service-manual-button"
+            name="service-manual"
           >
             <FileDown className="mr-2 h-4 w-4" />
             View Service Manual
