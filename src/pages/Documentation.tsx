@@ -3,7 +3,7 @@ import React from "react";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/layout/Footer";
 import { Card, CardContent } from "@/components/ui/card";
-import { FileText, Book, Compass, Tool } from "lucide-react";
+import { FileText, Book, Compass, Wrench } from "lucide-react";
 import Breadcrumbs from "@/components/Breadcrumbs";
 
 const Documentation = () => {
@@ -24,7 +24,7 @@ const Documentation = () => {
       description: "How to plan and navigate your motorcycle journeys.",
     },
     {
-      icon: Tool,
+      icon: Wrench,
       title: "Technical Reference",
       description: "Specifications and technical documentation.",
     },
