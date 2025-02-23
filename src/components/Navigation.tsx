@@ -1,7 +1,7 @@
 
 import React, { useEffect, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Home, UserPlus, LogIn } from "lucide-react";
+import { Home, LogIn } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -57,16 +57,6 @@ const Navigation = () => {
               }`}
             >
               Contact
-            </Link>
-            <Link to="/subscribe">
-              <Button 
-                variant="default" 
-                size="sm"
-                className="ml-4 bg-theme-500 hover:bg-theme-600"
-              >
-                <UserPlus className="mr-2 h-4 w-4" />
-                Sign Up
-              </Button>
             </Link>
             <Link to="/auth">
               <Button 
