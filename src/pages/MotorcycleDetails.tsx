@@ -27,6 +27,8 @@ const MotorcycleDetails = () => {
           return;
         }
 
+        console.log('Fetching motorcycle with ID:', numericId); // Debug log
+
         const { data, error } = await supabase
           .from('data_2025')
           .select('*')
@@ -38,12 +40,16 @@ const MotorcycleDetails = () => {
           return;
         }
 
+        console.log('Fetched motorcycle data:', data); // Debug log
+
         if (data && data.msrp) {
           const updatedValue = await updateMotorcycleValue(data);
-          setMotorcycle({
+          const motorcycleData = {
             ...data,
             current_value: updatedValue
-          });
+          };
+          console.log('Setting motorcycle data:', motorcycleData); // Debug log
+          setMotorcycle(motorcycleData);
         } else {
           setMotorcycle(data);
         }
@@ -78,6 +84,13 @@ const MotorcycleDetails = () => {
       </div>
     );
   }
+
+  // Debug log before rendering
+  console.log('Rendering motorcycle details:', {
+    make: motorcycle.make,
+    model: motorcycle.model,
+    year: motorcycle.year
+  });
 
   return (
     <div className="min-h-screen bg-gray-50">
