@@ -18,25 +18,3 @@ export const getFallbackImage = (state: string) => {
   const index = Math.abs(state.charCodeAt(0)) % fallbackImages.length;
   return `https://images.unsplash.com/${fallbackImages[index]}?auto=format&fit=crop&w=800&h=400`;
 };
-
-export const verifyImageUrl = async (url: string): Promise<boolean> => {
-  return new Promise((resolve) => {
-    const img = new Image();
-    const timeoutId = setTimeout(() => {
-      img.src = '';
-      resolve(false);
-    }, 5000); // 5 second timeout
-
-    img.onload = () => {
-      clearTimeout(timeoutId);
-      resolve(true);
-    };
-    
-    img.onerror = () => {
-      clearTimeout(timeoutId);
-      resolve(false);
-    };
-
-    img.src = url;
-  });
-};

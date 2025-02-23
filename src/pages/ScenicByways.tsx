@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/layout/Footer";
 import {
@@ -12,10 +12,9 @@ import {
 import Breadcrumbs from "@/components/Breadcrumbs";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/hooks/use-toast";
 import BywayCard from "@/components/scenic-byways/BywayCard";
 import { ScenicByway, stateAbbreviations } from "@/components/scenic-byways/types";
-import { capitalizeWords, getFallbackImage, verifyImageUrl } from "@/components/scenic-byways/utils";
+import { capitalizeWords, getFallbackImage } from "@/components/scenic-byways/utils";
 
 const getFullStateName = (stateAbbr: string) => {
   return stateAbbreviations[stateAbbr.toUpperCase()] || stateAbbr;
@@ -23,9 +22,6 @@ const getFullStateName = (stateAbbr: string) => {
 
 const ScenicByways = () => {
   const [selectedState, setSelectedState] = useState<string>("all");
-  const [verifiedUrls, setVerifiedUrls] = useState<{ [key: string]: boolean }>({});
-  const [isVerifying, setIsVerifying] = useState(false);
-  const { toast } = useToast();
 
   const { data: scenicByways, isLoading } = useQuery({
     queryKey: ["scenic-byways"],
@@ -39,40 +35,6 @@ const ScenicByways = () => {
       return data as ScenicByway[];
     },
   });
-
-  useEffect(() => {
-    const verifyImages = async () => {
-      if (!scenicByways) return;
-      setIsVerifying(true);
-
-      const verificationResults: { [key: string]: boolean } = {};
-      let invalidCount = 0;
-
-      for (const byway of scenicByways) {
-        if (byway.image_url) {
-          const isValid = await verifyImageUrl(byway.image_url);
-          verificationResults[byway.image_url] = isValid;
-          if (!isValid) {
-            invalidCount++;
-            console.log(`Invalid image URL for ${byway.byway_name}: ${byway.image_url}`);
-          }
-        }
-      }
-
-      setVerifiedUrls(verificationResults);
-      setIsVerifying(false);
-      
-      if (invalidCount > 0) {
-        toast({
-          title: "Image Verification Results",
-          description: `Using fallback images for ${invalidCount} byways with invalid URLs.`,
-          variant: "default",
-        });
-      }
-    };
-
-    verifyImages();
-  }, [scenicByways, toast]);
 
   const filteredByways = selectedState === "all"
     ? scenicByways
@@ -119,17 +81,14 @@ const ScenicByways = () => {
               </Select>
             </div>
 
-            {isLoading || isVerifying ? (
-              <div className="text-center text-gray-600">
-                {isLoading ? "Loading scenic byways..." : "Verifying images..."}
-              </div>
+            {isLoading ? (
+              <div className="text-center text-gray-600">Loading scenic byways...</div>
             ) : (
               <div className="grid gap-6 md:grid-cols-2">
                 {filteredByways?.map((byway, index) => (
                   <BywayCard
                     key={index}
                     byway={byway}
-                    verifiedUrls={verifiedUrls}
                     getFullStateName={getFullStateName}
                     capitalizeWords={capitalizeWords}
                     getFallbackImage={getFallbackImage}
