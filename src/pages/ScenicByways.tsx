@@ -11,7 +11,7 @@ import { supabase } from "@/integrations/supabase/client";
 interface ScenicByway {
   byway_name: string;
   state: string;
-  length_miles: number | null;
+  length_miles: string | null;  // Changed from number | null to string | null
   designation: string;
 }
 
