@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -44,7 +43,7 @@ export const MotorcycleValueInfo = ({ currentValue, msrp, year, make, model }: M
     toast.success("Value recalculated based on mileage and condition");
   };
 
-  const handleManualDownload = async (type: 'owners' | 'service') => {
+  const handleManualDownload = async (type: 'owners' | 'service' | 'quickstart') => {
     console.log('Download attempt started with:', { make, model, type });
 
     if (!make || !model) {
@@ -78,10 +77,24 @@ export const MotorcycleValueInfo = ({ currentValue, msrp, year, make, model }: M
       filename = filename.replace('gold-wing', 'goldwing');
       
       console.log('Attempting to download:', filename);
-      console.log('Storage bucket:', type === 'owners' ? 'owners_manuals' : 'service_manuals');
+      
+      let bucket = '';
+      switch(type) {
+        case 'owners':
+          bucket = 'owners_manuals';
+          break;
+        case 'service':
+          bucket = 'service_manuals';
+          break;
+        case 'quickstart':
+          bucket = 'quickstart_guides';
+          break;
+      }
+      
+      console.log('Storage bucket:', bucket);
 
       const { data, error } = await supabase.storage
-        .from(type === 'owners' ? 'owners_manuals' : 'service_manuals')
+        .from(bucket)
         .createSignedUrl(filename, 60);
 
       if (error) {
@@ -89,7 +102,7 @@ export const MotorcycleValueInfo = ({ currentValue, msrp, year, make, model }: M
         console.error('Error details:', {
           error: error.message,
           filename,
-          bucket: type === 'owners' ? 'owners_manuals' : 'service_manuals'
+          bucket
         });
         toast.error(`Unable to download ${type} manual`, {
           description: "The manual may not be available yet."
@@ -180,7 +193,7 @@ export const MotorcycleValueInfo = ({ currentValue, msrp, year, make, model }: M
 
       <div className="pt-4 border-t">
         <h4 className="font-medium mb-4">Documentation</h4>
-        <div className="flex flex-col sm:flex-row gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <Button 
             variant="outline" 
             className="flex-1"
@@ -200,6 +213,16 @@ export const MotorcycleValueInfo = ({ currentValue, msrp, year, make, model }: M
           >
             <FileDown className="mr-2 h-4 w-4" />
             View Service Manual
+          </Button>
+          <Button 
+            variant="outline" 
+            className="flex-1"
+            onClick={() => handleManualDownload('quickstart')}
+            id="quickstart-guide-button"
+            name="quickstart-guide"
+          >
+            <FileDown className="mr-2 h-4 w-4" />
+            View Quickstart Guide
           </Button>
         </div>
       </div>
