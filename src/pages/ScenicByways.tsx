@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/layout/Footer";
@@ -46,6 +47,19 @@ const capitalizeWords = (str: string) => {
 
 const getFullStateName = (stateAbbr: string) => {
   return stateAbbreviations[stateAbbr.toUpperCase()] || stateAbbr;
+};
+
+// Function to get a fallback image based on state
+const getFallbackImage = (state: string) => {
+  // Use the mountain or deer image as fallbacks for scenic routes
+  const fallbackImages = [
+    'photo-1470071459604-3b5ec3a7fe05',
+    'photo-1472396961693-142e6e269027'
+  ];
+  
+  // Use a deterministic way to pick an image based on the state name
+  const index = state.charCodeAt(0) % fallbackImages.length;
+  return `https://images.unsplash.com/${fallbackImages[index]}?auto=format&fit=crop&w=800&h=400`;
 };
 
 const ScenicByways = () => {
@@ -123,9 +137,13 @@ const ScenicByways = () => {
                     </CardHeader>
                     <div className="px-6">
                       <img
-                        src={byway.image_url || '/placeholder.svg'}
+                        src={byway.image_url || getFallbackImage(byway.state)}
                         alt={byway.byway_name}
                         className="w-full h-48 object-cover rounded-md mb-4"
+                        onError={(e) => {
+                          const img = e.target as HTMLImageElement;
+                          img.src = getFallbackImage(byway.state);
+                        }}
                       />
                     </div>
                     <CardContent>
