@@ -48,23 +48,6 @@ const getFullStateName = (stateAbbr: string) => {
   return stateAbbreviations[stateAbbr.toUpperCase()] || stateAbbr;
 };
 
-const getImageUrl = (imageUrl: string | null, bywayName: string, state: string) => {
-  const generateSearchTerms = (name: string, state: string) => {
-    const commonWords = ['byway', 'scenic', 'road', 'highway', 'trail'];
-    const terms = name
-      .toLowerCase()
-      .split(' ')
-      .filter(word => !commonWords.includes(word))
-      .join(' ');
-    
-    const searchTerms = `scenic ${terms} ${state} landscape`;
-    return encodeURIComponent(searchTerms);
-  };
-
-  const searchTerms = generateSearchTerms(bywayName, getFullStateName(state));
-  return `https://source.unsplash.com/1600x900/?${searchTerms}`;
-};
-
 const ScenicByways = () => {
   const [selectedState, setSelectedState] = useState<string>("all");
 
@@ -140,13 +123,9 @@ const ScenicByways = () => {
                     </CardHeader>
                     <div className="px-6">
                       <img
-                        src={getImageUrl(byway.image_url, byway.byway_name, byway.state)}
+                        src={byway.image_url || '/placeholder.svg'}
                         alt={byway.byway_name}
                         className="w-full h-48 object-cover rounded-md mb-4"
-                        onError={(e) => {
-                          const searchTerms = encodeURIComponent(`scenic landscape ${getFullStateName(byway.state)}`);
-                          e.currentTarget.src = `https://source.unsplash.com/1600x900/?${searchTerms}`;
-                        }}
                       />
                     </div>
                     <CardContent>
