@@ -68,14 +68,22 @@ const Subscribe = () => {
         }
       );
 
-      const { url, error } = await response.json();
+      const data = await response.json();
       
-      if (error) throw new Error(error);
-      if (url) window.location.href = url;
+      if (!response.ok) {
+        console.error('Response error:', data);
+        throw new Error(data.error || 'Failed to start checkout process');
+      }
+      
+      if (data.url) {
+        window.location.href = data.url;
+      } else {
+        throw new Error('No checkout URL received');
+      }
       
     } catch (error) {
       console.error('Error:', error);
-      toast.error('Failed to start checkout process');
+      toast.error(error instanceof Error ? error.message : 'Failed to start checkout process');
     }
   };
 
