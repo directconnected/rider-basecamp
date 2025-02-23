@@ -31,11 +31,44 @@ const TopRoads = () => {
     },
   });
 
-  const handleGpxDownload = (roadName: string) => {
-    // For now, just show a toast since we don't have actual GPX files
-    toast.info("GPX download functionality coming soon!", {
-      description: `GPX file for ${roadName} will be available in a future update.`
-    });
+  const handleGpxDownload = async (roadName: string) => {
+    try {
+      // Convert road name to a standardized filename format
+      const filename = roadName
+        .toLowerCase()
+        .replace(/[^\w\s-]/g, '') // Remove special characters
+        .replace(/\s+/g, '-') // Replace spaces with hyphens
+        + '.gpx';
+
+      const { data, error } = await supabase.storage
+        .from('gpx_files')
+        .createSignedUrl(filename, 60); // URL valid for 60 seconds
+
+      if (error) {
+        console.error('Error getting download URL:', error);
+        toast.error("Unable to download GPX file", {
+          description: "The file may not be available yet."
+        });
+        return;
+      }
+
+      // Create a temporary link and trigger the download
+      const link = document.createElement('a');
+      link.href = data.signedUrl;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+      toast.success("Download started!", {
+        description: `Downloading GPX file for ${roadName}`
+      });
+    } catch (error) {
+      console.error('Download error:', error);
+      toast.error("Download failed", {
+        description: "There was an error downloading the GPX file."
+      });
+    }
   };
 
   return (
