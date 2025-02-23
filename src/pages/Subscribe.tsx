@@ -15,7 +15,7 @@ const Subscribe = () => {
     {
       title: "Basic",
       price: "9.99",
-      priceId: "prod_RpQAQMVlK2FvCS",
+      priceId: "price_1QvlKaCXT3Oz0sc73x23FLQ2",
       features: [
         "Basic motorcycle valuations",
         "Limited search functionality",
@@ -25,7 +25,7 @@ const Subscribe = () => {
     {
       title: "Pro",
       price: "19.99",
-      priceId: "prod_RpQBRxto1aEsfb",
+      priceId: "price_1QvlLRCXT3Oz0sc7KBXQlgPT",
       features: [
         "Advanced motorcycle valuations",
         "Full search capabilities",
@@ -37,7 +37,7 @@ const Subscribe = () => {
     {
       title: "Enterprise",
       price: "49.99",
-      priceId: "prod_RpQCZhud4zANQQ",
+      priceId: "price_1QvlLcCXT3Oz0sc7AhZJKdvz",
       features: [
         "Custom API access",
         "Bulk valuations",
