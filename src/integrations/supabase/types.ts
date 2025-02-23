@@ -157,17 +157,23 @@ export type Database = {
         Row: {
           description: string
           id: number
+          image: string | null
           name: string
+          url: string | null
         }
         Insert: {
           description: string
           id?: number
+          image?: string | null
           name: string
+          url?: string | null
         }
         Update: {
           description?: string
           id?: number
+          image?: string | null
           name?: string
+          url?: string | null
         }
         Relationships: []
       }
