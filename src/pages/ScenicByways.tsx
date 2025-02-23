@@ -1,9 +1,16 @@
 
-import React from "react";
+import React, { useState } from "react";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/layout/Footer";
 import { Route } from "lucide-react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -11,7 +18,7 @@ import { supabase } from "@/integrations/supabase/client";
 interface ScenicByway {
   byway_name: string;
   state: string;
-  length_miles: string | null;  // Changed from number | null to string | null
+  length_miles: string | null;
   designation: string;
 }
 
@@ -41,6 +48,8 @@ const getFullStateName = (stateAbbr: string) => {
 };
 
 const ScenicByways = () => {
+  const [selectedState, setSelectedState] = useState<string>("");
+
   const { data: scenicByways, isLoading } = useQuery({
     queryKey: ["scenic-byways"],
     queryFn: async () => {
@@ -53,6 +62,12 @@ const ScenicByways = () => {
       return data as ScenicByway[];
     },
   });
+
+  const filteredByways = selectedState
+    ? scenicByways?.filter(byway => getFullStateName(byway.state) === selectedState)
+    : scenicByways;
+
+  const uniqueStates = Array.from(new Set(scenicByways?.map(byway => getFullStateName(byway.state)) || [])).sort();
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -74,11 +89,30 @@ const ScenicByways = () => {
 
         <section className="py-24">
           <div className="container mx-auto px-4">
+            <div className="mb-8 max-w-xs mx-auto">
+              <Select
+                value={selectedState}
+                onValueChange={setSelectedState}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Filter by state" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="">All States</SelectItem>
+                  {uniqueStates.map((state) => (
+                    <SelectItem key={state} value={state}>
+                      {state}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
             {isLoading ? (
               <div className="text-center text-gray-600">Loading scenic byways...</div>
             ) : (
               <div className="grid gap-6 md:grid-cols-2">
-                {scenicByways?.map((byway, index) => (
+                {filteredByways?.map((byway, index) => (
                   <Card key={index} className="hover-card">
                     <CardHeader>
                       <CardTitle className="flex items-center gap-2">
