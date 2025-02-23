@@ -84,7 +84,7 @@ const MotorcycleDetails = () => {
       <section className="w-full bg-white py-16">
         <div className="container mx-auto px-6">
           <div className="mb-6">
-            <Link to="/">
+            <Link to="/data">
               <Button variant="outline" className="mb-6">
                 <ArrowLeft className="mr-2 h-4 w-4" />
                 Back to Search
