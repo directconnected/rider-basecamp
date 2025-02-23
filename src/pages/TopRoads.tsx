@@ -4,9 +4,11 @@ import { useQuery } from "@tanstack/react-query";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/layout/Footer";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Map } from "lucide-react";
+import { Map, FileDown } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import Breadcrumbs from "@/components/Breadcrumbs";
+import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
 
 const TopRoads = () => {
   const { data: roads, isLoading } = useQuery({
@@ -28,6 +30,13 @@ const TopRoads = () => {
       });
     },
   });
+
+  const handleGpxDownload = (roadName: string) => {
+    // For now, just show a toast since we don't have actual GPX files
+    toast.info("GPX download functionality coming soon!", {
+      description: `GPX file for ${roadName} will be available in a future update.`
+    });
+  };
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -76,7 +85,15 @@ const TopRoads = () => {
                       </div>
                     </CardHeader>
                     <CardContent>
-                      <p className="text-gray-600">{road.description}</p>
+                      <p className="text-gray-600 mb-4">{road.description}</p>
+                      <Button 
+                        variant="outline" 
+                        className="w-full"
+                        onClick={() => handleGpxDownload(road.name)}
+                      >
+                        <FileDown className="mr-2 h-4 w-4" />
+                        Download GPX
+                      </Button>
                     </CardContent>
                   </Card>
                 ))}
