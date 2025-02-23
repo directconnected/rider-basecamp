@@ -110,14 +110,16 @@ const Tents = () => {
                       <TentTree className="h-6 w-6 text-theme-600" />
                     </div>
                     <p className="text-gray-600 mb-4 flex-1">{tent.description}</p>
-                    <a 
-                      href={tent.amazon_url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-block bg-theme-600 text-white px-4 py-2 rounded hover:bg-theme-700 transition-colors"
-                    >
-                      View on Amazon
-                    </a>
+                    <div className="flex justify-center">
+                      <a 
+                        href={tent.amazon_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-block bg-theme-600 text-white px-3 py-1.5 text-sm rounded hover:bg-theme-700 transition-colors"
+                      >
+                        View on Amazon
+                      </a>
+                    </div>
                   </CardContent>
                 </Card>
               ))}
