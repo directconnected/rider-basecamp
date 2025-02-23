@@ -158,21 +158,27 @@ export type Database = {
           description: string
           id: number
           image: string | null
+          miles: string | null
           name: string
+          state: string | null
           url: string | null
         }
         Insert: {
           description: string
           id?: number
           image?: string | null
+          miles?: string | null
           name: string
+          state?: string | null
           url?: string | null
         }
         Update: {
           description?: string
           id?: number
           image?: string | null
+          miles?: string | null
           name?: string
+          state?: string | null
           url?: string | null
         }
         Relationships: []

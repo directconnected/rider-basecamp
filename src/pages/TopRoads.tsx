@@ -69,6 +69,11 @@ const TopRoads = () => {
                         <Map className="h-5 w-5 text-theme-600" />
                         {road.name}
                       </CardTitle>
+                      <div className="text-sm text-gray-600 mt-1">
+                        {road.state && <span>{road.state}</span>}
+                        {road.state && road.miles && <span> • </span>}
+                        {road.miles && <span>{road.miles} miles</span>}
+                      </div>
                     </CardHeader>
                     <CardContent>
                       <p className="text-gray-600">{road.description}</p>
