@@ -35,7 +35,8 @@ serve(async (req) => {
     if (type === 'routes') {
       searchQuery = '"best motorcycle route" OR "motorcycle road" OR "scenic motorcycle ride"';
     } else if (type === 'gear') {
-      searchQuery = '"motorcycle gear review" OR "best motorcycle equipment" OR "motorcycle protective gear"';
+      // Add 2025 to the search query for gear
+      searchQuery = '2025 ("motorcycle gear review" OR "best motorcycle equipment" OR "motorcycle protective gear")';
     } else {
       return new Response(
         JSON.stringify({ error: 'Invalid type specified' }), 
@@ -46,7 +47,7 @@ serve(async (req) => {
       );
     }
 
-    const searchUrl = `https://www.googleapis.com/customsearch/v1?key=${GOOGLE_SEARCH_API_KEY}&cx=${GOOGLE_SEARCH_ENGINE_ID}&q=${encodeURIComponent(searchQuery)}&num=10`;
+    const searchUrl = `https://www.googleapis.com/customsearch/v1?key=${GOOGLE_SEARCH_API_KEY}&cx=${GOOGLE_SEARCH_ENGINE_ID}&q=${encodeURIComponent(searchQuery)}&num=10&dateRestrict=y1`;
     console.log('Making Google Search API request...');
     
     try {
@@ -89,12 +90,33 @@ serve(async (req) => {
           link: item.link
         }));
       } else {
-        searchResults = data.items.map(item => ({
-          title: item.title || 'Untitled Product',
-          price: extractPrice(item.snippet, item.title),
-          link: item.link,
-          type: 'riding'
-        }));
+        // For gear, filter results that contain 2025 in title or snippet
+        searchResults = data.items
+          .filter(item => {
+            const content = `${item.title} ${item.snippet}`.toLowerCase();
+            return content.includes('2025');
+          })
+          .map(item => ({
+            title: item.title || 'Untitled Product',
+            price: extractPrice(item.snippet, item.title),
+            link: item.link,
+            type: 'riding'
+          }));
+        
+        console.log(`Filtered ${data.items.length} results to ${searchResults.length} 2025-specific items`);
+      }
+
+      if (searchResults.length === 0) {
+        return new Response(
+          JSON.stringify({ 
+            success: true, 
+            count: 0,
+            message: type === 'gear' ? 'No 2025 gear results found' : 'No results found'
+          }),
+          { 
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+          }
+        );
       }
 
       const supabase = createClient(
