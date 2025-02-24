@@ -110,11 +110,21 @@ export const findPointsOfInterest = async (route: any): Promise<PointOfInterest[
           // Determine POI type based on Mapbox category
           let type: 'restaurant' | 'hotel' | 'camping' = 'restaurant';
           
-          if (feature.properties.category) {
-            if (feature.properties.category.includes('lodging')) {
+          if (feature.properties && feature.properties.category) {
+            const categories = Array.isArray(feature.properties.category) 
+              ? feature.properties.category 
+              : [feature.properties.category];
+            
+            if (categories.some(cat => cat.includes('lodging'))) {
               type = 'hotel';
-            } else if (feature.properties.category.includes('campground')) {
+            } else if (categories.some(cat => cat.includes('campground'))) {
               type = 'camping';
+            } else if (categories.some(cat => 
+              cat.includes('restaurant') || 
+              cat.includes('food') || 
+              cat.includes('cafe')
+            )) {
+              type = 'restaurant';
             }
           }
 
@@ -139,5 +149,7 @@ export const findPointsOfInterest = async (route: any): Promise<PointOfInterest[
     index === self.findIndex((p) => p.name === poi.name)
   );
 
-  return uniquePois.slice(0, 6); // Limit to 6 suggestions
+  const finalPois = uniquePois.slice(0, 6); // Limit to 6 suggestions
+  console.log('Found POIs:', finalPois); // Debug log
+  return finalPois;
 };
