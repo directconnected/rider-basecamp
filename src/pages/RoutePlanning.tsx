@@ -7,6 +7,7 @@ import RouteForm from "@/components/route-planning/RouteForm";
 import RouteDetails from "@/components/route-planning/RouteDetails";
 import SuggestedStops from "@/components/route-planning/SuggestedStops";
 import RouteMap from "@/components/route-planning/RouteMap";
+import RouteItinerary from "@/components/route-planning/RouteItinerary";
 import { supabase } from "@/integrations/supabase/client";
 import mapboxgl from 'mapbox-gl';
 
@@ -260,6 +261,13 @@ const RoutePlanning = () => {
                     startCoords={startCoords}
                     endCoords={endCoords}
                     route={currentRoute}
+                    fuelStops={fuelStops}
+                  />
+                  <RouteItinerary
+                    startPoint={routeDetails.startPoint}
+                    destination={routeDetails.destination}
+                    distance={routeDetails.distance}
+                    duration={routeDetails.duration}
                     fuelStops={fuelStops}
                   />
                 </>
