@@ -1,4 +1,3 @@
-
 import React from "react";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/layout/Footer";
@@ -181,6 +180,20 @@ const destinations = [
     location: "Wyoming",
     description: "Dramatic mountain range with pristine lakes and valleys.",
     highlights: ["Mountain vistas", "Lake activities", "Wildlife viewing"]
+  },
+  {
+    id: 26,
+    name: "Rocky Mountain Arsenal",
+    location: "Colorado",
+    description: "Urban wildlife refuge with vast prairie landscapes and hiking trails.",
+    highlights: ["Bison herds", "Prairie ecosystems", "Bird watching"]
+  },
+  {
+    id: 27,
+    name: "Apostle Islands",
+    location: "Wisconsin",
+    description: "21 islands in Lake Superior with sea caves and historic lighthouses.",
+    highlights: ["Island hopping", "Lake views", "Historic lighthouses"]
   }
 ];
 
