@@ -1,4 +1,3 @@
-
 import React from "react";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/layout/Footer";
@@ -7,80 +6,80 @@ import { Card } from "@/components/ui/card";
 import { Link } from "react-router-dom";
 import Breadcrumbs from "@/components/Breadcrumbs";
 
-const Index = () => {
-  const features = [
-    {
-      icon: Route,
-      title: "Destination Hub",
-      description: "Top motorcycle roads, routes, destinations & GPX files.",
-      link: "/destinations",
-      id: "destinations-feature"
-    },
-    {
-      icon: Tent,
-      title: "Camping Hub",
-      description: "Top camping gear for motorcycle campers & latest news.",
-      link: "/camping-gear",
-      id: "camping-gear-feature"
-    },
-    {
-      icon: Shield,
-      title: "Gear Hub",
-      description: "Top riding gear for motorcycle riders & latest news.",
-      link: "/riding-gear",
-      id: "riding-gear-feature"
-    },
-    {
-      icon: Wrench,
-      title: "Service Hub",
-      description: "Track maintenance records and service intervals.",
-      link: "/service-landing",
-      id: "service-feature"
-    },
-    {
-      icon: Search,
-      title: "Data Hub",
-      description: "Owner's manuals, service manuals, VIN lookup & data.",
-      link: "/data",
-      id: "data-feature"
-    },
-    {
-      icon: Store,
-      title: "Dealers Hub",
-      description: "Find local motorcycle dealers and repair shops near you.",
-      link: "/dealers",
-      id: "dealers-feature"
-    },
-    {
-      icon: Settings,
-      title: "Parts Hub",
-      description: "Find and compare motorcycle parts and accessories.",
-      link: "/parts",
-      id: "parts-feature"
-    },
-    {
-      icon: Group,
-      title: "Group Rides Hub",
-      description: "Join and organize group rides in your area.",
-      link: "/group-rides",
-      id: "group-rides-feature"
-    },
-    {
-      icon: Car,
-      title: "Rentals Hub",
-      description: "Find motorcycle rentals and compare prices.",
-      link: "/rentals",
-      id: "rentals-feature"
-    },
-    {
-      icon: Newspaper,
-      title: "News Hub",
-      description: "Stay updated with the latest motorcycle news and reviews.",
-      link: "/news",
-      id: "news-feature"
-    }
-  ];
+const features = [
+  {
+    icon: Route,
+    title: "Destination Hub",
+    description: "Top motorcycle roads, routes, destinations & GPX files.",
+    link: "/destinations",
+    id: "destinations-feature"
+  },
+  {
+    icon: Tent,
+    title: "Camping Hub",
+    description: "Find motorcycle friendly accomodations.",
+    link: "/camping-hub",
+    id: "camping-hub-feature"
+  },
+  {
+    icon: Shield,
+    title: "Gear Hub",
+    description: "Top riding gear for motorcycle riders & latest news.",
+    link: "/riding-gear",
+    id: "riding-gear-feature"
+  },
+  {
+    icon: Wrench,
+    title: "Service Hub",
+    description: "Track maintenance records and service intervals.",
+    link: "/service-landing",
+    id: "service-feature"
+  },
+  {
+    icon: Search,
+    title: "Data Hub",
+    description: "Owner's manuals, service manuals, VIN lookup & data.",
+    link: "/data",
+    id: "data-feature"
+  },
+  {
+    icon: Store,
+    title: "Dealers Hub",
+    description: "Find local motorcycle dealers and repair shops near you.",
+    link: "/dealers",
+    id: "dealers-feature"
+  },
+  {
+    icon: Settings,
+    title: "Parts Hub",
+    description: "Find and compare motorcycle parts and accessories.",
+    link: "/parts",
+    id: "parts-feature"
+  },
+  {
+    icon: Group,
+    title: "Group Rides Hub",
+    description: "Join and organize group rides in your area.",
+    link: "/group-rides",
+    id: "group-rides-feature"
+  },
+  {
+    icon: Car,
+    title: "Rentals Hub",
+    description: "Find motorcycle rentals and compare prices.",
+    link: "/rentals",
+    id: "rentals-feature"
+  },
+  {
+    icon: Newspaper,
+    title: "News Hub",
+    description: "Stay updated with the latest motorcycle news and reviews.",
+    link: "/news",
+    id: "news-feature"
+  }
+];
 
+const Index = () => {
   return (
     <div className="min-h-screen flex flex-col" id="index-page">
       <Navigation />
