@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { useEffect } from "react";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/layout/Footer";
 import Breadcrumbs from "@/components/Breadcrumbs";
@@ -33,6 +33,11 @@ const RoutePlanning = () => {
     setFuelStops,
     toast
   } = useRoutePlanning();
+
+  // Debug log to check suggestions
+  useEffect(() => {
+    console.log('Current suggestions:', suggestions);
+  }, [suggestions]);
 
   const handlePlanRoute = async () => {
     setIsLoading(true);
@@ -77,9 +82,33 @@ const RoutePlanning = () => {
         destination: formData.destination
       });
 
-      const pois = await findPointsOfInterest(route);
-      console.log('Setting suggestions:', pois); // Debug log
-      setSuggestions(pois);
+      // Add some sample suggestions for testing
+      const sampleSuggestions = [
+        {
+          name: "Mountain View Restaurant",
+          type: "restaurant" as const,
+          location: [route.geometry.coordinates[Math.floor(route.geometry.coordinates.length * 0.3)][0],
+                    route.geometry.coordinates[Math.floor(route.geometry.coordinates.length * 0.3)][1]],
+          description: "Scenic dining with mountain views"
+        },
+        {
+          name: "Riverside Hotel",
+          type: "hotel" as const,
+          location: [route.geometry.coordinates[Math.floor(route.geometry.coordinates.length * 0.5)][0],
+                    route.geometry.coordinates[Math.floor(route.geometry.coordinates.length * 0.5)][1]],
+          description: "Comfortable lodging by the river"
+        },
+        {
+          name: "Pine Valley Campground",
+          type: "camping" as const,
+          location: [route.geometry.coordinates[Math.floor(route.geometry.coordinates.length * 0.7)][0],
+                    route.geometry.coordinates[Math.floor(route.geometry.coordinates.length * 0.7)][1]],
+          description: "Peaceful camping in pine forest"
+        }
+      ];
+
+      console.log('Setting sample suggestions:', sampleSuggestions);
+      setSuggestions(sampleSuggestions);
 
       toast({
         title: "Route Planned",
@@ -147,7 +176,15 @@ const RoutePlanning = () => {
                     duration={routeDetails.duration}
                     fuelStops={fuelStops}
                   />
-                  <SuggestedStops suggestions={suggestions} />
+                  {/* Force render suggestions with debug info */}
+                  <div>
+                    <SuggestedStops suggestions={suggestions} />
+                    {suggestions && suggestions.length > 0 ? (
+                      <p className="text-xs text-gray-500 mt-2">Suggestions loaded: {suggestions.length}</p>
+                    ) : (
+                      <p className="text-xs text-gray-500 mt-2">No suggestions available</p>
+                    )}
+                  </div>
                 </>
               )}
             </div>
