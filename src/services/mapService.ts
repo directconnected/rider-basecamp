@@ -48,10 +48,21 @@ export const geocodeLocation = async (location: string): Promise<[number, number
   }
 };
 
-export const getLocationName = async (coordinates: [number, number]): Promise<string> => {
+export const getLocationName = async (coordinates: [number, number], type?: 'hotel' | 'restaurant' | 'camping'): Promise<string> => {
   try {
+    let query = `${coordinates[0]},${coordinates[1]}`;
+    let typesFilter = '';
+    
+    if (type === 'hotel') {
+      typesFilter = '&types=poi&limit=1&proximity=ip&category=lodging';
+    } else if (type === 'restaurant') {
+      typesFilter = '&types=poi&limit=1&proximity=ip&category=restaurant,food';
+    } else if (type === 'camping') {
+      typesFilter = '&types=poi&limit=1&proximity=ip&category=campground';
+    }
+
     const response = await fetch(
-      `https://api.mapbox.com/geocoding/v5/mapbox.places/${coordinates[0]},${coordinates[1]}.json?access_token=${mapboxgl.accessToken}`
+      `https://api.mapbox.com/geocoding/v5/mapbox.places/${query}.json?access_token=${mapboxgl.accessToken}${typesFilter}`
     );
     
     if (!response.ok) {
@@ -61,13 +72,38 @@ export const getLocationName = async (coordinates: [number, number]): Promise<st
     const data = await response.json();
     
     if (data.features && data.features.length > 0) {
-      // Look for place or locality features first
+      // If we're looking for a specific type of POI
+      if (type) {
+        const poi = data.features[0];
+        const cityFeature = data.features.find((f: any) => 
+          f.place_type.includes('place') || 
+          f.place_type.includes('locality')
+        );
+        const cityName = cityFeature ? cityFeature.text : '';
+        
+        // Return POI name if found, otherwise generate a generic name
+        if (poi.text && poi.properties?.category) {
+          return poi.text;
+        } else {
+          switch (type) {
+            case 'hotel':
+              return `${cityName} Lodge`;
+            case 'restaurant':
+              return `${cityName} Diner`;
+            case 'camping':
+              return `${cityName} Campground`;
+            default:
+              return poi.text || cityName;
+          }
+        }
+      }
+      
+      // For general location names (city/locality)
       const place = data.features.find((f: any) => 
         f.place_type.includes('place') || 
         f.place_type.includes('locality')
       );
 
-      // If no place/locality is found, look for region (state/province)
       if (place) {
         return place.text;
       } else {

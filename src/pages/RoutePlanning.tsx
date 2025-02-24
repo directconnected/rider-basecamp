@@ -96,7 +96,7 @@ const RoutePlanning = () => {
       const numDays = Math.ceil(totalMiles / milesPerDay);
       const coordinates = route.geometry.coordinates;
       
-      const getLocationName = async (location: [number, number]) => {
+      const getLocationName = async (location: [number, number], type?: string) => {
         const response = await fetch(`https://api.mapbox.com/geocoding/v5/mapbox.places/${location[0]},${location[1]}.json?access_token=${mapboxgl.accessToken}`);
         const data = await response.json();
         return data.features[0].place_name;
@@ -116,16 +116,18 @@ const RoutePlanning = () => {
             ] as [number, number];
             
             const locationName = await getLocationName(stopLocation);
+            const hotelName = await getLocationName(stopLocation, 'hotel');
+            const campingName = await getLocationName(stopLocation, 'camping');
             
             sampleSuggestions.push({
-              name: `${locationName} Hotel`,
+              name: hotelName,
               type: "hotel" as const,
               location: stopLocation,
               description: `Hotel in ${locationName} after day ${day} (${Math.round(progress * totalMiles)} miles)`
             });
 
             sampleSuggestions.push({
-              name: `${locationName} Campground`,
+              name: campingName,
               type: "camping" as const,
               location: stopLocation,
               description: `Camping near ${locationName} after day ${day} (${Math.round(progress * totalMiles)} miles)`
@@ -142,9 +144,10 @@ const RoutePlanning = () => {
                 ] as [number, number];
                 
                 const lunchLocationName = await getLocationName(lunchLocation);
+                const restaurantName = await getLocationName(lunchLocation, 'restaurant');
                 
                 sampleSuggestions.push({
-                  name: `${lunchLocationName} Restaurant`,
+                  name: restaurantName,
                   type: "restaurant" as const,
                   location: lunchLocation,
                   description: `Restaurant in ${lunchLocationName} for lunch on day ${day} (${Math.round(lunchProgress * totalMiles)} miles)`
