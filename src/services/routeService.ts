@@ -14,10 +14,10 @@ const findNearestGasStation = async (coordinates: [number, number]): Promise<Gas
   console.log('Searching for gas stations near coordinates:', coordinates);
   
   try {
-    // Fix: Mapbox expects coordinates in [longitude,latitude] order
+    // Swap coordinates for Mapbox API (it expects longitude,latitude)
     const response = await fetch(
       `https://api.mapbox.com/geocoding/v5/mapbox.places/gas%20station.json?` + 
-      `proximity=${coordinates[0]},${coordinates[1]}&` +
+      `proximity=${coordinates[1]},${coordinates[0]}&` + // Swapped order here
       `types=poi&` +
       `limit=1&` +
       `access_token=${mapboxgl.accessToken}`
