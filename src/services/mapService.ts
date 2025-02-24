@@ -1,4 +1,3 @@
-
 import mapboxgl from 'mapbox-gl';
 import { supabase } from "@/integrations/supabase/client";
 import { PointOfInterest } from "@/hooks/useRoutePlanning";
@@ -51,19 +50,10 @@ export const geocodeLocation = async (location: string): Promise<[number, number
 
 export const getLocationName = async (coordinates: [number, number], type?: 'hotel' | 'restaurant' | 'camping'): Promise<string> => {
   try {
-    let query = `${coordinates[0]},${coordinates[1]}`;
-    let typesFilter = '';
+    const [lng, lat] = coordinates;
     
-    if (type === 'hotel') {
-      typesFilter = '&types=poi&limit=1&proximity=ip&category=lodging';
-    } else if (type === 'restaurant') {
-      typesFilter = '&types=poi&limit=1&proximity=ip&category=restaurant,food';
-    } else if (type === 'camping') {
-      typesFilter = '&types=poi&limit=1&proximity=ip&category=campground';
-    }
-
     const response = await fetch(
-      `https://api.mapbox.com/geocoding/v5/mapbox.places/${query}.json?access_token=${mapboxgl.accessToken}${typesFilter}`
+      `https://api.mapbox.com/geocoding/v5/mapbox.places/${lng},${lat}.json?types=place&limit=1&access_token=${mapboxgl.accessToken}`
     );
     
     if (!response.ok) {
@@ -71,60 +61,46 @@ export const getLocationName = async (coordinates: [number, number], type?: 'hot
     }
 
     const data = await response.json();
+    const cityName = data.features?.[0]?.text || 'Local';
     
-    if (data.features && data.features.length > 0) {
-      // If we're looking for a specific type of POI
-      if (type) {
-        const poi = data.features[0];
-        const cityFeature = data.features.find((f: any) => 
-          f.place_type.includes('place') || 
-          f.place_type.includes('locality')
-        );
-        const cityName = cityFeature ? cityFeature.text : '';
-        
-        // Return POI name if found, otherwise generate a descriptive name
-        if (poi.text && poi.properties?.category) {
-          return poi.text;
-        } else {
-          const adjectives = {
-            hotel: ['Grand', 'Royal', 'Comfort', 'Pleasant', 'Tranquil'],
-            restaurant: ['Tasty', 'Local', 'Fresh', 'Homestyle', 'Country'],
-            camping: ['Pine', 'Mountain', 'River', 'Valley', 'Lake']
-          };
-          
-          const nouns = {
-            hotel: ['Inn', 'Hotel', 'Lodge', 'Suites', 'Resort'],
-            restaurant: ['Diner', 'Cafe', 'Grill', 'Kitchen', 'Restaurant'],
-            camping: ['Campground', 'Camping', 'RV Park', 'Grounds', 'Camp']
-          };
-          
-          const randomAdjective = adjectives[type][Math.floor(Math.random() * adjectives[type].length)];
-          const randomNoun = nouns[type][Math.floor(Math.random() * nouns[type].length)];
-          
-          return `${cityName} ${randomAdjective} ${randomNoun}`.trim();
-        }
-      }
+    const getBusinessName = (city: string, type: 'hotel' | 'restaurant' | 'camping') => {
+      const hash = Math.abs(Math.floor((lng * lat) * 1000)) % 5;
       
-      // For general location names (city/locality)
-      const place = data.features.find((f: any) => 
-        f.place_type.includes('place') || 
-        f.place_type.includes('locality')
-      );
+      const names = {
+        hotel: [
+          `${city} Grand Hotel`,
+          `${city} Royal Inn`,
+          `${city} Comfort Lodge`,
+          `${city} Plaza Hotel`,
+          `${city} Central Inn`
+        ],
+        restaurant: [
+          `${city} Main Street Diner`,
+          `${city} Local Kitchen`,
+          `${city} Family Restaurant`,
+          `${city} Cafe & Grill`,
+          `${city} Downtown Eatery`
+        ],
+        camping: [
+          `${city} Valley Campground`,
+          `${city} Forest Camp`,
+          `${city} Lake Camping`,
+          `${city} Mountain RV Park`,
+          `${city} River Campsite`
+        ]
+      };
+      
+      return names[type][hash];
+    };
 
-      if (place) {
-        return place.text;
-      } else {
-        const region = data.features.find((f: any) => 
-          f.place_type.includes('region')
-        );
-        return region ? region.text : 'Unknown Location';
-      }
+    if (type) {
+      return getBusinessName(cityName, type);
     }
     
-    return 'Unknown Location';
+    return cityName;
   } catch (error) {
     console.error('Error getting location name:', error);
-    return 'Unknown Location';
+    return 'Local Stop';
   }
 };
 
@@ -133,7 +109,6 @@ export const findPointsOfInterest = async (route: any): Promise<PointOfInterest[
   const coordinates = route.geometry.coordinates;
   const numPoints = coordinates.length;
   
-  // Sample points along the route at intervals
   const samplePoints = [
     Math.floor(numPoints * 0.25),  // 25% along route
     Math.floor(numPoints * 0.5),   // 50% along route
@@ -146,7 +121,6 @@ export const findPointsOfInterest = async (route: any): Promise<PointOfInterest[
     const [lng, lat] = coordinates[pointIndex];
     
     try {
-      // Search for POIs around this point
       const response = await fetch(
         `https://api.mapbox.com/geocoding/v5/mapbox.places/${lng},${lat}.json?types=poi&limit=3&access_token=${mapboxgl.accessToken}`
       );
@@ -157,7 +131,6 @@ export const findPointsOfInterest = async (route: any): Promise<PointOfInterest[
       
       if (data.features) {
         for (const feature of data.features) {
-          // Determine POI type based on Mapbox category
           let type: 'restaurant' | 'hotel' | 'camping' = 'restaurant';
           
           if (feature.properties && feature.properties.category) {
@@ -194,7 +167,6 @@ export const findPointsOfInterest = async (route: any): Promise<PointOfInterest[
     }
   }
 
-  // Filter to ensure we have a mix of different types and limit total suggestions
   const uniquePois = pois.filter((poi, index, self) =>
     index === self.findIndex((p) => p.name === poi.name)
   );
