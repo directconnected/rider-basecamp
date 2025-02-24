@@ -16,27 +16,24 @@ const Auth = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // Store the redirect path in state to ensure it persists
-  const [redirectPath, setRedirectPath] = useState(location.state?.from?.pathname || "/dashboard");
+  // Get the redirect path directly from location.state each time it's needed
+  const redirectPath = location.state?.from?.pathname;
 
   useEffect(() => {
-    // Update redirectPath if location.state changes
-    setRedirectPath(location.state?.from?.pathname || "/dashboard");
-  }, [location.state]);
-
-  useEffect(() => {
-    console.log("Current redirect path:", redirectPath); // Debug log
+    console.log("Current location state:", location.state); // Debug log
     
     const checkSession = async () => {
       const { data: { session } } = await supabase.auth.getSession();
       if (session) {
-        console.log("Already logged in. Redirecting to:", redirectPath);
-        navigate(redirectPath);
+        // Only redirect to dashboard if no specific path was provided
+        const path = redirectPath || "/dashboard";
+        console.log("Already logged in. Redirecting to:", path);
+        navigate(path);
       }
     };
     
     checkSession();
-  }, [navigate, redirectPath]);
+  }, [navigate, location.state, redirectPath]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -58,7 +55,7 @@ const Auth = () => {
 
         if (user) {
           toast.success("Account created! Please check your email to verify your account.");
-          navigate(redirectPath);
+          navigate(redirectPath || "/dashboard");
         }
       } else {
         const { data, error: signInError } = await supabase.auth.signInWithPassword({
@@ -69,8 +66,10 @@ const Auth = () => {
         if (signInError) throw signInError;
 
         toast.success("Successfully signed in");
-        console.log("Successfully signed in. Navigating to:", redirectPath);
-        navigate(redirectPath);
+        // Only use dashboard as fallback if no redirect path exists
+        const path = redirectPath || "/dashboard";
+        console.log("Successfully signed in. Navigating to:", path);
+        navigate(path);
       }
     } catch (error) {
       console.error("Auth error:", error);
