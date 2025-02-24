@@ -9,19 +9,20 @@ const Rentals = () => {
     <div className="min-h-screen flex flex-col">
       <Navigation />
       <Breadcrumbs />
-      <main className="flex-1">
-        <section className="py-24 bg-gradient-to-b from-gray-900 to-gray-800">
-          <div className="container mx-auto px-4">
-            <div className="text-center mb-16">
-              <h1 className="text-4xl md:text-5xl font-bold text-white mb-6">
-                Motorcycle Rentals
-              </h1>
-              <p className="text-xl text-gray-300 max-w-2xl mx-auto">
-                Find motorcycle rentals and compare prices
-              </p>
-            </div>
+      <main className="flex-1 container mx-auto px-4 py-8">
+        <h1 className="text-4xl font-bold mb-6">Motorcycle Rentals</h1>
+        <p className="text-lg text-gray-600 mb-8">
+          Find motorcycle rentals and compare prices in your area.
+        </p>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {/* Rentals content will go here */}
+          <div className="p-6 border rounded-lg shadow-sm">
+            <h2 className="text-xl font-semibold mb-4">Coming Soon</h2>
+            <p className="text-gray-600">
+              We're working on bringing you motorcycle rental listings and comparisons.
+            </p>
           </div>
-        </section>
+        </div>
       </main>
       <Footer />
     </div>
