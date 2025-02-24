@@ -25,6 +25,7 @@ const Auth = () => {
       const { data: { session } } = await supabase.auth.getSession();
       if (session) {
         // Redirect to the intended destination immediately
+        console.log("Redirecting to:", from);
         navigate(from);
       }
     };
@@ -63,6 +64,7 @@ const Auth = () => {
         if (signInError) throw signInError;
 
         toast.success("Successfully signed in");
+        console.log("Navigating to:", from);
         navigate(from);
       }
     } catch (error) {
