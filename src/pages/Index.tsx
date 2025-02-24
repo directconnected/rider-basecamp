@@ -74,11 +74,6 @@ const Index = () => {
 
         <section className="py-24 bg-white" id="features-section">
           <div className="container mx-auto px-4">
-            <div className="text-center mb-16">
-              <h2 className="text-3xl font-bold mb-4" id="features-title">
-                Features
-              </h2>
-            </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
               {features.map((feature) => (
                 <Link 
