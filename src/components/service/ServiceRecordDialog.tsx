@@ -6,8 +6,6 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { format } from "date-fns";
-import { Calendar } from "@/components/ui/calendar";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { CalendarIcon, Plus } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -28,13 +26,11 @@ interface ServiceRecordDialogProps {
 const ServiceRecordDialog = ({ onSubmit }: ServiceRecordDialogProps) => {
   const [open, setOpen] = React.useState(false);
   const [serviceType, setServiceType] = React.useState<ServiceType>();
-  const [serviceDate, setServiceDate] = React.useState<Date>();
-  const [nextServiceDate, setNextServiceDate] = React.useState<Date>();
   const [mileage, setMileage] = React.useState("");
   const [cost, setCost] = React.useState("");
   const [notes, setNotes] = React.useState("");
-  const [serviceDateOpen, setServiceDateOpen] = React.useState(false);
-  const [nextServiceDateOpen, setNextServiceDateOpen] = React.useState(false);
+  const [serviceDate, setServiceDate] = React.useState("");
+  const [nextServiceDate, setNextServiceDate] = React.useState("");
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -42,31 +38,21 @@ const ServiceRecordDialog = ({ onSubmit }: ServiceRecordDialogProps) => {
 
     onSubmit({
       service_type: serviceType,
-      service_date: format(serviceDate, 'yyyy-MM-dd'),
+      service_date: serviceDate,
       mileage: mileage ? parseInt(mileage) : undefined,
       cost: cost ? parseFloat(cost) : undefined,
       notes: notes || undefined,
-      next_service_date: nextServiceDate ? format(nextServiceDate, 'yyyy-MM-dd') : undefined,
+      next_service_date: nextServiceDate || undefined,
     });
 
     setOpen(false);
     // Reset form
     setServiceType(undefined);
-    setServiceDate(undefined);
-    setNextServiceDate(undefined);
+    setServiceDate("");
+    setNextServiceDate("");
     setMileage("");
     setCost("");
     setNotes("");
-  };
-
-  const handleServiceDateSelect = (date: Date | undefined) => {
-    setServiceDate(date);
-    setServiceDateOpen(false);
-  };
-
-  const handleNextServiceDateSelect = (date: Date | undefined) => {
-    setNextServiceDate(date);
-    setNextServiceDateOpen(false);
   };
 
   return (
@@ -102,56 +88,23 @@ const ServiceRecordDialog = ({ onSubmit }: ServiceRecordDialogProps) => {
 
           <div className="space-y-2">
             <label className="text-sm font-medium">Service Date</label>
-            <Popover open={serviceDateOpen} onOpenChange={setServiceDateOpen}>
-              <PopoverTrigger asChild>
-                <Button
-                  type="button"
-                  variant="outline"
-                  className={cn(
-                    "w-full justify-start text-left font-normal",
-                    !serviceDate && "text-muted-foreground"
-                  )}
-                >
-                  <CalendarIcon className="mr-2 h-4 w-4" />
-                  {serviceDate ? format(serviceDate, "PPP") : "Pick a date"}
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-auto p-0" align="start">
-                <Calendar
-                  mode="single"
-                  selected={serviceDate}
-                  onSelect={handleServiceDateSelect}
-                  initialFocus
-                />
-              </PopoverContent>
-            </Popover>
+            <Input
+              type="date"
+              value={serviceDate}
+              onChange={(e) => setServiceDate(e.target.value)}
+              required
+              className="w-full"
+            />
           </div>
 
           <div className="space-y-2">
             <label className="text-sm font-medium">Next Service Date (Optional)</label>
-            <Popover open={nextServiceDateOpen} onOpenChange={setNextServiceDateOpen}>
-              <PopoverTrigger asChild>
-                <Button
-                  type="button"
-                  variant="outline"
-                  className={cn(
-                    "w-full justify-start text-left font-normal",
-                    !nextServiceDate && "text-muted-foreground"
-                  )}
-                >
-                  <CalendarIcon className="mr-2 h-4 w-4" />
-                  {nextServiceDate ? format(nextServiceDate, "PPP") : "Pick a date"}
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-auto p-0" align="start">
-                <Calendar
-                  mode="single"
-                  selected={nextServiceDate}
-                  onSelect={handleNextServiceDateSelect}
-                  initialFocus
-                />
-              </PopoverContent>
-            </Popover>
+            <Input
+              type="date"
+              value={nextServiceDate}
+              onChange={(e) => setNextServiceDate(e.target.value)}
+              className="w-full"
+            />
           </div>
 
           <div className="space-y-2">
