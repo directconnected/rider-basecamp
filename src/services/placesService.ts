@@ -9,76 +9,58 @@ interface PlaceResult {
   price_level?: number;
 }
 
-export const findNearbyLodging = async (coordinates: [number, number], radius: number = 5000): Promise<PlaceResult | null> => {
-  try {
-    console.log('Finding lodging near coordinates:', coordinates);
-    const { data, error } = await supabase.functions.invoke('find-nearby-places', {
-      body: {
-        location: coordinates,
-        type: 'lodging',
-        radius
+const findPlace = async (
+  coordinates: [number, number], 
+  type: 'lodging' | 'gas_station', 
+  initialRadius: number = 5000
+): Promise<PlaceResult | null> => {
+  // Try with increasingly larger search radii
+  const searchRadii = [initialRadius, 10000, 20000, 40000];
+  
+  for (const radius of searchRadii) {
+    try {
+      console.log(`Searching for ${type} near coordinates:`, coordinates, 'with radius:', radius);
+      const { data, error } = await supabase.functions.invoke('find-nearby-places', {
+        body: {
+          location: [coordinates[1], coordinates[0]], // Swap to [lat, lng] for Google Places API
+          type,
+          radius
+        }
+      });
+
+      if (error) {
+        console.error(`Error finding ${type}:`, error);
+        continue;
       }
-    });
 
-    if (error) {
-      console.error('Error finding lodging:', error);
-      return null;
+      if (!data?.places?.[0]) {
+        console.log(`No ${type} found near coordinates with radius ${radius}:`, coordinates);
+        continue;
+      }
+
+      const place = data.places[0];
+      console.log(`Found ${type}:`, place.name, 'at radius:', radius);
+      
+      return {
+        name: place.name,
+        address: place.vicinity || place.formatted_address,
+        location: [place.geometry.location.lng, place.geometry.location.lat],
+        rating: place.rating,
+        price_level: place.price_level
+      };
+    } catch (error) {
+      console.error(`Error in findPlace for ${type}:`, error);
+      continue;
     }
-
-    if (!data?.places?.[0]) {
-      console.log('No lodging found near coordinates:', coordinates);
-      return null;
-    }
-
-    const place = data.places[0];
-    console.log('Found lodging:', place.name);
-    
-    return {
-      name: place.name,
-      address: place.vicinity || place.formatted_address,
-      location: [place.geometry.location.lng, place.geometry.location.lat],
-      rating: place.rating,
-      price_level: place.price_level
-    };
-  } catch (error) {
-    console.error('Error in findNearbyLodging:', error);
-    return null;
   }
+  
+  return null;
+};
+
+export const findNearbyLodging = async (coordinates: [number, number], radius: number = 5000): Promise<PlaceResult | null> => {
+  return findPlace(coordinates, 'lodging', radius);
 };
 
 export const findNearbyGasStation = async (coordinates: [number, number], radius: number = 5000): Promise<PlaceResult | null> => {
-  try {
-    console.log('Finding gas station near coordinates:', coordinates);
-    const { data, error } = await supabase.functions.invoke('find-nearby-places', {
-      body: {
-        location: coordinates,
-        type: 'gas_station',
-        radius
-      }
-    });
-
-    if (error) {
-      console.error('Error finding gas station:', error);
-      return null;
-    }
-
-    if (!data?.places?.[0]) {
-      console.log('No gas station found near coordinates:', coordinates);
-      return null;
-    }
-
-    const place = data.places[0];
-    console.log('Found gas station:', place.name);
-    
-    return {
-      name: place.name,
-      address: place.vicinity || place.formatted_address,
-      location: [place.geometry.location.lng, place.geometry.location.lat],
-      rating: place.rating,
-      price_level: place.price_level
-    };
-  } catch (error) {
-    console.error('Error in findNearbyGasStation:', error);
-    return null;
-  }
+  return findPlace(coordinates, 'gas_station', radius);
 };

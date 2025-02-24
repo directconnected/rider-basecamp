@@ -38,6 +38,10 @@ export const calculateFuelStops = async (route: any, fuelMileage: number): Promi
       const locationName = await getLocationName(coordinates);
       const gasStation = await findNearbyGasStation(coordinates);
       
+      if (!gasStation) {
+        console.log(`No gas station found at stop ${i}, retrying with larger radius`);
+      }
+      
       fuelStops.push({
         location: coordinates,
         name: gasStation ? `${gasStation.name} near ${locationName}` : `Near ${locationName}`,
@@ -89,6 +93,10 @@ export const calculateHotelStops = async (route: any, milesPerDay: number): Prom
     try {
       const locationName = await getLocationName(coordinates);
       const hotel = await findNearbyLodging(coordinates);
+      
+      if (!hotel) {
+        console.log(`No hotel found at stop ${i}, tried multiple search radii`);
+      }
       
       hotelStops.push({
         location: coordinates,
