@@ -1,13 +1,16 @@
 
-import React from "react";
+import React, { useEffect } from "react";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/layout/Footer";
 import { Card } from "@/components/ui/card";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Wrench, Clock, Settings } from "lucide-react";
 import Breadcrumbs from "@/components/Breadcrumbs";
+import { supabase } from "@/integrations/supabase/client";
 
 const ServiceLanding = () => {
+  const navigate = useNavigate();
+
   const serviceFeatures = [
     {
       icon: Wrench,
@@ -32,6 +35,21 @@ const ServiceLanding = () => {
     }
   ];
 
+  const handleFeatureClick = async (link: string, e: React.MouseEvent) => {
+    if (link === "#") return;
+    
+    e.preventDefault();
+    const { data: { session } } = await supabase.auth.getSession();
+    
+    if (!session) {
+      // Redirect to auth with the intended destination
+      navigate('/auth', { state: { from: { pathname: link } } });
+    } else {
+      // If already authenticated, go directly to the page
+      navigate(link);
+    }
+  };
+
   return (
     <div className="min-h-screen flex flex-col">
       <Navigation />
@@ -55,10 +73,10 @@ const ServiceLanding = () => {
           <div className="container mx-auto px-4">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
               {serviceFeatures.map((feature) => (
-                <Link 
-                  to={feature.link}
+                <div 
                   key={feature.id}
-                  className={`block ${feature.link === "#" ? "cursor-not-allowed" : ""}`}
+                  onClick={(e) => handleFeatureClick(feature.link, e)}
+                  className={`block ${feature.link === "#" ? "cursor-not-allowed" : "cursor-pointer"}`}
                 >
                   <Card className="p-6 h-full hover:shadow-lg transition-shadow">
                     <div className="flex flex-col h-full">
@@ -73,7 +91,7 @@ const ServiceLanding = () => {
                       </div>
                     </div>
                   </Card>
-                </Link>
+                </div>
               ))}
             </div>
           </div>

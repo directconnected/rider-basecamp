@@ -1,6 +1,6 @@
 
 import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
@@ -14,15 +14,19 @@ const Auth = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [isSignUp, setIsSignUp] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
+
+  // Get the redirect path from the state, fallback to dashboard if none provided
+  const from = location.state?.from?.pathname || "/dashboard";
 
   useEffect(() => {
     // Check if user is already logged in
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session) {
-        navigate("/dashboard");
+        navigate(from);
       }
     });
-  }, [navigate]);
+  }, [navigate, from]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -44,7 +48,7 @@ const Auth = () => {
 
         if (user) {
           toast.success("Account created! Please check your email to verify your account.");
-          navigate("/dashboard");
+          navigate(from);
         }
       } else {
         const { error: signInError } = await supabase.auth.signInWithPassword({
@@ -55,7 +59,7 @@ const Auth = () => {
         if (signInError) throw signInError;
 
         toast.success("Successfully signed in");
-        navigate("/dashboard");
+        navigate(from);
       }
     } catch (error) {
       console.error("Auth error:", error);
