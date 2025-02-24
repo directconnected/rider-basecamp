@@ -70,7 +70,7 @@ const RouteItinerary = ({
       <CardContent className="space-y-6">
         <div className="prose max-w-none">
           <p className="text-lg">
-            Your journey from <span className="font-semibold">{startPoint}</span> to{" "}
+            Your route from <span className="font-semibold">{startPoint}</span> to{" "}
             <span className="font-semibold">{destination}</span> covers{" "}
             <span className="font-semibold">{distance} miles</span> and takes approximately{" "}
             <span className="font-semibold">{formatDuration(duration)}</span>.
@@ -78,7 +78,7 @@ const RouteItinerary = ({
         </div>
 
         <div className="space-y-4">
-          <h3 className="text-lg font-semibold">Suggested Stops:</h3>
+          <h3 className="text-lg font-semibold">Suggested Fuel Stops:</h3>
           <div className="space-y-3">
             <div className="flex items-center gap-4">
               <div className="w-3 h-3 rounded-full bg-green-500" />
