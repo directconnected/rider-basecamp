@@ -4,6 +4,7 @@ import RouteDetails from './RouteDetails';
 import RouteMap from './RouteMap';
 import RouteItinerary from './RouteItinerary';
 import { RouteDetails as RouteDetailsType, FuelStop, HotelStop } from '@/hooks/useRoutePlanning';
+import { RestaurantStop, CampingStop, calculateRestaurantStops, calculateCampingStops } from '@/services/stopCalculationService';
 
 interface RouteResultsProps {
   routeDetails: RouteDetailsType;
@@ -22,12 +23,39 @@ const RouteResults: React.FC<RouteResultsProps> = ({
   fuelStops,
   hotelStops,
 }) => {
+  const [restaurantStops, setRestaurantStops] = React.useState<RestaurantStop[]>([]);
+  const [campingStops, setCampingStops] = React.useState<CampingStop[]>([]);
+
+  useEffect(() => {
+    const calculateAdditionalStops = async () => {
+      if (currentRoute?.geometry?.coordinates) {
+        try {
+          // Calculate restaurant stops every 150 miles
+          const restaurants = await calculateRestaurantStops(currentRoute, 150);
+          setRestaurantStops(restaurants);
+          console.log('Calculated restaurant stops:', restaurants);
+
+          // Calculate camping stops at the same intervals as hotel stops (using milesPerDay from route details)
+          const camping = await calculateCampingStops(currentRoute, Math.floor(routeDetails.distance / hotelStops.length));
+          setCampingStops(camping);
+          console.log('Calculated camping stops:', camping);
+        } catch (error) {
+          console.error('Error calculating additional stops:', error);
+        }
+      }
+    };
+
+    calculateAdditionalStops();
+  }, [currentRoute, routeDetails, hotelStops]);
+
   useEffect(() => {
     // Debug logging
     console.log('Route Details:', routeDetails);
     console.log('Current Route:', currentRoute);
     console.log('Fuel Stops:', fuelStops);
     console.log('Hotel Stops:', hotelStops);
+    console.log('Restaurant Stops:', restaurantStops);
+    console.log('Camping Stops:', campingStops);
     console.log('Start Coordinates:', startCoords);
     console.log('End Coordinates:', endCoords);
 
@@ -50,7 +78,7 @@ const RouteResults: React.FC<RouteResultsProps> = ({
       console.error('Hotel stops is not an array');
       return;
     }
-  }, [routeDetails, currentRoute, fuelStops, hotelStops, startCoords, endCoords]);
+  }, [routeDetails, currentRoute, fuelStops, hotelStops, restaurantStops, campingStops, startCoords, endCoords]);
 
   if (!routeDetails || !currentRoute?.geometry?.coordinates || !Array.isArray(fuelStops)) {
     console.error('Missing required data for route rendering');
@@ -79,6 +107,8 @@ const RouteResults: React.FC<RouteResultsProps> = ({
         duration={routeDetails.duration}
         fuelStops={fuelStops}
         hotelStops={hotelStops}
+        restaurantStops={restaurantStops}
+        campingStops={campingStops}
         currentRoute={currentRoute}
       />
     </>

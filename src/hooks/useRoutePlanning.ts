@@ -31,6 +31,20 @@ interface HotelStop {
   distance: number;
 }
 
+export interface RestaurantStop {
+  location: [number, number];
+  name: string;
+  restaurantName: string;
+  distance: number;
+}
+
+export interface CampingStop {
+  location: [number, number];
+  name: string;
+  campgroundName: string;
+  distance: number;
+}
+
 export const useRoutePlanning = () => {
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
@@ -74,4 +88,4 @@ export const useRoutePlanning = () => {
   };
 };
 
-export type { FormData, RouteDetails, FuelStop, HotelStop };
+export type { FormData, RouteDetails, FuelStop, HotelStop, RestaurantStop, CampingStop };
