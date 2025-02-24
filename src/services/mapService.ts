@@ -77,20 +77,13 @@ export const findPointsOfInterest = async (route: any, milesPerDay: number): Pro
   const totalDistance = route.distance / 1609.34; // Convert to miles
   const numDays = Math.ceil(totalDistance / milesPerDay);
   
-  console.log('Starting POI search with params:', {
-    totalDistance,
-    milesPerDay,
-    numDays,
-    totalCoordinates: coordinates.length
-  });
-
   if (!mapboxgl.accessToken) {
     console.error('Mapbox token not initialized');
     return [];
   }
   
-  // Sample points along the route
-  const numSamplePoints = Math.min(numDays * 2, 10); // Max 10 sample points
+  // Sample fewer points to get major cities/locations along route
+  const numSamplePoints = Math.min(numDays + 1, 8);
   const step = Math.floor(coordinates.length / numSamplePoints);
   
   for (let i = 1; i < numSamplePoints - 1; i++) {
@@ -98,63 +91,36 @@ export const findPointsOfInterest = async (route: any, milesPerDay: number): Pro
     const [lng, lat] = coordinates[pointIndex];
     
     try {
-      console.log(`Searching POIs near point ${i}:`, { lng, lat });
+      // Get places near this point
+      const response = await fetch(
+        `https://api.mapbox.com/geocoding/v5/mapbox.places/${lng},${lat}.json?` +
+        `types=place&` + // Only get actual cities/places
+        `limit=1&` + // Get the nearest major place
+        `access_token=${mapboxgl.accessToken}`
+      );
       
-      // Changed to include more place types and removed the poi type restriction
-      const url = `https://api.mapbox.com/geocoding/v5/mapbox.places/${lng},${lat}.json?` +
-        `types=poi,place&` + // Simple type filter
-        `limit=25&` + 
-        `access_token=${mapboxgl.accessToken}`;
-      
-      const response = await fetch(url);
       const data = await response.json();
       
       if (data.features && data.features.length > 0) {
-        for (const feature of data.features) {
-          if (!feature.text && !feature.place_name) continue;
+        const place = data.features[0];
+        const progress = pointIndex / coordinates.length;
+        const distanceFromStart = Math.round(totalDistance * progress);
 
-          const searchString = JSON.stringify(feature).toLowerCase();
-          let type: 'restaurant' | 'hotel' | 'camping';
-
-          // Simpler type determination
-          if (searchString.includes('hotel') || searchString.includes('motel') || searchString.includes('lodging')) {
-            type = 'hotel';
-          } else if (searchString.includes('camp') || searchString.includes('park')) {
-            type = 'camping';
-          } else {
-            type = 'restaurant'; // Default to restaurant for other POIs
-          }
-
-          const progress = pointIndex / coordinates.length;
-          const distanceFromStart = Math.round(totalDistance * progress);
-          const name = feature.text || feature.place_name?.split(',')[0] || 'Unknown Location';
-          const fullAddress = feature.place_name || feature.text;
-
-          pois.push({
-            name,
-            type,
-            location: feature.center as [number, number],
-            description: `${fullAddress} (${distanceFromStart} miles from start)`
-          });
-        }
+        // Default to restaurant since we don't have actual business type data
+        // This represents a potential stop in a major city
+        pois.push({
+          name: place.text,
+          type: 'restaurant',
+          location: place.center as [number, number],
+          description: `${place.place_name} (${distanceFromStart} miles from start)`
+        });
       }
     } catch (error) {
-      console.error(`Error fetching POIs for point ${i}:`, error);
+      console.error(`Error fetching location for point ${i}:`, error);
       continue;
     }
   }
 
-  // Remove duplicates
-  const uniquePois = Array.from(new Map(pois.map(poi => [poi.name, poi])).values());
-  
-  // Sort POIs to ensure a good mix of types (prefer hotels and camping spots)
-  const sortedPois = uniquePois.sort((a, b) => {
-    if (a.type === 'hotel' && b.type !== 'hotel') return -1;
-    if (a.type === 'camping' && b.type !== 'camping') return -1;
-    return 0;
-  });
-
-  // Limit the number of POIs
-  const maxPois = Math.min(12, numDays * 2);
-  return sortedPois.slice(0, maxPois);
+  // No need to remove duplicates since we're using unique places
+  return pois;
 };
