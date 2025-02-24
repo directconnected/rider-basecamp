@@ -82,27 +82,34 @@ const RoutePlanning = () => {
         destination: formData.destination
       });
 
-      // Add some sample suggestions for testing
+      // Add some sample suggestions for testing with proper typing
+      const coordinates = route.geometry.coordinates;
       const sampleSuggestions = [
         {
           name: "Mountain View Restaurant",
           type: "restaurant" as const,
-          location: [route.geometry.coordinates[Math.floor(route.geometry.coordinates.length * 0.3)][0],
-                    route.geometry.coordinates[Math.floor(route.geometry.coordinates.length * 0.3)][1]],
+          location: [
+            coordinates[Math.floor(coordinates.length * 0.3)][0],
+            coordinates[Math.floor(coordinates.length * 0.3)][1]
+          ] as [number, number],
           description: "Scenic dining with mountain views"
         },
         {
           name: "Riverside Hotel",
           type: "hotel" as const,
-          location: [route.geometry.coordinates[Math.floor(route.geometry.coordinates.length * 0.5)][0],
-                    route.geometry.coordinates[Math.floor(route.geometry.coordinates.length * 0.5)][1]],
+          location: [
+            coordinates[Math.floor(coordinates.length * 0.5)][0],
+            coordinates[Math.floor(coordinates.length * 0.5)][1]
+          ] as [number, number],
           description: "Comfortable lodging by the river"
         },
         {
           name: "Pine Valley Campground",
           type: "camping" as const,
-          location: [route.geometry.coordinates[Math.floor(route.geometry.coordinates.length * 0.7)][0],
-                    route.geometry.coordinates[Math.floor(route.geometry.coordinates.length * 0.7)][1]],
+          location: [
+            coordinates[Math.floor(coordinates.length * 0.7)][0],
+            coordinates[Math.floor(coordinates.length * 0.7)][1]
+          ] as [number, number],
           description: "Peaceful camping in pine forest"
         }
       ];
