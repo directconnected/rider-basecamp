@@ -1,4 +1,4 @@
-
+import React from "react";
 import { BrowserRouter as Router, Routes as RouterRoutes, Route } from "react-router-dom";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
@@ -34,6 +34,7 @@ import Support from "@/pages/Support";
 import TermsOfService from "@/pages/TermsOfService";
 import PrivacyPolicy from "@/pages/PrivacyPolicy";
 import Tents from "@/pages/Tents";
+import ServiceLanding from "@/pages/ServiceLanding";
 
 const queryClient = new QueryClient();
 
@@ -68,11 +69,12 @@ function App() {
                 </ProtectedAdminRoute>
               } 
             />
+            <Route path="/service-landing" element={<ServiceLanding />} />
+            <Route path="/service" element={<Service />} />
             <Route path="/destinations" element={<Destinations />} />
             <Route path="/camping-gear" element={<CampingGear />} />
             <Route path="/riding-gear" element={<RidingGear />} />
             <Route path="/data" element={<Data />} />
-            <Route path="/service" element={<Service />} />
             <Route path="/dealers" element={<Dealers />} />
             <Route path="/top-roads" element={<TopRoads />} />
             <Route path="/scenic-byways" element={<ScenicByways />} />

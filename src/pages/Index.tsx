@@ -34,7 +34,7 @@ const Index = () => {
       icon: Wrench,
       title: "Service Records",
       description: "Track maintenance records and service intervals.",
-      link: "/service",
+      link: "/service-landing",
       id: "service-feature"
     },
     {
