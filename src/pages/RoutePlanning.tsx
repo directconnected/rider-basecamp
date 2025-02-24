@@ -9,7 +9,7 @@ import SuggestedStops from "@/components/route-planning/SuggestedStops";
 import RouteMap from "@/components/route-planning/RouteMap";
 import RouteItinerary from "@/components/route-planning/RouteItinerary";
 import { useRoutePlanning } from "@/hooks/useRoutePlanning";
-import { initializeMapbox, geocodeLocation } from "@/services/mapService";
+import { initializeMapbox, geocodeLocation, getLocationName } from "@/services/mapService";
 import { calculateFuelStops, planRoute } from "@/services/routeService";
 import mapboxgl from 'mapbox-gl';
 
@@ -103,28 +103,35 @@ const RoutePlanning = () => {
             const lunchIndex = Math.floor(coordinates.length * lunchProgress);
             if (lunchIndex < coordinates.length) {
               const lunchCoord = coordinates[lunchIndex];
+              const restaurantName = await getLocationName([lunchCoord[0], lunchCoord[1]], 'restaurant');
+              const locationName = await getLocationName([lunchCoord[0], lunchCoord[1]]);
+              
               suggestions.push({
-                name: `Restaurant Stop ${i}`,
+                name: restaurantName,
                 type: 'restaurant' as const,
                 location: [lunchCoord[0], lunchCoord[1]],
-                description: `Lunch stop on day ${i} (${Math.round(lunchProgress * totalMiles)} miles)`
+                description: `Restaurant in ${locationName} for lunch on day ${i} (${Math.round(lunchProgress * totalMiles)} miles)`
               });
             }
           }
 
           // Add accommodation options for overnight
+          const hotelName = await getLocationName([coord[0], coord[1]], 'hotel');
+          const campingName = await getLocationName([coord[0], coord[1]], 'camping');
+          const locationName = await getLocationName([coord[0], coord[1]]);
+
           suggestions.push({
-            name: `Hotel Option ${i}`,
+            name: hotelName,
             type: 'hotel' as const,
             location: [coord[0], coord[1]],
-            description: `Overnight stay after day ${i} (${Math.round(progress * totalMiles)} miles)`
+            description: `Hotel in ${locationName} for night ${i} (${Math.round(progress * totalMiles)} miles)`
           });
 
           suggestions.push({
-            name: `Camping Option ${i}`,
+            name: campingName,
             type: 'camping' as const,
             location: [coord[0], coord[1]],
-            description: `Alternative camping spot for night ${i} (${Math.round(progress * totalMiles)} miles)`
+            description: `Campground in ${locationName} for night ${i} (${Math.round(progress * totalMiles)} miles)`
           });
         }
       }
