@@ -1,4 +1,3 @@
-
 import mapboxgl from 'mapbox-gl';
 import { getLocationName } from './mapService';
 import { FuelStop, HotelStop } from "@/hooks/useRoutePlanning";
@@ -110,53 +109,48 @@ const findNearestHotel = async (coordinates: [number, number]): Promise<{ name: 
     }
 
     // Configuration for search
-    const searchRadii = [5000, 10000, 15000]; // Search radii in meters
     const searchTerms = ['hotel', 'motel', 'inn'];
     let hotel = null;
 
-    // Try different search radii if needed
-    for (const radius of searchRadii) {
-      for (const term of searchTerms) {
-        const queryUrl = new URL('https://api.mapbox.com/geocoding/v5/mapbox.places/' + encodeURIComponent(term) + '.json');
-        // Fix: Swap coordinates order for proximity parameter (lat,lng)
-        queryUrl.searchParams.append('proximity', `${coordinates[1]},${coordinates[0]}`);
-        queryUrl.searchParams.append('types', 'poi');
-        queryUrl.searchParams.append('limit', '5');
-        queryUrl.searchParams.append('access_token', mapboxgl.accessToken);
-        queryUrl.searchParams.append('radius', radius.toString());
+    for (const term of searchTerms) {
+      const queryUrl = new URL('https://api.mapbox.com/geocoding/v5/mapbox.places/' + encodeURIComponent(term) + '.json');
+      // Keep longitude,latitude order as per Mapbox docs
+      queryUrl.searchParams.append('proximity', `${coordinates[0]},${coordinates[1]}`);
+      queryUrl.searchParams.append('types', 'poi');
+      queryUrl.searchParams.append('limit', '5');
+      queryUrl.searchParams.append('access_token', mapboxgl.accessToken);
+      // Add proximity bias to heavily weight nearby results
+      queryUrl.searchParams.append('proximity-bias', '1');
 
-        console.log(`Trying search with term "${term}" and radius ${radius}m at lat:${coordinates[1]}, lng:${coordinates[0]}`);
-        
-        const response = await fetch(queryUrl.toString());
+      console.log(`Searching for ${term} near lng:${coordinates[0]}, lat:${coordinates[1]}`);
+      
+      const response = await fetch(queryUrl.toString());
 
-        if (!response.ok) {
-          console.error(`Search failed for term "${term}" with radius ${radius}m:`, response.statusText);
-          continue;
-        }
+      if (!response.ok) {
+        console.error(`Search failed for term "${term}":`, response.statusText);
+        continue;
+      }
 
-        const data = await response.json();
-        console.log(`API response for "${term}" (${radius}m radius):`, data);
+      const data = await response.json();
+      console.log(`API response for "${term}":`, data);
 
-        if (data.features && data.features.length > 0) {
-          // Filter to ensure we have a lodging-related POI
-          const lodging = data.features.find(feature => 
-            feature.properties?.category?.toLowerCase().includes('lodging') ||
-            feature.properties?.category?.toLowerCase().includes('hotel') ||
-            (feature.place_type?.includes('poi') && 
-             (feature.text?.toLowerCase().includes('hotel') ||
-              feature.text?.toLowerCase().includes('inn') ||
-              feature.text?.toLowerCase().includes('motel')))
-          );
+      if (data.features && data.features.length > 0) {
+        // Filter to ensure we have a lodging-related POI
+        const lodging = data.features.find(feature => 
+          feature.properties?.category?.toLowerCase().includes('lodging') ||
+          feature.properties?.category?.toLowerCase().includes('hotel') ||
+          (feature.place_type?.includes('poi') && 
+           (feature.text?.toLowerCase().includes('hotel') ||
+            feature.text?.toLowerCase().includes('inn') ||
+            feature.text?.toLowerCase().includes('motel')))
+        );
 
-          if (lodging) {
-            hotel = lodging;
-            console.log(`Found hotel with ${radius}m radius:`, lodging);
-            break;
-          }
+        if (lodging) {
+          hotel = lodging;
+          console.log(`Found hotel:`, lodging);
+          break;
         }
       }
-      
-      if (hotel) break; // Stop searching if we found a hotel
     }
 
     if (!hotel) {
