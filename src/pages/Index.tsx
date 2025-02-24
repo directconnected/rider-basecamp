@@ -2,7 +2,7 @@
 import React from "react";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/layout/Footer";
-import { Map, Search, Database, BarChart, Clock, Users, Wrench, Route, Shield, Tent, Store } from "lucide-react";
+import { Map, Search, Database, BarChart, Clock, Users, Wrench, Route, Shield, Tent, Store, Settings, Group, Car, Newspaper } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Link } from "react-router-dom";
 import Breadcrumbs from "@/components/Breadcrumbs";
@@ -50,6 +50,34 @@ const Index = () => {
       description: "Find local motorcycle dealers and repair shops near you.",
       link: "/dealers",
       id: "dealers-feature"
+    },
+    {
+      icon: Settings,
+      title: "Parts Hub",
+      description: "Find and compare motorcycle parts and accessories.",
+      link: "/parts",
+      id: "parts-feature"
+    },
+    {
+      icon: Group,
+      title: "Group Rides Hub",
+      description: "Join and organize group rides in your area.",
+      link: "/group-rides",
+      id: "group-rides-feature"
+    },
+    {
+      icon: Car,
+      title: "Rentals Hub",
+      description: "Find motorcycle rentals and compare prices.",
+      link: "/rentals",
+      id: "rentals-feature"
+    },
+    {
+      icon: Newspaper,
+      title: "News Hub",
+      description: "Stay updated with the latest motorcycle news and reviews.",
+      link: "/news",
+      id: "news-feature"
     }
   ];
 
