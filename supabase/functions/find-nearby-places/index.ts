@@ -19,7 +19,21 @@ serve(async (req) => {
   }
 
   try {
-    const { location, type, radius = 5000 } = await req.json() as RequestBody;
+    // For testing, if no body is provided, use test coordinates
+    let requestData: RequestBody;
+    if (req.method === 'GET') {
+      // Test coordinates for Pittsburgh, PA
+      requestData = {
+        location: [40.4406, -79.9959],
+        type: 'lodging',
+        radius: 5000
+      };
+      console.log('Using test coordinates:', requestData);
+    } else {
+      requestData = await req.json() as RequestBody;
+    }
+
+    const { location, type, radius = 5000 } = requestData;
 
     if (!location || !Array.isArray(location) || location.length !== 2) {
       throw new Error('Invalid location coordinates');
@@ -42,7 +56,13 @@ serve(async (req) => {
     console.log(`Searching for ${type} near ${lat},${lng} within ${radius}m`);
     
     const response = await fetch(url.toString());
+    if (!response.ok) {
+      console.error('HTTP Error:', response.status, response.statusText);
+      throw new Error(`HTTP Error: ${response.status}`);
+    }
+
     const data = await response.json();
+    console.log('API Response status:', data.status);
 
     if (data.status === 'ZERO_RESULTS') {
       console.log('No places found');
@@ -59,6 +79,17 @@ serve(async (req) => {
 
     console.log(`Found ${data.results.length} places`);
     
+    // Log the first result for debugging
+    if (data.results.length > 0) {
+      const firstPlace = data.results[0];
+      console.log('Sample result:', {
+        name: firstPlace.name,
+        vicinity: firstPlace.vicinity,
+        rating: firstPlace.rating,
+        location: firstPlace.geometry.location
+      });
+    }
+
     return new Response(
       JSON.stringify({ places: data.results }),
       {
