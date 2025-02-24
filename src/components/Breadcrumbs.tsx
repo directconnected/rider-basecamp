@@ -1,3 +1,4 @@
+
 import React from "react";
 import { useLocation } from "react-router-dom";
 import { Link } from "react-router-dom";
@@ -60,6 +61,10 @@ const routeConfig: Record<string, RouteConfig> = {
   },
   'riding-gear': {
     label: 'Riding Gear'
+  },
+  'tents': {
+    parent: 'riding-gear',
+    label: 'Motorcycle Tents'
   },
   'admin': {
     label: 'Admin'
