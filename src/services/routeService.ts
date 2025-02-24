@@ -1,3 +1,4 @@
+
 import mapboxgl from 'mapbox-gl';
 import { getLocationName } from './mapService';
 import { FuelStop, HotelStop } from "@/hooks/useRoutePlanning";
@@ -108,9 +109,9 @@ const findNearestHotel = async (coordinates: [number, number]): Promise<{ name: 
       return null;
     }
 
-    // Create a bounding box around the point (roughly 10km in each direction)
+    // Create a much larger bounding box around the point (roughly 50km in each direction)
     const [lng, lat] = coordinates;
-    const radius = 0.1; // roughly 10km in decimal degrees
+    const radius = 0.5; // roughly 50km in decimal degrees
     const bbox = [
       lng - radius,
       lat - radius,
@@ -125,7 +126,7 @@ const findNearestHotel = async (coordinates: [number, number]): Promise<{ name: 
       const queryUrl = new URL('https://api.mapbox.com/geocoding/v5/mapbox.places/' + encodeURIComponent(term) + '.json');
       queryUrl.searchParams.append('bbox', bbox);
       queryUrl.searchParams.append('types', 'poi');
-      queryUrl.searchParams.append('limit', '10');
+      queryUrl.searchParams.append('limit', '25'); // Increased limit
       queryUrl.searchParams.append('access_token', mapboxgl.accessToken);
       // Also keep proximity to rank closer results higher
       queryUrl.searchParams.append('proximity', `${lng},${lat}`);
@@ -171,6 +172,28 @@ const findNearestHotel = async (coordinates: [number, number]): Promise<{ name: 
           hotel = lodging;
           console.log(`Found hotel:`, lodging);
           break;
+        }
+      }
+    }
+
+    if (!hotel) {
+      // If no hotels found in POI search, try searching for places with "hotel" or "motel" in the name
+      const placeSearchUrl = new URL('https://api.mapbox.com/geocoding/v5/mapbox.places/hotel.json');
+      placeSearchUrl.searchParams.append('bbox', bbox);
+      placeSearchUrl.searchParams.append('types', 'poi,place');
+      placeSearchUrl.searchParams.append('limit', '25');
+      placeSearchUrl.searchParams.append('access_token', mapboxgl.accessToken);
+      placeSearchUrl.searchParams.append('proximity', `${lng},${lat}`);
+
+      console.log('Trying broader place search for hotels');
+      
+      const response = await fetch(placeSearchUrl.toString());
+      if (response.ok) {
+        const data = await response.json();
+        console.log('Place search response:', data);
+        
+        if (data.features && data.features.length > 0) {
+          hotel = data.features[0];
         }
       }
     }
