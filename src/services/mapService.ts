@@ -1,4 +1,3 @@
-
 import mapboxgl from 'mapbox-gl';
 import { supabase } from "@/integrations/supabase/client";
 import { PointOfInterest } from "@/hooks/useRoutePlanning";
@@ -62,19 +61,27 @@ export const getLocationName = async (coordinates: [number, number]): Promise<st
     const data = await response.json();
     
     if (data.features && data.features.length > 0) {
+      // Look for place or locality features first
       const place = data.features.find((f: any) => 
         f.place_type.includes('place') || 
-        f.place_type.includes('locality') ||
-        f.place_type.includes('region')
+        f.place_type.includes('locality')
       );
-      
-      return place ? place.text : 'Fuel Stop';
+
+      // If no place/locality is found, look for region (state/province)
+      if (place) {
+        return place.text;
+      } else {
+        const region = data.features.find((f: any) => 
+          f.place_type.includes('region')
+        );
+        return region ? region.text : 'Unknown Location';
+      }
     }
     
-    return 'Fuel Stop';
+    return 'Unknown Location';
   } catch (error) {
     console.error('Error getting location name:', error);
-    return 'Fuel Stop';
+    return 'Unknown Location';
   }
 };
 
