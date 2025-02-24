@@ -19,8 +19,8 @@ serve(async (req) => {
   }
 
   try {
-    // For testing, if no body is provided, use test coordinates
     let requestData: RequestBody;
+    
     if (req.method === 'GET') {
       // Test coordinates for Pittsburgh, PA
       requestData = {
@@ -30,13 +30,31 @@ serve(async (req) => {
       };
       console.log('Using test coordinates:', requestData);
     } else {
-      requestData = await req.json() as RequestBody;
+      const body = await req.json();
+      console.log('Received request body:', body);
+      
+      // Validate location data
+      if (!body.location || !Array.isArray(body.location) || body.location.length !== 2) {
+        throw new Error(`Invalid location format. Expected [lat, lng] array, got: ${JSON.stringify(body.location)}`);
+      }
+      
+      requestData = {
+        location: body.location.map(Number) as [number, number],
+        type: body.type || 'lodging',
+        radius: body.radius || 5000
+      };
     }
 
-    const { location, type, radius = 5000 } = requestData;
+    console.log('Processed request data:', requestData);
 
-    if (!location || !Array.isArray(location) || location.length !== 2) {
-      throw new Error('Invalid location coordinates');
+    const { location, type, radius } = requestData;
+    const [lat, lng] = location;
+
+    // Validate coordinates
+    if (typeof lat !== 'number' || typeof lng !== 'number' || 
+        isNaN(lat) || isNaN(lng) ||
+        lat < -90 || lat > 90 || lng < -180 || lng > 180) {
+      throw new Error(`Invalid coordinates: lat=${lat}, lng=${lng}`);
     }
 
     const apiKey = Deno.env.get('GOOGLE_PLACES_API_KEY');
@@ -44,34 +62,26 @@ serve(async (req) => {
       throw new Error('Google Places API key not configured');
     }
 
-    // Extract coordinates and ensure they're valid numbers
-    const [lat, lng] = location;
-    if (typeof lat !== 'number' || typeof lng !== 'number' || 
-        isNaN(lat) || isNaN(lng) ||
-        lat < -90 || lat > 90 || lng < -180 || lng > 180) {
-      throw new Error('Invalid latitude or longitude values');
-    }
-
-    // Format coordinates as string in "lat,lng" format
+    // Format coordinates as string
     const locationString = `${lat},${lng}`;
 
-    // Using the Google Places Nearby Search endpoint
+    // Build Places API URL
     const url = new URL('https://maps.googleapis.com/maps/api/place/nearbysearch/json');
     url.searchParams.append('location', locationString);
     url.searchParams.append('radius', radius.toString());
     url.searchParams.append('type', type);
     url.searchParams.append('key', apiKey);
 
-    console.log(`Searching for ${type} near ${locationString} within ${radius}m`);
+    console.log(`Making request to Places API: ${type} near ${locationString} within ${radius}m`);
     
     const response = await fetch(url.toString());
     if (!response.ok) {
-      console.error('HTTP Error:', response.status, response.statusText);
+      console.error('Places API HTTP Error:', response.status, response.statusText);
       throw new Error(`HTTP Error: ${response.status}`);
     }
 
     const data = await response.json();
-    console.log('API Response status:', data.status);
+    console.log('Places API Response status:', data.status);
 
     if (data.status === 'ZERO_RESULTS') {
       console.log('No places found');
@@ -88,7 +98,6 @@ serve(async (req) => {
 
     console.log(`Found ${data.results.length} places`);
     
-    // Log the first result for debugging
     if (data.results.length > 0) {
       const firstPlace = data.results[0];
       console.log('Sample result:', {
