@@ -69,25 +69,25 @@ const ServiceLanding = () => {
           </div>
         </section>
 
-        <section className="py-12">
+        <section className="py-24 bg-white">
           <div className="container mx-auto px-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
               {serviceFeatures.map((feature) => (
                 <div 
                   key={feature.id}
                   onClick={(e) => handleFeatureClick(feature.link, e)}
-                  className={`block ${feature.link === "#" ? "cursor-not-allowed" : "cursor-pointer"}`}
+                  className={`block h-[300px] ${feature.link === "#" ? "cursor-not-allowed" : "cursor-pointer"}`}
                 >
-                  <Card className="p-6 h-full hover:shadow-lg transition-shadow">
-                    <div className="flex flex-col h-full">
+                  <Card className="p-6 text-center h-full hover:shadow-lg transition-shadow duration-200">
+                    <div className="h-full flex flex-col">
                       <div className="flex-none flex items-center justify-center mb-4">
                         <div className="w-12 h-12 rounded-full bg-theme-100 text-theme-600 flex items-center justify-center">
                           <feature.icon size={24} />
                         </div>
                       </div>
-                      <div className="flex-1">
-                        <h3 className="text-lg font-bold mb-2">{feature.title}</h3>
-                        <p className="text-gray-600">{feature.description}</p>
+                      <div className="flex-1 flex flex-col justify-center">
+                        <h3 className="text-lg font-bold mb-2 line-clamp-2">{feature.title}</h3>
+                        <p className="text-gray-600 text-sm line-clamp-3">{feature.description}</p>
                       </div>
                     </div>
                   </Card>
