@@ -14,32 +14,59 @@ const findNearestGasStation = async (coordinates: [number, number]): Promise<Gas
   console.log('Searching for gas stations near coordinates:', coordinates);
   
   try {
-    // Try multiple search terms to increase chances of finding fuel stations
+    // Validate coordinates
+    if (!coordinates || coordinates.length !== 2 || 
+        !isFinite(coordinates[0]) || !isFinite(coordinates[1])) {
+      console.error('Invalid coordinates:', coordinates);
+      return null;
+    }
+
+    // Configuration for search
+    const searchRadii = [5000, 10000, 15000]; // Search radii in meters
     const searchTerms = ['gas station', 'fuel', 'petrol station'];
     let station = null;
 
-    for (const term of searchTerms) {
-      // Swap coordinates for Mapbox API (it expects longitude,latitude)
-      const response = await fetch(
-        `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(term)}.json?` + 
-        `proximity=${coordinates[1]},${coordinates[0]}&` + // Swapped order here
-        `types=poi&` +
-        `limit=1&` +
-        `access_token=${mapboxgl.accessToken}`
-      );
+    // Try different search radii if needed
+    for (const radius of searchRadii) {
+      for (const term of searchTerms) {
+        // Build the query URL with proper parameters
+        const queryUrl = new URL('https://api.mapbox.com/geocoding/v5/mapbox.places/' + encodeURIComponent(term) + '.json');
+        queryUrl.searchParams.append('proximity', `${coordinates[1]},${coordinates[0]}`); // longitude,latitude
+        queryUrl.searchParams.append('types', 'poi');
+        queryUrl.searchParams.append('limit', '1');
+        queryUrl.searchParams.append('access_token', mapboxgl.accessToken);
+        queryUrl.searchParams.append('radius', radius.toString());
 
-      if (!response.ok) {
-        console.error('Gas station search failed:', response.statusText);
-        continue;
+        console.log(`Trying search with term "${term}" and radius ${radius}m`);
+        
+        const response = await fetch(queryUrl.toString());
+
+        if (!response.ok) {
+          console.error(`Search failed for term "${term}" with radius ${radius}m:`, response.statusText);
+          continue;
+        }
+
+        const data = await response.json();
+        console.log(`API response for "${term}" (${radius}m radius):`, data);
+
+        if (data.features && data.features.length > 0) {
+          // Filter to ensure we have a fuel-related POI
+          const fuelStation = data.features.find(feature => 
+            feature.properties?.category?.toLowerCase().includes('fuel') ||
+            feature.properties?.category?.toLowerCase().includes('gas') ||
+            (feature.place_type?.includes('poi') && 
+             feature.text?.toLowerCase().includes('gas'))
+          );
+
+          if (fuelStation) {
+            station = fuelStation;
+            console.log(`Found fuel station with ${radius}m radius:`, fuelStation);
+            break;
+          }
+        }
       }
-
-      const data = await response.json();
-      console.log(`Mapbox Places API response for "${term}":`, data);
-
-      if (data.features && data.features.length > 0) {
-        station = data.features[0];
-        break;
-      }
+      
+      if (station) break; // Stop searching if we found a station
     }
 
     if (!station) {
