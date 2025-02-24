@@ -94,7 +94,7 @@ const Index = () => {
                 RIDERS BASECAMP
               </h2>
               <p className="text-xl md:text-2xl text-gray-200 mb-8 animate-fade-in" id="hero-subtitle">
-                Hub for All Things Motorcyle
+                Hub for All Things Motorcycle
               </p>
             </div>
           </div>
