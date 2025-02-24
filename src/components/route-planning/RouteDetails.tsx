@@ -22,11 +22,11 @@ const RouteDetails = ({ startPoint, destination, distance, duration }: RouteDeta
       <CardContent className="space-y-4">
         <div className="grid grid-cols-2 gap-4">
           <div className="space-y-2">
-            <p className="text-sm font-medium text-gray-500">From</p>
+            <p className="text-sm font-medium text-gray-500">FROM</p>
             <p className="text-lg font-semibold">{startPoint}</p>
           </div>
           <div className="space-y-2">
-            <p className="text-sm font-medium text-gray-500">To</p>
+            <p className="text-sm font-medium text-gray-500">TO</p>
             <p className="text-lg font-semibold">{destination}</p>
           </div>
         </div>
