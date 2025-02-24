@@ -18,6 +18,13 @@ interface PointOfInterest {
   description: string;
 }
 
+interface RouteDetails {
+  distance: number;
+  duration: number;
+  startPoint: string;
+  destination: string;
+}
+
 const RoutePlanning = () => {
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<mapboxgl.Map | null>(null);
@@ -32,6 +39,7 @@ const RoutePlanning = () => {
 
   const [isLoading, setIsLoading] = useState(false);
   const [suggestions, setSuggestions] = useState<PointOfInterest[]>([]);
+  const [routeDetails, setRouteDetails] = useState<RouteDetails | null>(null);
 
   useEffect(() => {
     const initializeMap = async () => {
@@ -156,8 +164,6 @@ const RoutePlanning = () => {
         return;
       }
 
-      console.log("Fetching route for coordinates:", startCoords, endCoords);
-
       const routeResponse = await fetch(
         `https://api.mapbox.com/directions/v5/mapbox/driving/${startCoords[0]},${startCoords[1]};${endCoords[0]},${endCoords[1]}?geometries=geojson&access_token=${mapboxgl.accessToken}`
       );
@@ -167,10 +173,16 @@ const RoutePlanning = () => {
       }
 
       const routeData = await routeResponse.json();
-      console.log("Route data:", routeData);
 
       if (routeData.routes && routeData.routes.length > 0) {
         const route = routeData.routes[0];
+        
+        setRouteDetails({
+          distance: Math.round(route.distance / 1609.34), // Convert meters to miles
+          duration: Math.round(route.duration / 3600), // Convert seconds to hours
+          startPoint: formData.startPoint,
+          destination: formData.destination
+        });
 
         if (map.current) {
           if (map.current.getSource('route')) {
@@ -333,6 +345,39 @@ const RoutePlanning = () => {
                   </Button>
                 </CardContent>
               </Card>
+
+              {routeDetails && (
+                <Card className="mt-8">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <MapPin className="h-5 w-5 text-theme-600" />
+                      Route Details
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <p className="text-sm font-medium text-gray-500">From</p>
+                        <p className="text-lg font-semibold">{routeDetails.startPoint}</p>
+                      </div>
+                      <div className="space-y-2">
+                        <p className="text-sm font-medium text-gray-500">To</p>
+                        <p className="text-lg font-semibold">{routeDetails.destination}</p>
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-2 gap-4 pt-4 border-t">
+                      <div className="space-y-2">
+                        <p className="text-sm font-medium text-gray-500">Distance</p>
+                        <p className="text-lg font-semibold">{routeDetails.distance} miles</p>
+                      </div>
+                      <div className="space-y-2">
+                        <p className="text-sm font-medium text-gray-500">Estimated Duration</p>
+                        <p className="text-lg font-semibold">{routeDetails.duration} hours</p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
 
               {suggestions.length > 0 && (
                 <Card className="mt-8 mb-12">
