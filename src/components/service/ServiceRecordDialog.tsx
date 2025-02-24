@@ -59,6 +59,16 @@ const ServiceRecordDialog = ({ onSubmit }: ServiceRecordDialogProps) => {
     setNotes("");
   };
 
+  const handleServiceDateSelect = (date: Date | undefined) => {
+    setServiceDate(date);
+    setServiceDateOpen(false);
+  };
+
+  const handleNextServiceDateSelect = (date: Date | undefined) => {
+    setNextServiceDate(date);
+    setNextServiceDateOpen(false);
+  };
+
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
@@ -95,6 +105,7 @@ const ServiceRecordDialog = ({ onSubmit }: ServiceRecordDialogProps) => {
             <Popover open={serviceDateOpen} onOpenChange={setServiceDateOpen}>
               <PopoverTrigger asChild>
                 <Button
+                  type="button"
                   variant="outline"
                   className={cn(
                     "w-full justify-start text-left font-normal",
@@ -109,10 +120,7 @@ const ServiceRecordDialog = ({ onSubmit }: ServiceRecordDialogProps) => {
                 <Calendar
                   mode="single"
                   selected={serviceDate}
-                  onSelect={(date) => {
-                    setServiceDate(date);
-                    setServiceDateOpen(false);
-                  }}
+                  onSelect={handleServiceDateSelect}
                   initialFocus
                 />
               </PopoverContent>
@@ -124,6 +132,7 @@ const ServiceRecordDialog = ({ onSubmit }: ServiceRecordDialogProps) => {
             <Popover open={nextServiceDateOpen} onOpenChange={setNextServiceDateOpen}>
               <PopoverTrigger asChild>
                 <Button
+                  type="button"
                   variant="outline"
                   className={cn(
                     "w-full justify-start text-left font-normal",
@@ -138,10 +147,7 @@ const ServiceRecordDialog = ({ onSubmit }: ServiceRecordDialogProps) => {
                 <Calendar
                   mode="single"
                   selected={nextServiceDate}
-                  onSelect={(date) => {
-                    setNextServiceDate(date);
-                    setNextServiceDateOpen(false);
-                  }}
+                  onSelect={handleNextServiceDateSelect}
                   initialFocus
                 />
               </PopoverContent>
