@@ -108,21 +108,29 @@ const findNearestHotel = async (coordinates: [number, number]): Promise<{ name: 
       return null;
     }
 
-    // Configuration for search
-    const searchTerms = ['hotel', 'motel', 'inn'];
+    // Create a bounding box around the point (roughly 10km in each direction)
+    const [lng, lat] = coordinates;
+    const radius = 0.1; // roughly 10km in decimal degrees
+    const bbox = [
+      lng - radius,
+      lat - radius,
+      lng + radius,
+      lat + radius
+    ].join(',');
+
+    const searchTerms = ['hotel', 'motel', 'inn', 'lodging'];
     let hotel = null;
 
     for (const term of searchTerms) {
       const queryUrl = new URL('https://api.mapbox.com/geocoding/v5/mapbox.places/' + encodeURIComponent(term) + '.json');
-      // Keep longitude,latitude order as per Mapbox docs
-      queryUrl.searchParams.append('proximity', `${coordinates[0]},${coordinates[1]}`);
+      queryUrl.searchParams.append('bbox', bbox);
       queryUrl.searchParams.append('types', 'poi');
-      queryUrl.searchParams.append('limit', '5');
+      queryUrl.searchParams.append('limit', '10');
       queryUrl.searchParams.append('access_token', mapboxgl.accessToken);
-      // Add proximity bias to heavily weight nearby results
-      queryUrl.searchParams.append('proximity-bias', '1');
+      // Also keep proximity to rank closer results higher
+      queryUrl.searchParams.append('proximity', `${lng},${lat}`);
 
-      console.log(`Searching for ${term} near lng:${coordinates[0]}, lat:${coordinates[1]}`);
+      console.log(`Searching for ${term} in bbox: ${bbox}`);
       
       const response = await fetch(queryUrl.toString());
 
@@ -135,8 +143,22 @@ const findNearestHotel = async (coordinates: [number, number]): Promise<{ name: 
       console.log(`API response for "${term}":`, data);
 
       if (data.features && data.features.length > 0) {
-        // Filter to ensure we have a lodging-related POI
-        const lodging = data.features.find(feature => 
+        // Sort features by distance from target coordinates
+        const featuresWithDistance = data.features.map(feature => ({
+          ...feature,
+          distance: calculateDistance(
+            lat, 
+            lng,
+            feature.center[1],
+            feature.center[0]
+          )
+        }));
+
+        // Sort by distance
+        featuresWithDistance.sort((a, b) => a.distance - b.distance);
+
+        // Find the closest legitimate lodging
+        const lodging = featuresWithDistance.find(feature => 
           feature.properties?.category?.toLowerCase().includes('lodging') ||
           feature.properties?.category?.toLowerCase().includes('hotel') ||
           (feature.place_type?.includes('poi') && 
@@ -158,7 +180,6 @@ const findNearestHotel = async (coordinates: [number, number]): Promise<{ name: 
       return null;
     }
 
-    // Verify we have all required data
     if (!hotel.text || !hotel.center) {
       console.error('Invalid hotel data:', hotel);
       return null;
@@ -177,6 +198,22 @@ const findNearestHotel = async (coordinates: [number, number]): Promise<{ name: 
     return null;
   }
 };
+
+function calculateDistance(lat1: number, lon1: number, lat2: number, lon2: number): number {
+  const R = 6371; // Radius of the earth in km
+  const dLat = deg2rad(lat2 - lat1);
+  const dLon = deg2rad(lon2 - lon1);
+  const a = 
+    Math.sin(dLat/2) * Math.sin(dLat/2) +
+    Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) * 
+    Math.sin(dLon/2) * Math.sin(dLon/2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+  return R * c; // Distance in km
+}
+
+function deg2rad(deg: number): number {
+  return deg * (Math.PI/180);
+}
 
 export const calculateFuelStops = async (route: any, fuelMileage: number): Promise<FuelStop[]> => {
   console.log('Calculating fuel stops with mileage:', fuelMileage);
