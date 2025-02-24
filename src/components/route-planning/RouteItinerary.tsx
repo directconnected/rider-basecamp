@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { List, FileDown, Hotel } from "lucide-react";
@@ -19,6 +18,7 @@ interface RouteItineraryProps {
     name: string;
     location: [number, number];
     distance: number;
+    hotelName: string;
   }>;
   currentRoute?: any;
 }
@@ -100,7 +100,7 @@ const RouteItinerary = ({
               <div key={`hotel-${index}`} className="flex items-center gap-4">
                 <div className="w-3 h-3 rounded-full bg-purple-500" />
                 <p className="text-base">
-                  Overnight in {stop.name} - {Math.round(stop.distance)} miles from start
+                  {stop.hotelName} in {stop.name} - {Math.round(stop.distance)} miles from start
                 </p>
               </div>
             ))}

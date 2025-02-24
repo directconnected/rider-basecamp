@@ -98,6 +98,44 @@ const findNearestGasStation = async (coordinates: [number, number]): Promise<Gas
   }
 };
 
+const findNearestHotel = async (coordinates: [number, number]): Promise<{ name: string; location: [number, number] } | null> => {
+  try {
+    if (!coordinates || coordinates.length !== 2 || 
+        !isFinite(coordinates[0]) || !isFinite(coordinates[1])) {
+      console.error('Invalid coordinates for hotel search:', coordinates);
+      return null;
+    }
+
+    const queryUrl = new URL('https://api.mapbox.com/geocoding/v5/mapbox.places/hotel.json');
+    queryUrl.searchParams.append('proximity', `${coordinates[0]},${coordinates[1]}`);
+    queryUrl.searchParams.append('types', 'poi');
+    queryUrl.searchParams.append('limit', '1');
+    queryUrl.searchParams.append('access_token', mapboxgl.accessToken);
+
+    const response = await fetch(queryUrl.toString());
+    
+    if (!response.ok) {
+      throw new Error(`Hotel search failed: ${response.status} ${response.statusText}`);
+    }
+
+    const data = await response.json();
+    
+    if (!data.features || data.features.length === 0) {
+      console.log('No hotels found near:', coordinates);
+      return null;
+    }
+
+    const hotel = data.features[0];
+    return {
+      name: hotel.text,
+      location: hotel.center as [number, number]
+    };
+  } catch (error) {
+    console.error('Error finding hotel:', error);
+    return null;
+  }
+};
+
 export const calculateFuelStops = async (route: any, fuelMileage: number): Promise<FuelStop[]> => {
   console.log('Calculating fuel stops with mileage:', fuelMileage);
   console.log('Route data:', route);
@@ -181,9 +219,12 @@ export const calculateHotelStops = async (route: any, milesPerDay: number): Prom
     
     try {
       const locationName = await getLocationName(coordinates);
+      const hotel = await findNearestHotel(coordinates);
+      
       hotelStops.push({
         location: coordinates,
-        name: `${locationName}`,
+        name: locationName,
+        hotelName: hotel ? hotel.name : "No hotel found",
         distance: Math.round(progress * totalDistance)
       });
       console.log(`Added hotel stop ${i} at:`, locationName);
@@ -191,7 +232,8 @@ export const calculateHotelStops = async (route: any, milesPerDay: number): Prom
       console.error(`Error processing hotel stop ${i}:`, error);
       hotelStops.push({
         location: coordinates,
-        name: `Unknown Location`,
+        name: "Unknown Location",
+        hotelName: "No hotel found",
         distance: Math.round(progress * totalDistance)
       });
     }
