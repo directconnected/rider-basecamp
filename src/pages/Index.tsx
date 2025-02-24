@@ -11,21 +11,21 @@ const Index = () => {
   const features = [
     {
       icon: Route,
-      title: "Destinations",
+      title: "Destination Hub",
       description: "Top motorcycle roads, routes, destinations & GPX files.",
       link: "/destinations",
       id: "destinations-feature"
     },
     {
       icon: Tent,
-      title: "Camping Gear",
+      title: "Camping Hub",
       description: "Top camping gear for motorcycle campers & latest news.",
       link: "/camping-gear",
       id: "camping-gear-feature"
     },
     {
       icon: Shield,
-      title: "Riding Gear",
+      title: "Gear Hub",
       description: "Top riding gear for motorcycle riders & latest news.",
       link: "/riding-gear",
       id: "riding-gear-feature"
@@ -39,7 +39,7 @@ const Index = () => {
     },
     {
       icon: Search,
-      title: "Motorcycle Data",
+      title: "Data Hub",
       description: "Owner's manuals, service manuals, VIN lookup & data.",
       link: "/data",
       id: "data-feature"
