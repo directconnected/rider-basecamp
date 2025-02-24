@@ -30,25 +30,39 @@ const Service = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    checkAuth();
-    fetchServiceRecords();
+    checkAuthAndFetchRecords();
   }, []);
 
-  const checkAuth = async () => {
+  const checkAuthAndFetchRecords = async () => {
     const { data: { session } } = await supabase.auth.getSession();
     if (!session) {
       navigate("/auth");
+      return;
     }
+    fetchServiceRecords();
   };
 
   const fetchServiceRecords = async () => {
     try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        throw new Error("No authenticated session");
+      }
+
+      console.log("Fetching records for user:", session.user.id);
+      
       const { data, error } = await supabase
         .from('service_records')
         .select('*')
+        .eq('user_id', session.user.id)
         .order('service_date', { ascending: false });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Fetch error:', error);
+        throw error;
+      }
+
+      console.log("Fetched records:", data);
       setRecords(data || []);
     } catch (error) {
       console.error('Error fetching service records:', error);
