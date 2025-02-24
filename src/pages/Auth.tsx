@@ -16,24 +16,23 @@ const Auth = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // Get the redirect path directly from location.state each time it's needed
-  const redirectPath = location.state?.from?.pathname;
+  // Store the initial redirect path in a ref to preserve it
+  const [storedRedirectPath] = useState(() => location.state?.from?.pathname);
 
   useEffect(() => {
-    console.log("Current location state:", location.state); // Debug log
+    console.log("Initial redirect path stored:", storedRedirectPath);
     
     const checkSession = async () => {
       const { data: { session } } = await supabase.auth.getSession();
       if (session) {
-        // Only redirect to dashboard if no specific path was provided
-        const path = redirectPath || "/dashboard";
+        const path = storedRedirectPath || "/dashboard";
         console.log("Already logged in. Redirecting to:", path);
-        navigate(path);
+        navigate(path, { replace: true });
       }
     };
     
     checkSession();
-  }, [navigate, location.state, redirectPath]);
+  }, [navigate, storedRedirectPath]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -55,7 +54,7 @@ const Auth = () => {
 
         if (user) {
           toast.success("Account created! Please check your email to verify your account.");
-          navigate(redirectPath || "/dashboard");
+          navigate(storedRedirectPath || "/dashboard", { replace: true });
         }
       } else {
         const { data, error: signInError } = await supabase.auth.signInWithPassword({
@@ -66,10 +65,9 @@ const Auth = () => {
         if (signInError) throw signInError;
 
         toast.success("Successfully signed in");
-        // Only use dashboard as fallback if no redirect path exists
-        const path = redirectPath || "/dashboard";
+        const path = storedRedirectPath || "/dashboard";
         console.log("Successfully signed in. Navigating to:", path);
-        navigate(path);
+        navigate(path, { replace: true });
       }
     } catch (error) {
       console.error("Auth error:", error);
