@@ -2,7 +2,7 @@
 import React from "react";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/layout/Footer";
-import { Map, Search, Database, BarChart, Clock, Users, Wrench, Route, Shield, Tent } from "lucide-react";
+import { Map, Search, Database, BarChart, Clock, Users, Wrench, Route, Shield, Tent, Store } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Link } from "react-router-dom";
 import Breadcrumbs from "@/components/Breadcrumbs";
@@ -43,6 +43,13 @@ const Index = () => {
       description: "Owner's manuals, service manuals, VIN lookup & data.",
       link: "/data",
       id: "data-feature"
+    },
+    {
+      icon: Store,
+      title: "Dealers Hub",
+      description: "Find local motorcycle dealers and repair shops near you.",
+      link: "/dealers",
+      id: "dealers-feature"
     }
   ];
 
@@ -72,7 +79,7 @@ const Index = () => {
                 Features
               </h2>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-8 max-w-6xl mx-auto">
+            <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-8 max-w-6xl mx-auto">
               {features.map((feature) => (
                 <Link 
                   to={feature.link}
