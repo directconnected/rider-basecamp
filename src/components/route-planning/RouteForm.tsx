@@ -1,4 +1,4 @@
-e
+
 import React from "react";
 import { Compass, MapPin, Clock, Calendar, Fuel, LayoutGrid } from "lucide-react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
