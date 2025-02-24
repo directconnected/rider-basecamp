@@ -1,3 +1,4 @@
+
 import mapboxgl from 'mapbox-gl';
 import { getLocationName } from './mapService';
 import { FuelStop, HotelStop } from "@/hooks/useRoutePlanning";
@@ -117,13 +118,14 @@ const findNearestHotel = async (coordinates: [number, number]): Promise<{ name: 
     for (const radius of searchRadii) {
       for (const term of searchTerms) {
         const queryUrl = new URL('https://api.mapbox.com/geocoding/v5/mapbox.places/' + encodeURIComponent(term) + '.json');
-        queryUrl.searchParams.append('proximity', `${coordinates[0]},${coordinates[1]}`);
+        // Fix: Swap coordinates order for proximity parameter (lat,lng)
+        queryUrl.searchParams.append('proximity', `${coordinates[1]},${coordinates[0]}`);
         queryUrl.searchParams.append('types', 'poi');
         queryUrl.searchParams.append('limit', '5');
         queryUrl.searchParams.append('access_token', mapboxgl.accessToken);
         queryUrl.searchParams.append('radius', radius.toString());
 
-        console.log(`Trying search with term "${term}" and radius ${radius}m`);
+        console.log(`Trying search with term "${term}" and radius ${radius}m at lat:${coordinates[1]}, lng:${coordinates[0]}`);
         
         const response = await fetch(queryUrl.toString());
 
