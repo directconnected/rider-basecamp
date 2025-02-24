@@ -19,7 +19,7 @@ import AdminLogin from "@/pages/AdminLogin";
 import AdminSignup from "@/pages/AdminSignup";
 import ProtectedAdminRoute from "@/components/admin/ProtectedAdminRoute";
 import Destinations from "@/pages/Destinations";
-import CampingGear from "@/pages/CampingGear";
+import CampingHub from "@/pages/CampingHub";
 import RidingGear from "@/pages/RidingGear";
 import Data from "@/pages/Data";
 import Service from "@/pages/Service";
@@ -34,7 +34,6 @@ import Documentation from "@/pages/Documentation";
 import Support from "@/pages/Support";
 import TermsOfService from "@/pages/TermsOfService";
 import PrivacyPolicy from "@/pages/PrivacyPolicy";
-import Tents from "@/pages/Tents";
 import ServiceLanding from "@/pages/ServiceLanding";
 import Parts from "@/pages/Parts";
 import GroupRides from "@/pages/GroupRides";
@@ -77,7 +76,7 @@ function App() {
             <Route path="/service-landing" element={<ServiceLanding />} />
             <Route path="/service" element={<Service />} />
             <Route path="/destinations" element={<Destinations />} />
-            <Route path="/camping-gear" element={<CampingGear />} />
+            <Route path="/camping-hub" element={<CampingHub />} />
             <Route path="/riding-gear" element={<RidingGear />} />
             <Route path="/data" element={<Data />} />
             <Route path="/dealers" element={<Dealers />} />
@@ -91,7 +90,6 @@ function App() {
             <Route path="/support" element={<Support />} />
             <Route path="/terms" element={<TermsOfService />} />
             <Route path="/privacy" element={<PrivacyPolicy />} />
-            <Route path="/tents" element={<Tents />} />
             <Route path="/parts" element={<Parts />} />
             <Route path="/group-rides" element={<GroupRides />} />
             <Route path="/rentals" element={<Rentals />} />

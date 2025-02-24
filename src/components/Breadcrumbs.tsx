@@ -1,4 +1,3 @@
-
 import React from "react";
 import { useLocation } from "react-router-dom";
 import { Link } from "react-router-dom";
@@ -56,12 +55,8 @@ const routeConfig: Record<string, RouteConfig> = {
   'service': {
     label: 'Service Records'
   },
-  'camping-gear': {
-    label: 'Camping Gear'
-  },
-  'tents': {
-    parent: 'camping-gear',
-    label: 'Tents'
+  'camping-hub': {
+    label: 'Camping Hub'
   },
   'riding-gear': {
     label: 'Riding Gear'
@@ -183,7 +178,6 @@ const getBreadcrumbs = (pathname: string) => {
     const config = routeConfig[path];
     
     if (config) {
-      // Check if this route has a parent and it's a child route
       if ('parent' in config && config.parent && !paths.includes(config.parent)) {
         const parentConfig = routeConfig[config.parent];
         if (parentConfig) {
@@ -194,7 +188,6 @@ const getBreadcrumbs = (pathname: string) => {
         }
       }
       
-      // Add the current route
       breadcrumbs.push({
         label: config.label,
         url: `/${paths.slice(0, i + 1).join('/')}`
