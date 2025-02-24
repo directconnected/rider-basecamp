@@ -1,6 +1,6 @@
-
 import mapboxgl from 'mapbox-gl';
 import { getLocationName } from './mapService';
+import { findNearbyGasStation, findNearbyLodging } from './placesService';
 import { FuelStop, HotelStop } from "@/hooks/useRoutePlanning";
 
 interface GasStation {
@@ -14,81 +14,25 @@ const findNearestGasStation = async (coordinates: [number, number]): Promise<Gas
   console.log('Searching for gas stations near coordinates:', coordinates);
   
   try {
-    // Validate coordinates
     if (!coordinates || coordinates.length !== 2 || 
         !isFinite(coordinates[0]) || !isFinite(coordinates[1])) {
       console.error('Invalid coordinates:', coordinates);
       return null;
     }
 
-    // Configuration for search
-    const searchRadii = [5000, 10000, 15000]; // Search radii in meters
-    const searchTerms = ['gas station', 'fuel', 'petrol station'];
-    let station = null;
-
-    // Try different search radii if needed
-    for (const radius of searchRadii) {
-      for (const term of searchTerms) {
-        // Build the query URL with proper parameters
-        const queryUrl = new URL('https://api.mapbox.com/geocoding/v5/mapbox.places/' + encodeURIComponent(term) + '.json');
-        queryUrl.searchParams.append('proximity', `${coordinates[1]},${coordinates[0]}`); // longitude,latitude
-        queryUrl.searchParams.append('types', 'poi');
-        queryUrl.searchParams.append('limit', '1');
-        queryUrl.searchParams.append('access_token', mapboxgl.accessToken);
-        queryUrl.searchParams.append('radius', radius.toString());
-
-        console.log(`Trying search with term "${term}" and radius ${radius}m`);
-        
-        const response = await fetch(queryUrl.toString());
-
-        if (!response.ok) {
-          console.error(`Search failed for term "${term}" with radius ${radius}m:`, response.statusText);
-          continue;
-        }
-
-        const data = await response.json();
-        console.log(`API response for "${term}" (${radius}m radius):`, data);
-
-        if (data.features && data.features.length > 0) {
-          // Filter to ensure we have a fuel-related POI
-          const fuelStation = data.features.find(feature => 
-            feature.properties?.category?.toLowerCase().includes('fuel') ||
-            feature.properties?.category?.toLowerCase().includes('gas') ||
-            (feature.place_type?.includes('poi') && 
-             feature.text?.toLowerCase().includes('gas'))
-          );
-
-          if (fuelStation) {
-            station = fuelStation;
-            console.log(`Found fuel station with ${radius}m radius:`, fuelStation);
-            break;
-          }
-        }
-      }
-      
-      if (station) break; // Stop searching if we found a station
-    }
-
+    const station = await findNearbyGasStation(coordinates);
+    
     if (!station) {
       console.log('No gas stations found near coordinates:', coordinates);
       return null;
     }
 
-    // Verify we have all required data
-    if (!station.text || !station.place_name || !station.center) {
-      console.error('Invalid station data:', station);
-      return null;
-    }
-
-    const result = {
-      name: station.text,
-      address: station.place_name,
-      coordinates: station.center as [number, number],
-      distance: station.properties?.distance || 0
+    return {
+      name: station.name,
+      address: station.address,
+      coordinates: station.location,
+      distance: 0 // We'll calculate this if needed
     };
-
-    console.log('Found gas station:', result);
-    return result;
   } catch (error) {
     console.error('Error finding gas station:', error);
     console.error('Error details:', {
@@ -109,108 +53,16 @@ const findNearestHotel = async (coordinates: [number, number]): Promise<{ name: 
       return null;
     }
 
-    // Create a much larger bounding box around the point (roughly 50km in each direction)
-    const [lng, lat] = coordinates;
-    const radius = 0.5; // roughly 50km in decimal degrees
-    const bbox = [
-      lng - radius,
-      lat - radius,
-      lng + radius,
-      lat + radius
-    ].join(',');
-
-    const searchTerms = ['hotel', 'motel', 'inn', 'lodging'];
-    let hotel = null;
-
-    for (const term of searchTerms) {
-      const queryUrl = new URL('https://api.mapbox.com/geocoding/v5/mapbox.places/' + encodeURIComponent(term) + '.json');
-      queryUrl.searchParams.append('bbox', bbox);
-      queryUrl.searchParams.append('types', 'poi');
-      queryUrl.searchParams.append('limit', '25'); // Increased limit
-      queryUrl.searchParams.append('access_token', mapboxgl.accessToken);
-      // Also keep proximity to rank closer results higher
-      queryUrl.searchParams.append('proximity', `${lng},${lat}`);
-
-      console.log(`Searching for ${term} in bbox: ${bbox}`);
-      
-      const response = await fetch(queryUrl.toString());
-
-      if (!response.ok) {
-        console.error(`Search failed for term "${term}":`, response.statusText);
-        continue;
-      }
-
-      const data = await response.json();
-      console.log(`API response for "${term}":`, data);
-
-      if (data.features && data.features.length > 0) {
-        // Sort features by distance from target coordinates
-        const featuresWithDistance = data.features.map(feature => ({
-          ...feature,
-          distance: calculateDistance(
-            lat, 
-            lng,
-            feature.center[1],
-            feature.center[0]
-          )
-        }));
-
-        // Sort by distance
-        featuresWithDistance.sort((a, b) => a.distance - b.distance);
-
-        // Find the closest legitimate lodging
-        const lodging = featuresWithDistance.find(feature => 
-          feature.properties?.category?.toLowerCase().includes('lodging') ||
-          feature.properties?.category?.toLowerCase().includes('hotel') ||
-          (feature.place_type?.includes('poi') && 
-           (feature.text?.toLowerCase().includes('hotel') ||
-            feature.text?.toLowerCase().includes('inn') ||
-            feature.text?.toLowerCase().includes('motel')))
-        );
-
-        if (lodging) {
-          hotel = lodging;
-          console.log(`Found hotel:`, lodging);
-          break;
-        }
-      }
-    }
-
-    if (!hotel) {
-      // If no hotels found in POI search, try searching for places with "hotel" or "motel" in the name
-      const placeSearchUrl = new URL('https://api.mapbox.com/geocoding/v5/mapbox.places/hotel.json');
-      placeSearchUrl.searchParams.append('bbox', bbox);
-      placeSearchUrl.searchParams.append('types', 'poi,place');
-      placeSearchUrl.searchParams.append('limit', '25');
-      placeSearchUrl.searchParams.append('access_token', mapboxgl.accessToken);
-      placeSearchUrl.searchParams.append('proximity', `${lng},${lat}`);
-
-      console.log('Trying broader place search for hotels');
-      
-      const response = await fetch(placeSearchUrl.toString());
-      if (response.ok) {
-        const data = await response.json();
-        console.log('Place search response:', data);
-        
-        if (data.features && data.features.length > 0) {
-          hotel = data.features[0];
-        }
-      }
-    }
+    const hotel = await findNearbyLodging(coordinates);
 
     if (!hotel) {
       console.log('No hotels found near coordinates:', coordinates);
       return null;
     }
 
-    if (!hotel.text || !hotel.center) {
-      console.error('Invalid hotel data:', hotel);
-      return null;
-    }
-
     return {
-      name: hotel.text,
-      location: hotel.center as [number, number]
+      name: hotel.name,
+      location: hotel.location
     };
   } catch (error) {
     console.error('Error finding hotel:', error);
