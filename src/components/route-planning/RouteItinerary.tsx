@@ -51,7 +51,7 @@ const RouteItinerary = ({ startPoint, destination, distance, duration, fuelStops
               <div key={index} className="flex items-center gap-4">
                 <div className="w-3 h-3 rounded-full bg-amber-500" />
                 <p className="text-base">
-                  {stop.name} - <span className="font-medium">{Math.round(stop.distance)} miles</span> from start
+                  <span className="font-medium">{stop.name}</span> - {Math.round(stop.distance)} miles from start
                 </p>
               </div>
             ))}

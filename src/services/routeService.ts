@@ -1,4 +1,3 @@
-
 import mapboxgl from 'mapbox-gl';
 import { getLocationName } from './mapService';
 import { FuelStop } from "@/hooks/useRoutePlanning";
@@ -136,7 +135,7 @@ export const calculateFuelStops = async (route: any, fuelMileage: number): Promi
       if (gasStation) {
         fuelStops.push({
           location: gasStation.coordinates,
-          name: `${gasStation.name} - ${gasStation.address}`,
+          name: gasStation.address,
           distance: Math.round(progress * totalDistance)
         });
         console.log(`Added fuel stop ${i}:`, gasStation);
@@ -145,7 +144,7 @@ export const calculateFuelStops = async (route: any, fuelMileage: number): Promi
         const locationName = await getLocationName(coordinates);
         fuelStops.push({
           location: coordinates,
-          name: `Refueling Stop near ${locationName}`,
+          name: `Near ${locationName}`,
           distance: Math.round(progress * totalDistance)
         });
         console.log(`Added fallback fuel stop ${i} near:`, locationName);
@@ -156,7 +155,7 @@ export const calculateFuelStops = async (route: any, fuelMileage: number): Promi
       const locationName = await getLocationName(coordinates);
       fuelStops.push({
         location: coordinates,
-        name: `Refueling Stop near ${locationName}`,
+        name: `Near ${locationName}`,
         distance: Math.round(progress * totalDistance)
       });
     }
@@ -178,4 +177,3 @@ export const planRoute = async (start: [number, number], end: [number, number]) 
   const data = await response.json();
   return data.routes[0];
 };
-
