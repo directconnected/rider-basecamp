@@ -48,12 +48,10 @@ export const geocodeLocation = async (location: string): Promise<[number, number
   }
 };
 
-export const getLocationName = async (coordinates: [number, number], type?: 'hotel' | 'restaurant' | 'camping'): Promise<string> => {
+export const getLocationName = async (coordinates: [number, number]): Promise<string> => {
   try {
-    const [lng, lat] = coordinates;
-    
     const response = await fetch(
-      `https://api.mapbox.com/geocoding/v5/mapbox.places/${lng},${lat}.json?types=place&limit=1&access_token=${mapboxgl.accessToken}`
+      `https://api.mapbox.com/geocoding/v5/mapbox.places/${coordinates[0]},${coordinates[1]}.json?types=poi,place&limit=1&access_token=${mapboxgl.accessToken}`
     );
     
     if (!response.ok) {
@@ -61,46 +59,10 @@ export const getLocationName = async (coordinates: [number, number], type?: 'hot
     }
 
     const data = await response.json();
-    const cityName = data.features?.[0]?.text || 'Local';
-    
-    const getBusinessName = (city: string, type: 'hotel' | 'restaurant' | 'camping') => {
-      const hash = Math.abs(Math.floor((lng * lat) * 1000)) % 5;
-      
-      const names = {
-        hotel: [
-          `${city} Grand Hotel`,
-          `${city} Royal Inn`,
-          `${city} Comfort Lodge`,
-          `${city} Plaza Hotel`,
-          `${city} Central Inn`
-        ],
-        restaurant: [
-          `${city} Main Street Diner`,
-          `${city} Local Kitchen`,
-          `${city} Family Restaurant`,
-          `${city} Cafe & Grill`,
-          `${city} Downtown Eatery`
-        ],
-        camping: [
-          `${city} Valley Campground`,
-          `${city} Forest Camp`,
-          `${city} Lake Camping`,
-          `${city} Mountain RV Park`,
-          `${city} River Campsite`
-        ]
-      };
-      
-      return names[type][hash];
-    };
-
-    if (type) {
-      return getBusinessName(cityName, type);
-    }
-    
-    return cityName;
+    return data.features?.[0]?.text || data.features?.[0]?.place_name || 'Unknown Location';
   } catch (error) {
     console.error('Error getting location name:', error);
-    return 'Local Stop';
+    return 'Unknown Location';
   }
 };
 
