@@ -32,7 +32,7 @@ const features = [
     icon: Wrench,
     title: "Service Hub",
     description: "Track maintenance records & service intervals.",
-    link: "/service-landing",
+    link: "/service",
     id: "service-feature"
   },
   {

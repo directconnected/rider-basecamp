@@ -16,7 +16,7 @@ const ServiceLanding = () => {
       icon: Wrench,
       title: "Service Records",
       description: "Track your motorcycle's maintenance history and upcoming service needs.",
-      link: "/service",
+      link: "/service-records",
       id: "service-records"
     },
     {

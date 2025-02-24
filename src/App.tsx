@@ -73,8 +73,8 @@ function App() {
                 </ProtectedAdminRoute>
               } 
             />
-            <Route path="/service-landing" element={<ServiceLanding />} />
-            <Route path="/service" element={<Service />} />
+            <Route path="/service" element={<ServiceLanding />} />
+            <Route path="/service-records" element={<Service />} />
             <Route path="/destinations" element={<Destinations />} />
             <Route path="/camping-hub" element={<CampingHub />} />
             <Route path="/riding-gear" element={<RidingGear />} />
