@@ -81,8 +81,8 @@ export const useRouteCalculation = () => {
       const milesPerDay = parseInt(formData.milesPerDay);
       const numDays = Math.ceil(totalMiles / milesPerDay);
 
-      // Get POIs along the route
-      const suggestions = await findPointsOfInterest(route);
+      // Get POIs along the route with milesPerDay parameter
+      const suggestions = await findPointsOfInterest(route, milesPerDay);
       
       setRouteDetails({
         distance: totalMiles,

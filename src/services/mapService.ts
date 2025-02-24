@@ -1,4 +1,3 @@
-
 import mapboxgl from 'mapbox-gl';
 import { supabase } from "@/integrations/supabase/client";
 import { PointOfInterest } from "@/hooks/useRoutePlanning";
@@ -67,11 +66,10 @@ export const getLocationName = async (coordinates: [number, number]): Promise<st
   }
 };
 
-export const findPointsOfInterest = async (route: any): Promise<PointOfInterest[]> => {
+export const findPointsOfInterest = async (route: any, milesPerDay: number): Promise<PointOfInterest[]> => {
   const pois: PointOfInterest[] = [];
   const coordinates = route.geometry.coordinates;
   const totalDistance = route.distance / 1609.34; // Convert to miles
-  const milesPerDay = 300; // Default miles per day
   const numDays = Math.ceil(totalDistance / milesPerDay);
   
   // Calculate sample points for each day's journey
