@@ -52,7 +52,7 @@ const features = [
   {
     icon: Settings,
     title: "Parts Hub",
-    description: "Find motorcycle parts and accessories.",
+    description: "Find motorcycle parts & accessories.",
     link: "/parts",
     id: "parts-feature"
   },
@@ -66,7 +66,7 @@ const features = [
   {
     icon: Car,
     title: "Rentals Hub",
-    description: "Find motorcycle rentals and compare prices.",
+    description: "Find motorcycle rentals & compare prices.",
     link: "/rentals",
     id: "rentals-feature"
   },
