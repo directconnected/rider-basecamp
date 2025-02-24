@@ -68,19 +68,30 @@ export const getLocationName = async (coordinates: [number, number]): Promise<st
 };
 
 export const findPointsOfInterest = async (route: any, milesPerDay: number): Promise<PointOfInterest[]> => {
+  if (!route?.geometry?.coordinates || !Array.isArray(route.geometry.coordinates)) {
+    console.error('Invalid route geometry:', route);
+    return [];
+  }
+
   const pois: PointOfInterest[] = [];
   const coordinates = route.geometry.coordinates;
   const totalDistance = route.distance / 1609.34; // Convert to miles
   const numDays = Math.ceil(totalDistance / milesPerDay);
   
-  console.log('Finding POIs for route:', {
+  console.log('Starting POI search with params:', {
     totalDistance,
     milesPerDay,
     numDays,
-    totalCoordinates: coordinates.length
+    totalCoordinates: coordinates.length,
+    mapboxToken: mapboxgl.accessToken ? 'Present' : 'Missing'
   });
+
+  if (!mapboxgl.accessToken) {
+    console.error('Mapbox token not initialized');
+    return [];
+  }
   
-  // Sample fewer points to avoid rate limiting
+  // Sample points along the route
   const numSamplePoints = Math.min(numDays * 2, 10); // Max 10 sample points
   const step = Math.floor(coordinates.length / numSamplePoints);
   
@@ -89,82 +100,96 @@ export const findPointsOfInterest = async (route: any, milesPerDay: number): Pro
     const [lng, lat] = coordinates[pointIndex];
     
     try {
-      console.log(`Searching POIs near: ${lng},${lat}`);
+      console.log(`Searching POIs near point ${i}:`, { lng, lat });
       
-      // Query with expanded search radius and specific POI types
-      const response = await fetch(
-        `https://api.mapbox.com/geocoding/v5/mapbox.places/${lng},${lat}.json?` +
+      const url = `https://api.mapbox.com/geocoding/v5/mapbox.places/${lng},${lat}.json?` +
         `types=poi&limit=10&` +
         `proximity=${lng},${lat}&` +
-        `radius=10000&` + // 10km radius
-        `access_token=${mapboxgl.accessToken}`
-      );
-
-      if (!response.ok) {
-        console.error('Mapbox API error:', await response.text());
-        continue;
-      }
-
-      const data = await response.json();
-      console.log('Mapbox response:', data);
+        `radius=20000&` + // Increased to 20km radius
+        `access_token=${mapboxgl.accessToken}`;
       
-      if (data.features && data.features.length > 0) {
-        for (const feature of data.features) {
-          // Skip features without a name
-          if (!feature.text && !feature.place_name) continue;
+      console.log('Mapbox API URL:', url);
+      
+      const response = await fetch(url);
+      const responseText = await response.text();
+      
+      try {
+        const data = JSON.parse(responseText);
+        console.log(`POI data for point ${i}:`, data);
+        
+        if (data.features && data.features.length > 0) {
+          for (const feature of data.features) {
+            // Skip features without a name
+            if (!feature.text && !feature.place_name) {
+              console.log('Skipping POI - no name:', feature);
+              continue;
+            }
 
-          // Default to restaurant if no clear category is found
-          let type: 'restaurant' | 'hotel' | 'camping' = 'restaurant';
-          
-          const categories = [
-            ...(feature.properties?.category || []),
-            ...(feature.properties?.categories || []),
-            feature.place_type,
-            feature.properties?.type
-          ].flat().filter(Boolean).map(cat => String(cat).toLowerCase());
+            // Default to restaurant if no clear category is found
+            let type: 'restaurant' | 'hotel' | 'camping' = 'restaurant';
+            
+            const categories = [
+              ...(feature.properties?.category || []),
+              ...(feature.properties?.categories || []),
+              feature.place_type,
+              feature.properties?.type
+            ].flat().filter(Boolean).map(cat => String(cat).toLowerCase());
 
-          if (categories.some(cat => 
-            cat.includes('lodging') || 
-            cat.includes('hotel') || 
-            cat.includes('motel') ||
-            cat.includes('inn')
-          )) {
-            type = 'hotel';
-          } else if (categories.some(cat => 
-            cat.includes('camp') || 
-            cat.includes('rv') ||
-            cat.includes('outdoor')
-          )) {
-            type = 'camping';
-          } else if (categories.some(cat => 
-            cat.includes('restaurant') || 
-            cat.includes('food') || 
-            cat.includes('cafe') ||
-            cat.includes('dining') ||
-            cat.includes('bar')
-          )) {
-            type = 'restaurant';
+            console.log('POI categories:', categories);
+
+            if (categories.some(cat => 
+              cat.includes('lodging') || 
+              cat.includes('hotel') || 
+              cat.includes('motel') ||
+              cat.includes('inn')
+            )) {
+              type = 'hotel';
+            } else if (categories.some(cat => 
+              cat.includes('camp') || 
+              cat.includes('rv') ||
+              cat.includes('outdoor')
+            )) {
+              type = 'camping';
+            } else if (categories.some(cat => 
+              cat.includes('restaurant') || 
+              cat.includes('food') || 
+              cat.includes('cafe') ||
+              cat.includes('dining') ||
+              cat.includes('bar')
+            )) {
+              type = 'restaurant';
+            }
+
+            const progress = pointIndex / coordinates.length;
+            const distanceFromStart = Math.round(totalDistance * progress);
+
+            const name = feature.text || feature.place_name?.split(',')[0] || 'Unknown Location';
+            const fullAddress = feature.place_name || feature.text;
+
+            const poi = {
+              name,
+              type,
+              location: feature.center as [number, number],
+              description: `${fullAddress} (${distanceFromStart} miles from start)`
+            };
+
+            console.log('Adding POI:', poi);
+            pois.push(poi);
           }
-
-          const progress = pointIndex / coordinates.length;
-          const distanceFromStart = Math.round(totalDistance * progress);
-
-          const name = feature.text || feature.place_name?.split(',')[0] || 'Unknown Location';
-          const fullAddress = feature.place_name || feature.text;
-
-          pois.push({
-            name,
-            type,
-            location: feature.center as [number, number],
-            description: `${fullAddress} (${distanceFromStart} miles from start)`
-          });
+        } else {
+          console.log(`No POIs found for point ${i}`);
         }
+      } catch (parseError) {
+        console.error('Error parsing Mapbox response:', parseError);
+        console.log('Raw response:', responseText);
       }
     } catch (error) {
-      console.error('Error fetching POIs:', error);
+      console.error(`Error fetching POIs for point ${i}:`, error);
       continue;
     }
   }
+
+  console.log('Total POIs found:', pois.length);
 
   // Remove duplicates and sort by type
   const uniquePois = pois.filter((poi, index, self) =>
@@ -172,6 +197,8 @@ export const findPointsOfInterest = async (route: any, milesPerDay: number): Pro
       p.name === poi.name && p.type === poi.type
     ))
   );
+
+  console.log('Unique POIs:', uniquePois.length);
 
   // Sort POIs to ensure a good mix of types
   const sortedPois = uniquePois.sort((a, b) => {
@@ -182,8 +209,6 @@ export const findPointsOfInterest = async (route: any, milesPerDay: number): Pro
     if (b.type === 'camping') return 1;
     return 0;
   });
-
-  console.log('Found POIs before filtering:', sortedPois);
 
   // Take the top N suggestions, ensuring at least one of each type if available
   const finalPois: PointOfInterest[] = [];
