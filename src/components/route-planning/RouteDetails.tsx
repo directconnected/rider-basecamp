@@ -11,6 +11,13 @@ interface RouteDetailsProps {
 }
 
 const RouteDetails = ({ startPoint, destination, distance, duration }: RouteDetailsProps) => {
+  const capitalizeLocation = (location: string) => {
+    return location
+      .split(' ')
+      .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+      .join(' ');
+  };
+
   return (
     <Card className="mt-8">
       <CardHeader>
@@ -23,11 +30,11 @@ const RouteDetails = ({ startPoint, destination, distance, duration }: RouteDeta
         <div className="grid grid-cols-2 gap-4">
           <div className="space-y-2">
             <p className="text-sm font-medium text-gray-500">FROM</p>
-            <p className="text-lg font-semibold">{startPoint}</p>
+            <p className="text-lg font-semibold">{capitalizeLocation(startPoint)}</p>
           </div>
           <div className="space-y-2">
             <p className="text-sm font-medium text-gray-500">TO</p>
-            <p className="text-lg font-semibold">{destination}</p>
+            <p className="text-lg font-semibold">{capitalizeLocation(destination)}</p>
           </div>
         </div>
         <div className="grid grid-cols-2 gap-4 pt-4 border-t">
