@@ -1,4 +1,3 @@
-
 import React, { useEffect, useRef, useState } from "react";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/layout/Footer";
@@ -6,11 +5,11 @@ import { Compass, MapPin, Clock, Calendar, Search } from "lucide-react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/components/ui/use-toast";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
+import { supabase } from "@/integrations/supabase/client";
 
 interface PointOfInterest {
   name: string;
@@ -31,33 +30,50 @@ const RoutePlanning = () => {
     duration: "1"
   });
 
-  const [mapboxToken, setMapboxToken] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [suggestions, setSuggestions] = useState<PointOfInterest[]>([]);
 
   useEffect(() => {
-    if (!mapContainer.current || !mapboxToken) return;
+    const initializeMap = async () => {
+      try {
+        const { data, error } = await supabase.functions.invoke('get-mapbox-token');
+        
+        if (error) throw error;
+        if (!data?.token) throw new Error('No token returned');
 
-    mapboxgl.accessToken = mapboxToken;
-    
-    map.current = new mapboxgl.Map({
-      container: mapContainer.current,
-      style: 'mapbox://styles/mapbox/streets-v12',
-      center: [-98.5795, 39.8283], // Center of USA
-      zoom: 3
-    });
+        mapboxgl.accessToken = data.token;
+        
+        if (!mapContainer.current) return;
 
-    map.current.addControl(new mapboxgl.NavigationControl(), 'top-right');
+        map.current = new mapboxgl.Map({
+          container: mapContainer.current,
+          style: 'mapbox://styles/mapbox/streets-v12',
+          center: [-98.5795, 39.8283], // Center of USA
+          zoom: 3
+        });
+
+        map.current.addControl(new mapboxgl.NavigationControl(), 'top-right');
+      } catch (error) {
+        console.error('Map initialization error:', error);
+        toast({
+          title: "Map Error",
+          description: "Could not initialize the map. Please try again later.",
+          variant: "destructive"
+        });
+      }
+    };
+
+    initializeMap();
 
     return () => {
       map.current?.remove();
     };
-  }, [mapboxToken]);
+  }, [toast]);
 
   const geocodeLocation = async (location: string): Promise<[number, number] | null> => {
     try {
       const response = await fetch(
-        `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(location)}.json?access_token=${mapboxToken}`
+        `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(location)}.json?access_token=${mapboxgl.accessToken}`
       );
       const data = await response.json();
       if (data.features && data.features.length > 0) {
@@ -99,15 +115,6 @@ const RoutePlanning = () => {
   };
 
   const planRoute = async () => {
-    if (!mapboxToken) {
-      toast({
-        title: "Mapbox token required",
-        description: "Please enter your Mapbox token to use the route planning feature.",
-        variant: "destructive"
-      });
-      return;
-    }
-
     setIsLoading(true);
     try {
       // Geocode start and end points
@@ -125,7 +132,7 @@ const RoutePlanning = () => {
 
       // Get route from Mapbox Directions API
       const routeResponse = await fetch(
-        `https://api.mapbox.com/directions/v5/mapbox/driving/${startCoords[0]},${startCoords[1]};${endCoords[0]},${endCoords[1]}?geometries=geojson&access_token=${mapboxToken}`
+        `https://api.mapbox.com/directions/v5/mapbox/driving/${startCoords[0]},${startCoords[1]};${endCoords[0]},${endCoords[1]}?geometries=geojson&access_token=${mapboxgl.accessToken}`
       );
       const routeData = await routeResponse.json();
 
@@ -228,20 +235,6 @@ const RoutePlanning = () => {
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-4">
-                    {!mapboxToken && (
-                      <div className="mb-4">
-                        <label className="block text-sm font-medium mb-2">Mapbox Token</label>
-                        <Input
-                          placeholder="Enter your Mapbox token"
-                          value={mapboxToken}
-                          onChange={(e) => setMapboxToken(e.target.value)}
-                        />
-                        <p className="text-xs text-gray-500 mt-1">
-                          Required for route planning. Get your token at mapbox.com
-                        </p>
-                      </div>
-                    )}
-                    
                     <div>
                       <label className="block text-sm font-medium mb-2">Starting Point</label>
                       <div className="flex gap-2">
@@ -305,7 +298,7 @@ const RoutePlanning = () => {
                     <Button 
                       className="w-full"
                       onClick={planRoute}
-                      disabled={isLoading || !mapboxToken}
+                      disabled={isLoading}
                     >
                       {isLoading ? "Planning Route..." : "Plan Route"}
                     </Button>
