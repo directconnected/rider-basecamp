@@ -1,7 +1,8 @@
+
 import React from "react";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/layout/Footer";
-import { Map, Search, Database, BarChart, Clock, Users, Wrench, Route, Shield, Tent, Store, Settings, Group, Car, Newspaper } from "lucide-react";
+import { Map, Search, Database, BarChart, Clock, Users, Wrench, Route, Shield, Tent, Store, Settings, Group, Bike, Newspaper } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Link } from "react-router-dom";
 import Breadcrumbs from "@/components/Breadcrumbs";
@@ -64,7 +65,7 @@ const features = [
     id: "group-rides-feature"
   },
   {
-    icon: Car,
+    icon: Bike,
     title: "Rentals Hub",
     description: "Find motorcycle rentals & compare prices.",
     link: "/rentals",
