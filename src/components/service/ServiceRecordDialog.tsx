@@ -11,9 +11,12 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { CalendarIcon, Plus } from "lucide-react";
 import { cn } from "@/lib/utils";
 
+type ServiceType = 'oil_change' | 'tire_replacement' | 'brake_service' | 
+                  'chain_maintenance' | 'general_maintenance' | 'repair' | 'inspection';
+
 interface ServiceRecordDialogProps {
   onSubmit: (data: {
-    service_type: string;
+    service_type: ServiceType;
     service_date: string;
     mileage?: number;
     cost?: number;
@@ -24,7 +27,7 @@ interface ServiceRecordDialogProps {
 
 const ServiceRecordDialog = ({ onSubmit }: ServiceRecordDialogProps) => {
   const [open, setOpen] = React.useState(false);
-  const [serviceType, setServiceType] = React.useState("");
+  const [serviceType, setServiceType] = React.useState<ServiceType>();
   const [serviceDate, setServiceDate] = React.useState<Date>();
   const [nextServiceDate, setNextServiceDate] = React.useState<Date>();
   const [mileage, setMileage] = React.useState("");
@@ -46,7 +49,7 @@ const ServiceRecordDialog = ({ onSubmit }: ServiceRecordDialogProps) => {
 
     setOpen(false);
     // Reset form
-    setServiceType("");
+    setServiceType(undefined);
     setServiceDate(undefined);
     setNextServiceDate(undefined);
     setMileage("");
@@ -69,7 +72,7 @@ const ServiceRecordDialog = ({ onSubmit }: ServiceRecordDialogProps) => {
         <form onSubmit={handleSubmit} className="space-y-4 mt-4">
           <div className="space-y-2">
             <label className="text-sm font-medium">Service Type</label>
-            <Select value={serviceType} onValueChange={setServiceType} required>
+            <Select value={serviceType} onValueChange={(value: ServiceType) => setServiceType(value)} required>
               <SelectTrigger>
                 <SelectValue placeholder="Select service type" />
               </SelectTrigger>

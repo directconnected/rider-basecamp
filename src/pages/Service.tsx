@@ -11,9 +11,12 @@ import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { format } from "date-fns";
 
+type ServiceType = 'oil_change' | 'tire_replacement' | 'brake_service' | 
+                  'chain_maintenance' | 'general_maintenance' | 'repair' | 'inspection';
+
 interface ServiceRecord {
   id: string;
-  service_type: string;
+  service_type: ServiceType;
   service_date: string;
   mileage: number | null;
   cost: number | null;
@@ -64,9 +67,19 @@ const Service = () => {
     next_service_date?: string;
   }) => {
     try {
+      // Get current user session
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session?.user) {
+        throw new Error("User not authenticated");
+      }
+
       const { error } = await supabase
         .from('service_records')
-        .insert([data]);
+        .insert({
+          ...data,
+          service_type: data.service_type as ServiceType,
+          user_id: session.user.id
+        });
 
       if (error) throw error;
       
