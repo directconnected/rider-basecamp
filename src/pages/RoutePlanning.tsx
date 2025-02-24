@@ -127,7 +127,37 @@ const RoutePlanning = () => {
     }
   };
 
-  const calculateFuelStops = (route: any) => {
+  const getLocationName = async (coordinates: [number, number]): Promise<string> => {
+    try {
+      const response = await fetch(
+        `https://api.mapbox.com/geocoding/v5/mapbox.places/${coordinates[0]},${coordinates[1]}.json?access_token=${mapboxgl.accessToken}`
+      );
+      
+      if (!response.ok) {
+        throw new Error('Failed to fetch location name');
+      }
+
+      const data = await response.json();
+      
+      if (data.features && data.features.length > 0) {
+        // Try to get a place name, then locality, then region
+        const place = data.features.find((f: any) => 
+          f.place_type.includes('place') || 
+          f.place_type.includes('locality') ||
+          f.place_type.includes('region')
+        );
+        
+        return place ? place.text : 'Fuel Stop';
+      }
+      
+      return 'Fuel Stop';
+    } catch (error) {
+      console.error('Error getting location name:', error);
+      return 'Fuel Stop';
+    }
+  };
+
+  const calculateFuelStops = async (route: any) => {
     const fuelStops: FuelStop[] = [];
     const totalDistance = route.distance / 1609.34; // Convert to miles
     const numStops = Math.floor(totalDistance / 200);
@@ -136,11 +166,13 @@ const RoutePlanning = () => {
       const progress = i / (numStops + 1);
       const coordinates = route.geometry.coordinates[
         Math.floor(progress * route.geometry.coordinates.length)
-      ];
+      ] as [number, number];
+      
+      const locationName = await getLocationName(coordinates);
       
       fuelStops.push({
-        location: coordinates as [number, number],
-        name: `Fuel Stop ${i}`,
+        location: coordinates,
+        name: `${locationName} Fuel Stop`,
         distance: progress * totalDistance
       });
     }
@@ -185,8 +217,8 @@ const RoutePlanning = () => {
         const route = routeData.routes[0];
         setCurrentRoute(route);
         
-        // Calculate fuel stops
-        const calculatedFuelStops = calculateFuelStops(route);
+        // Calculate fuel stops with actual location names
+        const calculatedFuelStops = await calculateFuelStops(route);
         setFuelStops(calculatedFuelStops);
 
         setRouteDetails({
@@ -201,7 +233,7 @@ const RoutePlanning = () => {
 
         toast({
           title: "Route Planned",
-          description: "Your route has been planned with fuel stops added every 200 miles.",
+          description: "Your route has been planned with named fuel stops added every 200 miles.",
         });
       }
     } catch (error) {
