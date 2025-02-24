@@ -73,7 +73,8 @@ export const useRouteCalculation = () => {
 
       setCurrentRoute(route);
       
-      const calculatedFuelStops = await calculateFuelStops(route);
+      const fuelMileage = parseInt(formData.fuelMileage);
+      const calculatedFuelStops = await calculateFuelStops(route, fuelMileage);
       setFuelStops(calculatedFuelStops);
 
       const totalMiles = Math.round(route.distance / 1609.34);

@@ -3,13 +3,24 @@ import mapboxgl from 'mapbox-gl';
 import { getLocationName } from './mapService';
 import { FuelStop } from "@/hooks/useRoutePlanning";
 
-export const calculateFuelStops = async (route: any): Promise<FuelStop[]> => {
+export const calculateFuelStops = async (route: any, fuelMileage: number): Promise<FuelStop[]> => {
   const fuelStops: FuelStop[] = [];
   const totalDistance = route.distance / 1609.34; // Convert to miles
-  const numStops = Math.floor(totalDistance / 200);
   
+  // Calculate number of fuel stops needed based on provided fuel mileage
+  // We'll stop at 80% of max range to maintain a safety buffer
+  const safeRange = fuelMileage * 0.8;
+  const numStops = Math.ceil(totalDistance / safeRange) - 1; // -1 because we start with a full tank
+  
+  if (numStops <= 0) {
+    return []; // No fuel stops needed if the destination is within range
+  }
+  
+  // Calculate evenly spaced stops
   for (let i = 1; i <= numStops; i++) {
-    const progress = i / (numStops + 1);
+    const progress = (i * safeRange) / totalDistance;
+    if (progress >= 1) break; // Don't add stops beyond the destination
+    
     const coordinates = route.geometry.coordinates[
       Math.floor(progress * route.geometry.coordinates.length)
     ] as [number, number];
@@ -19,7 +30,7 @@ export const calculateFuelStops = async (route: any): Promise<FuelStop[]> => {
     fuelStops.push({
       location: coordinates,
       name: `${locationName} Fuel Stop`,
-      distance: progress * totalDistance
+      distance: Math.round(progress * totalDistance)
     });
   }
 
@@ -38,3 +49,4 @@ export const planRoute = async (start: [number, number], end: [number, number]) 
   const data = await response.json();
   return data.routes[0];
 };
+
