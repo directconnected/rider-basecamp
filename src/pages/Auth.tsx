@@ -25,8 +25,8 @@ const Auth = () => {
       const { data: { session } } = await supabase.auth.getSession();
       if (session) {
         // Redirect to the intended destination immediately
-        console.log("Redirecting to:", from);
-        navigate(from);
+        console.log("Already logged in. Redirecting to:", from);
+        navigate(from, { replace: true });
       }
     };
     
@@ -53,7 +53,7 @@ const Auth = () => {
 
         if (user) {
           toast.success("Account created! Please check your email to verify your account.");
-          navigate(from);
+          navigate(from, { replace: true });
         }
       } else {
         const { error: signInError } = await supabase.auth.signInWithPassword({
@@ -64,8 +64,8 @@ const Auth = () => {
         if (signInError) throw signInError;
 
         toast.success("Successfully signed in");
-        console.log("Navigating to:", from);
-        navigate(from);
+        console.log("Successfully signed in. Navigating to:", from);
+        navigate(from, { replace: true });
       }
     } catch (error) {
       console.error("Auth error:", error);
