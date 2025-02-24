@@ -1,6 +1,7 @@
+
 import React from "react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { List, FileDown, Hotel } from "lucide-react";
+import { List, FileDown, Hotel, UtensilsCrossed, Tent } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { downloadGPX } from "@/utils/gpxGenerator";
 
@@ -20,6 +21,18 @@ interface RouteItineraryProps {
     distance: number;
     hotelName: string;
   }>;
+  restaurantStops?: Array<{
+    name: string;
+    location: [number, number];
+    distance: number;
+    restaurantName: string;
+  }>;
+  campingStops?: Array<{
+    name: string;
+    location: [number, number];
+    distance: number;
+    campgroundName: string;
+  }>;
   currentRoute?: any;
 }
 
@@ -30,6 +43,8 @@ const RouteItinerary = ({
   duration, 
   fuelStops,
   hotelStops,
+  restaurantStops = [],
+  campingStops = [],
   currentRoute 
 }: RouteItineraryProps) => {
   const formatDuration = (hours: number) => {
@@ -94,13 +109,50 @@ const RouteItinerary = ({
         </div>
 
         <div className="space-y-4">
-          <h3 className="text-lg font-semibold">Suggested Stays:</h3>
+          <h3 className="text-lg font-semibold flex items-center gap-2">
+            <Hotel className="h-5 w-5" />
+            Suggested Stays:
+          </h3>
           <div className="space-y-3">
             {Array.isArray(hotelStops) && hotelStops.map((stop, index) => (
               <div key={`hotel-${index}`} className="flex items-center gap-4">
                 <div className="w-3 h-3 rounded-full bg-purple-500" />
                 <p className="text-base">
                   {stop.hotelName} in {stop.name} - {Math.round(stop.distance)} miles from start
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="space-y-4">
+          <h3 className="text-lg font-semibold flex items-center gap-2">
+            <UtensilsCrossed className="h-5 w-5" />
+            Suggested Restaurants:
+          </h3>
+          <div className="space-y-3">
+            {Array.isArray(restaurantStops) && restaurantStops.map((stop, index) => (
+              <div key={`restaurant-${index}`} className="flex items-center gap-4">
+                <div className="w-3 h-3 rounded-full bg-orange-500" />
+                <p className="text-base">
+                  {stop.restaurantName} in {stop.name} - {Math.round(stop.distance)} miles from start
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="space-y-4">
+          <h3 className="text-lg font-semibold flex items-center gap-2">
+            <Tent className="h-5 w-5" />
+            Suggested Camping:
+          </h3>
+          <div className="space-y-3">
+            {Array.isArray(campingStops) && campingStops.map((stop, index) => (
+              <div key={`camping-${index}`} className="flex items-center gap-4">
+                <div className="w-3 h-3 rounded-full bg-green-600" />
+                <p className="text-base">
+                  {stop.campgroundName} in {stop.name} - {Math.round(stop.distance)} miles from start
                 </p>
               </div>
             ))}

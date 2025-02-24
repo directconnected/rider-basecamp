@@ -1,7 +1,20 @@
-
 import { getLocationName } from './mapService';
-import { findNearbyGasStation, findNearbyLodging } from './placesService';
+import { findNearbyGasStation, findNearbyLodging, findNearbyRestaurant, findNearbyCampground } from './placesService';
 import { FuelStop, HotelStop } from "@/hooks/useRoutePlanning";
+
+export interface RestaurantStop {
+  location: [number, number];
+  name: string;
+  restaurantName: string;
+  distance: number;
+}
+
+export interface CampingStop {
+  location: [number, number];
+  name: string;
+  campgroundName: string;
+  distance: number;
+}
 
 export const calculateFuelStops = async (route: any, fuelMileage: number): Promise<FuelStop[]> => {
   console.log('Calculating fuel stops with mileage:', fuelMileage);
@@ -10,10 +23,8 @@ export const calculateFuelStops = async (route: any, fuelMileage: number): Promi
   const fuelStops: FuelStop[] = [];
   const totalDistance = route.distance / 1609.34; // Convert to miles
   
-  // Calculate number of fuel stops needed based on provided fuel mileage
-  // We'll stop at 80% of max range to maintain a safety buffer
   const safeRange = fuelMileage * 0.8;
-  const numStops = Math.ceil(totalDistance / safeRange) - 1; // -1 because we start with a full tank
+  const numStops = Math.ceil(totalDistance / safeRange) - 1;
   
   console.log('Number of fuel stops needed:', numStops);
   console.log('Safe range between stops:', safeRange);
@@ -23,7 +34,6 @@ export const calculateFuelStops = async (route: any, fuelMileage: number): Promi
     return [];
   }
   
-  // Calculate evenly spaced stops
   for (let i = 1; i <= numStops; i++) {
     const progress = (i * safeRange) / totalDistance;
     if (progress >= 1) break;
@@ -69,7 +79,6 @@ export const calculateHotelStops = async (route: any, milesPerDay: number): Prom
   const hotelStops: HotelStop[] = [];
   const totalDistance = route.distance / 1609.34; // Convert to miles
   
-  // Calculate number of hotel stops needed
   const numStops = Math.floor(totalDistance / milesPerDay);
   
   console.log('Number of hotel stops needed:', numStops);
@@ -79,7 +88,6 @@ export const calculateHotelStops = async (route: any, milesPerDay: number): Prom
     return [];
   }
   
-  // Calculate evenly spaced stops
   for (let i = 1; i <= numStops; i++) {
     const progress = (i * milesPerDay) / totalDistance;
     if (progress >= 1) break;
@@ -118,4 +126,78 @@ export const calculateHotelStops = async (route: any, milesPerDay: number): Prom
 
   console.log('Final hotel stops:', hotelStops);
   return hotelStops;
+};
+
+export const calculateRestaurantStops = async (route: any, milesPerMeal: number = 150): Promise<RestaurantStop[]> => {
+  console.log('Calculating restaurant stops every:', milesPerMeal, 'miles');
+  
+  const restaurantStops: RestaurantStop[] = [];
+  const totalDistance = route.distance / 1609.34; // Convert to miles
+  
+  const numStops = Math.floor(totalDistance / milesPerMeal);
+  
+  console.log('Number of restaurant stops needed:', numStops);
+  
+  if (numStops <= 0) return [];
+  
+  for (let i = 1; i <= numStops; i++) {
+    const progress = (i * milesPerMeal) / totalDistance;
+    if (progress >= 1) break;
+    
+    const pointIndex = Math.floor(progress * route.geometry.coordinates.length);
+    const coordinates = route.geometry.coordinates[pointIndex] as [number, number];
+    
+    try {
+      const locationName = await getLocationName(coordinates);
+      const restaurant = await findNearbyRestaurant(coordinates);
+      
+      restaurantStops.push({
+        location: coordinates,
+        name: locationName,
+        restaurantName: restaurant ? restaurant.name : "No restaurant found",
+        distance: Math.round(progress * totalDistance)
+      });
+    } catch (error) {
+      console.error('Error finding restaurant:', error);
+    }
+  }
+
+  return restaurantStops;
+};
+
+export const calculateCampingStops = async (route: any, milesPerDay: number): Promise<CampingStop[]> => {
+  console.log('Calculating camping stops with miles per day:', milesPerDay);
+  
+  const campingStops: CampingStop[] = [];
+  const totalDistance = route.distance / 1609.34;
+  
+  const numStops = Math.floor(totalDistance / milesPerDay);
+  
+  console.log('Number of camping stops needed:', numStops);
+  
+  if (numStops <= 0) return [];
+  
+  for (let i = 1; i <= numStops; i++) {
+    const progress = (i * milesPerDay) / totalDistance;
+    if (progress >= 1) break;
+    
+    const pointIndex = Math.floor(progress * route.geometry.coordinates.length);
+    const coordinates = route.geometry.coordinates[pointIndex] as [number, number];
+    
+    try {
+      const locationName = await getLocationName(coordinates);
+      const campground = await findNearbyCampground(coordinates);
+      
+      campingStops.push({
+        location: coordinates,
+        name: locationName,
+        campgroundName: campground ? campground.name : "No campground found",
+        distance: Math.round(progress * totalDistance)
+      });
+    } catch (error) {
+      console.error('Error finding campground:', error);
+    }
+  }
+
+  return campingStops;
 };

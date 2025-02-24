@@ -1,4 +1,3 @@
-
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 
 const corsHeaders = {
@@ -8,7 +7,7 @@ const corsHeaders = {
 
 interface RequestBody {
   location: [number, number]; // [latitude, longitude]
-  type: 'lodging' | 'gas_station';
+  type: 'lodging' | 'gas_station' | 'restaurant' | 'campground';
   radius?: number;
 }
 
