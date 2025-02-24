@@ -1,7 +1,6 @@
 
-import { useState } from "react";
-import { useToast } from "@/components/ui/use-toast";
 import mapboxgl from 'mapbox-gl';
+import { useToast } from "@/components/ui/use-toast";
 import { initializeMapbox, geocodeLocation } from "@/services/mapService";
 import { calculateFuelStops, calculateHotelStops, planRoute } from "@/services/routeService";
 import { FormData, RouteDetails, FuelStop, HotelStop } from "./useRoutePlanning";
@@ -32,6 +31,7 @@ export const useRouteCalculation = () => {
     } = callbacks;
 
     setIsLoading(true);
+    
     try {
       if (!mapboxgl.accessToken) {
         const initialized = await initializeMapbox();
@@ -83,7 +83,6 @@ export const useRouteCalculation = () => {
       setHotelStops(calculatedHotelStops);
 
       const totalMiles = Math.round(route.distance / 1609.34);
-      const numDays = Math.ceil(totalMiles / milesPerDay);
 
       setRouteDetails({
         distance: totalMiles,

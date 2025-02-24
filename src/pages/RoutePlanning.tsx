@@ -18,6 +18,7 @@ const RoutePlanning = () => {
     startCoords,
     endCoords,
     fuelStops,
+    hotelStops,
     handleFormDataChange,
     setIsLoading,
     setRouteDetails,
@@ -25,6 +26,7 @@ const RoutePlanning = () => {
     setStartCoords,
     setEndCoords,
     setFuelStops,
+    setHotelStops,
   } = useRoutePlanning();
 
   const { calculateRoute } = useRouteCalculation();
@@ -36,6 +38,7 @@ const RoutePlanning = () => {
       setEndCoords,
       setCurrentRoute,
       setFuelStops,
+      setHotelStops,
       setRouteDetails,
     });
   };
@@ -65,6 +68,7 @@ const RoutePlanning = () => {
                   endCoords={endCoords}
                   currentRoute={currentRoute}
                   fuelStops={fuelStops}
+                  hotelStops={hotelStops}
                 />
               )}
             </div>
