@@ -14,11 +14,11 @@ const findNearestGasStation = async (coordinates: [number, number]): Promise<Gas
   console.log('Searching for gas stations near coordinates:', coordinates);
   
   try {
+    // Fix: Mapbox expects coordinates in [longitude,latitude] order
     const response = await fetch(
       `https://api.mapbox.com/geocoding/v5/mapbox.places/gas%20station.json?` + 
       `proximity=${coordinates[0]},${coordinates[1]}&` +
       `types=poi&` +
-      `category=fuel&` +
       `limit=1&` +
       `access_token=${mapboxgl.accessToken}`
     );
@@ -37,23 +37,36 @@ const findNearestGasStation = async (coordinates: [number, number]): Promise<Gas
     }
 
     const station = data.features[0];
+    
+    // Verify we have all required data
+    if (!station.text || !station.place_name || !station.center) {
+      console.error('Invalid station data:', station);
+      return null;
+    }
+
     const result = {
       name: station.text,
       address: station.place_name,
       coordinates: station.center as [number, number],
-      distance: station.properties.distance || 0
+      distance: station.properties?.distance || 0
     };
 
     console.log('Found gas station:', result);
     return result;
   } catch (error) {
     console.error('Error finding gas station:', error);
+    console.error('Error details:', {
+      message: error.message,
+      stack: error.stack
+    });
     return null;
   }
 };
 
 export const calculateFuelStops = async (route: any, fuelMileage: number): Promise<FuelStop[]> => {
   console.log('Calculating fuel stops with mileage:', fuelMileage);
+  console.log('Route data:', route);
+  
   const fuelStops: FuelStop[] = [];
   const totalDistance = route.distance / 1609.34; // Convert to miles
   
@@ -63,6 +76,7 @@ export const calculateFuelStops = async (route: any, fuelMileage: number): Promi
   const numStops = Math.ceil(totalDistance / safeRange) - 1; // -1 because we start with a full tank
   
   console.log('Number of fuel stops needed:', numStops);
+  console.log('Safe range between stops:', safeRange);
   
   if (numStops <= 0) {
     console.log('No fuel stops needed - destination within range');
@@ -74,30 +88,41 @@ export const calculateFuelStops = async (route: any, fuelMileage: number): Promi
     const progress = (i * safeRange) / totalDistance;
     if (progress >= 1) break;
     
-    const coordinates = route.geometry.coordinates[
-      Math.floor(progress * route.geometry.coordinates.length)
-    ] as [number, number];
+    const pointIndex = Math.floor(progress * route.geometry.coordinates.length);
+    const coordinates = route.geometry.coordinates[pointIndex] as [number, number];
     
     console.log(`Looking for gas station at stop ${i}:`, coordinates);
+    console.log(`Progress: ${Math.round(progress * 100)}%, Point index: ${pointIndex}`);
     
-    const gasStation = await findNearestGasStation(coordinates);
-    
-    if (gasStation) {
-      fuelStops.push({
-        location: gasStation.coordinates,
-        name: `${gasStation.name} - ${gasStation.address}`,
-        distance: Math.round(progress * totalDistance)
-      });
-      console.log(`Added fuel stop ${i}:`, gasStation);
-    } else {
-      // Fallback to approximate location if no gas station found
+    try {
+      const gasStation = await findNearestGasStation(coordinates);
+      
+      if (gasStation) {
+        fuelStops.push({
+          location: gasStation.coordinates,
+          name: `${gasStation.name} - ${gasStation.address}`,
+          distance: Math.round(progress * totalDistance)
+        });
+        console.log(`Added fuel stop ${i}:`, gasStation);
+      } else {
+        // Fallback to approximate location if no gas station found
+        const locationName = await getLocationName(coordinates);
+        fuelStops.push({
+          location: coordinates,
+          name: `Refueling Stop near ${locationName}`,
+          distance: Math.round(progress * totalDistance)
+        });
+        console.log(`Added fallback fuel stop ${i} near:`, locationName);
+      }
+    } catch (error) {
+      console.error(`Error processing stop ${i}:`, error);
+      // Still add a fallback stop in case of error
       const locationName = await getLocationName(coordinates);
       fuelStops.push({
         location: coordinates,
         name: `Refueling Stop near ${locationName}`,
         distance: Math.round(progress * totalDistance)
       });
-      console.log(`Added fallback fuel stop ${i} near:`, locationName);
     }
   }
 
