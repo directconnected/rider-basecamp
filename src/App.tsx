@@ -1,3 +1,4 @@
+
 import React from "react";
 import { BrowserRouter as Router, Routes as RouterRoutes, Route } from "react-router-dom";
 import { Toaster } from "@/components/ui/toaster";
@@ -35,6 +36,10 @@ import TermsOfService from "@/pages/TermsOfService";
 import PrivacyPolicy from "@/pages/PrivacyPolicy";
 import Tents from "@/pages/Tents";
 import ServiceLanding from "@/pages/ServiceLanding";
+import Parts from "@/pages/Parts";
+import GroupRides from "@/pages/GroupRides";
+import Rentals from "@/pages/Rentals";
+import News from "@/pages/News";
 
 const queryClient = new QueryClient();
 
@@ -87,6 +92,10 @@ function App() {
             <Route path="/terms" element={<TermsOfService />} />
             <Route path="/privacy" element={<PrivacyPolicy />} />
             <Route path="/tents" element={<Tents />} />
+            <Route path="/parts" element={<Parts />} />
+            <Route path="/group-rides" element={<GroupRides />} />
+            <Route path="/rentals" element={<Rentals />} />
+            <Route path="/news" element={<News />} />
             <Route path="*" element={<NotFound />} />
           </RouterRoutes>
           <Toaster />
