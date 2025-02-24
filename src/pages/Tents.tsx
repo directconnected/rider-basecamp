@@ -85,7 +85,7 @@ const Tents = () => {
           <div className="container mx-auto px-4">
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
               {tents?.map((tent: Tent) => (
-                <Card key={tent.id} className="hover-card overflow-hidden flex flex-col">
+                <Card key={tent.id} className="hover:shadow-lg transition-shadow overflow-hidden flex flex-col">
                   {tent.image_url && (
                     <div className="relative h-48 bg-white">
                       <img
