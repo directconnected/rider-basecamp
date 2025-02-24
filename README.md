@@ -1,4 +1,4 @@
-# Welcome to your Lovable project
+# Rider Basecamp Project
 
 ## Project info
 
