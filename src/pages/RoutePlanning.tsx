@@ -80,7 +80,6 @@ const RoutePlanning = () => {
 
       setCurrentRoute(route);
       
-      const fuelMileage = parseInt(formData.fuelMileage);
       const calculatedFuelStops = await calculateFuelStops(route);
       setFuelStops(calculatedFuelStops);
 
@@ -91,75 +90,9 @@ const RoutePlanning = () => {
         destination: formData.destination
       });
 
-      const totalMiles = Math.round(route.distance / 1609.34);
-      const milesPerDay = parseInt(formData.milesPerDay);
-      const numDays = Math.ceil(totalMiles / milesPerDay);
-      const coordinates = route.geometry.coordinates;
-      
-      const getLocationName = async (location: [number, number], type?: string) => {
-        const response = await fetch(`https://api.mapbox.com/geocoding/v5/mapbox.places/${location[0]},${location[1]}.json?access_token=${mapboxgl.accessToken}`);
-        const data = await response.json();
-        return data.features[0].place_name;
-      };
-
-      const sampleSuggestions = [];
-      
-      if (coordinates.length >= numDays) {
-        for (let day = 1; day <= numDays; day++) {
-          const progress = day / numDays;
-          const stopIndex = Math.floor(coordinates.length * progress);
-          
-          if (stopIndex < coordinates.length && coordinates[stopIndex]?.length >= 2) {
-            const stopLocation = [
-              coordinates[stopIndex][0],
-              coordinates[stopIndex][1]
-            ] as [number, number];
-            
-            const locationName = await getLocationName(stopLocation);
-            const hotelName = await getLocationName(stopLocation, 'hotel');
-            const campingName = await getLocationName(stopLocation, 'camping');
-            
-            sampleSuggestions.push({
-              name: hotelName,
-              type: "hotel" as const,
-              location: stopLocation,
-              description: `Hotel in ${locationName} after day ${day} (${Math.round(progress * totalMiles)} miles)`
-            });
-
-            sampleSuggestions.push({
-              name: campingName,
-              type: "camping" as const,
-              location: stopLocation,
-              description: `Camping near ${locationName} after day ${day} (${Math.round(progress * totalMiles)} miles)`
-            });
-
-            if (day < numDays) {
-              const lunchProgress = (day - 0.5) / numDays;
-              const lunchIndex = Math.floor(coordinates.length * lunchProgress);
-              
-              if (lunchIndex < coordinates.length && coordinates[lunchIndex]?.length >= 2) {
-                const lunchLocation = [
-                  coordinates[lunchIndex][0],
-                  coordinates[lunchIndex][1]
-                ] as [number, number];
-                
-                const lunchLocationName = await getLocationName(lunchLocation);
-                const restaurantName = await getLocationName(lunchLocation, 'restaurant');
-                
-                sampleSuggestions.push({
-                  name: restaurantName,
-                  type: "restaurant" as const,
-                  location: lunchLocation,
-                  description: `Restaurant in ${lunchLocationName} for lunch on day ${day} (${Math.round(lunchProgress * totalMiles)} miles)`
-                });
-              }
-            }
-          }
-        }
-      }
-
-      console.log('Setting sample suggestions:', sampleSuggestions);
-      setSuggestions(sampleSuggestions);
+      const foundPois = await findPointsOfInterest(route);
+      console.log('Found POIs:', foundPois);
+      setSuggestions(foundPois);
 
       toast({
         title: "Route Planned",
