@@ -29,7 +29,7 @@ export const calculateFuelStops = async (route: any, fuelMileage: number): Promi
     
     fuelStops.push({
       location: coordinates,
-      name: `${locationName} Fuel Stop`,
+      name: `Refueling Stop near ${locationName}`,
       distance: Math.round(progress * totalDistance)
     });
   }
@@ -49,4 +49,3 @@ export const planRoute = async (start: [number, number], end: [number, number]) 
   const data = await response.json();
   return data.routes[0];
 };
-

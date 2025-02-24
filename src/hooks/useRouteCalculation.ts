@@ -2,9 +2,9 @@
 import { useState } from "react";
 import { useToast } from "@/components/ui/use-toast";
 import mapboxgl from 'mapbox-gl';
-import { initializeMapbox, geocodeLocation, getLocationName, findPointsOfInterest } from "@/services/mapService";
+import { initializeMapbox, geocodeLocation } from "@/services/mapService";
 import { calculateFuelStops, planRoute } from "@/services/routeService";
-import { FormData, RouteDetails, PointOfInterest, FuelStop } from "./useRoutePlanning";
+import { FormData, RouteDetails, FuelStop } from "./useRoutePlanning";
 
 export const useRouteCalculation = () => {
   const { toast } = useToast();
@@ -18,7 +18,6 @@ export const useRouteCalculation = () => {
       setCurrentRoute: (route: any) => void;
       setFuelStops: (stops: FuelStop[]) => void;
       setRouteDetails: (details: RouteDetails) => void;
-      setSuggestions: (suggestions: PointOfInterest[]) => void;
     }
   ) => {
     const {
@@ -28,7 +27,6 @@ export const useRouteCalculation = () => {
       setCurrentRoute,
       setFuelStops,
       setRouteDetails,
-      setSuggestions
     } = callbacks;
 
     setIsLoading(true);
@@ -81,9 +79,6 @@ export const useRouteCalculation = () => {
       const milesPerDay = parseInt(formData.milesPerDay);
       const numDays = Math.ceil(totalMiles / milesPerDay);
 
-      // Get POIs along the route with milesPerDay parameter
-      const suggestions = await findPointsOfInterest(route, milesPerDay);
-      
       setRouteDetails({
         distance: totalMiles,
         duration: Math.round(route.duration / 3600),
@@ -91,11 +86,9 @@ export const useRouteCalculation = () => {
         destination: formData.destination
       });
 
-      setSuggestions(suggestions);
-
       toast({
         title: "Route Planned",
-        description: "Your route has been planned with suggested stops and fuel stops.",
+        description: "Your route has been planned with suggested refueling stops.",
       });
     } catch (error) {
       console.error("Route planning error:", error);

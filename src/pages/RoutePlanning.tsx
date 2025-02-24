@@ -1,5 +1,5 @@
 
-import React, { useEffect } from "react";
+import React from "react";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/layout/Footer";
 import Breadcrumbs from "@/components/Breadcrumbs";
@@ -14,7 +14,6 @@ const RoutePlanning = () => {
     isLoading,
     formData,
     routeDetails,
-    suggestions,
     currentRoute,
     startCoords,
     endCoords,
@@ -22,7 +21,6 @@ const RoutePlanning = () => {
     handleFormDataChange,
     setIsLoading,
     setRouteDetails,
-    setSuggestions,
     setCurrentRoute,
     setStartCoords,
     setEndCoords,
@@ -30,10 +28,6 @@ const RoutePlanning = () => {
   } = useRoutePlanning();
 
   const { calculateRoute } = useRouteCalculation();
-
-  useEffect(() => {
-    console.log('Current suggestions:', suggestions);
-  }, [suggestions]);
 
   const handlePlanRoute = async () => {
     await calculateRoute(formData, {
@@ -43,7 +37,6 @@ const RoutePlanning = () => {
       setCurrentRoute,
       setFuelStops,
       setRouteDetails,
-      setSuggestions,
     });
   };
 
@@ -72,7 +65,6 @@ const RoutePlanning = () => {
                   endCoords={endCoords}
                   currentRoute={currentRoute}
                   fuelStops={fuelStops}
-                  suggestions={suggestions}
                 />
               )}
             </div>
