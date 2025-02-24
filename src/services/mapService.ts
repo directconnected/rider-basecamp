@@ -1,3 +1,4 @@
+
 import mapboxgl from 'mapbox-gl';
 import { supabase } from "@/integrations/supabase/client";
 import { PointOfInterest } from "@/hooks/useRoutePlanning";
@@ -69,17 +70,28 @@ export const getLocationName = async (coordinates: [number, number]): Promise<st
 export const findPointsOfInterest = async (route: any): Promise<PointOfInterest[]> => {
   const pois: PointOfInterest[] = [];
   const coordinates = route.geometry.coordinates;
-  const numPoints = coordinates.length;
+  const totalDistance = route.distance / 1609.34; // Convert to miles
+  const milesPerDay = 300; // Default miles per day
+  const numDays = Math.ceil(totalDistance / milesPerDay);
   
-  const samplePoints = [
-    Math.floor(numPoints * 0.25),  // 25% along route
-    Math.floor(numPoints * 0.5),   // 50% along route
-    Math.floor(numPoints * 0.75)   // 75% along route
-  ];
+  // Calculate sample points for each day's journey
+  const samplePoints = Array.from({ length: numDays }, (_, i) => {
+    const progress = (i + 0.5) / numDays; // Sample at midday for each day
+    return Math.floor(coordinates.length * progress);
+  });
 
-  const poiTypes = ['restaurant', 'hotel', 'campground'];
+  // Add evening stop points
+  const eveningStops = Array.from({ length: numDays }, (_, i) => {
+    const progress = (i + 1) / numDays;
+    return Math.floor(coordinates.length * progress);
+  });
+
+  // Combine all sampling points
+  const allSamplePoints = [...samplePoints, ...eveningStops];
   
-  for (const pointIndex of samplePoints) {
+  for (const pointIndex of allSamplePoints) {
+    if (pointIndex >= coordinates.length) continue;
+    
     const [lng, lat] = coordinates[pointIndex];
     
     try {
@@ -113,13 +125,15 @@ export const findPointsOfInterest = async (route: any): Promise<PointOfInterest[
             }
           }
 
+          const progress = pointIndex / coordinates.length;
+          const distanceFromStart = Math.round(totalDistance * progress);
+
           pois.push({
             name: feature.text || 'Unknown Location',
             type,
             location: feature.center as [number, number],
             description: feature.properties?.description || 
-                        feature.place_name?.split(',').slice(1).join(',').trim() ||
-                        `${type} near route`
+                        `${feature.text} (${distanceFromStart} miles from start)`
           });
         }
       }
@@ -133,7 +147,8 @@ export const findPointsOfInterest = async (route: any): Promise<PointOfInterest[
     index === self.findIndex((p) => p.name === poi.name)
   );
 
-  const finalPois = uniquePois.slice(0, 6); // Limit to 6 suggestions
-  console.log('Found POIs:', finalPois); // Debug log
+  // Limit to 12 suggestions (2 per day: midday and evening)
+  const finalPois = uniquePois.slice(0, Math.min(12, numDays * 2));
+  console.log('Found POIs:', finalPois);
   return finalPois;
 };

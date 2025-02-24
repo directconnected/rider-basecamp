@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { useToast } from "@/components/ui/use-toast";
 import mapboxgl from 'mapbox-gl';
-import { initializeMapbox, geocodeLocation, getLocationName } from "@/services/mapService";
+import { initializeMapbox, geocodeLocation, getLocationName, findPointsOfInterest } from "@/services/mapService";
 import { calculateFuelStops, planRoute } from "@/services/routeService";
 import { FormData, RouteDetails, PointOfInterest, FuelStop } from "./useRoutePlanning";
 
@@ -79,55 +79,10 @@ export const useRouteCalculation = () => {
       const totalMiles = Math.round(route.distance / 1609.34);
       const milesPerDay = parseInt(formData.milesPerDay);
       const numDays = Math.ceil(totalMiles / milesPerDay);
-      const coordinates = route.geometry.coordinates;
-      const suggestions = [];
 
-      // Calculate stops based on days
-      for (let i = 1; i <= numDays; i++) {
-        const progress = i / numDays;
-        const index = Math.floor(coordinates.length * progress);
-        if (index < coordinates.length) {
-          const coord = coordinates[index];
-          
-          // Add restaurant for lunch (midday)
-          if (i < numDays) {
-            const lunchProgress = (i - 0.5) / numDays;
-            const lunchIndex = Math.floor(coordinates.length * lunchProgress);
-            if (lunchIndex < coordinates.length) {
-              const lunchCoord = coordinates[lunchIndex];
-              const restaurantName = await getLocationName([lunchCoord[0], lunchCoord[1]], 'restaurant');
-              const locationName = await getLocationName([lunchCoord[0], lunchCoord[1]]);
-              
-              suggestions.push({
-                name: restaurantName,
-                type: 'restaurant' as const,
-                location: [lunchCoord[0], lunchCoord[1]],
-                description: `Restaurant in ${locationName} for lunch on day ${i} (${Math.round(lunchProgress * totalMiles)} miles)`
-              });
-            }
-          }
-
-          // Add accommodation options for overnight
-          const hotelName = await getLocationName([coord[0], coord[1]], 'hotel');
-          const campingName = await getLocationName([coord[0], coord[1]], 'camping');
-          const locationName = await getLocationName([coord[0], coord[1]]);
-
-          suggestions.push({
-            name: hotelName,
-            type: 'hotel' as const,
-            location: [coord[0], coord[1]],
-            description: `Hotel in ${locationName} for night ${i} (${Math.round(progress * totalMiles)} miles)`
-          });
-
-          suggestions.push({
-            name: campingName,
-            type: 'camping' as const,
-            location: [coord[0], coord[1]],
-            description: `Campground in ${locationName} for night ${i} (${Math.round(progress * totalMiles)} miles)`
-          });
-        }
-      }
-
+      // Get POIs along the route
+      const suggestions = await findPointsOfInterest(route);
+      
       setRouteDetails({
         distance: totalMiles,
         duration: Math.round(route.duration / 3600),
@@ -135,7 +90,6 @@ export const useRouteCalculation = () => {
         destination: formData.destination
       });
 
-      console.log('Setting suggestions:', suggestions);
       setSuggestions(suggestions);
 
       toast({
