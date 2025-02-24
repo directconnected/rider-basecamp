@@ -16,22 +16,27 @@ const Auth = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // Get the redirect path from the state, fallback to dashboard if none provided
-  const from = location?.state?.from?.pathname || "/dashboard";
+  // Store the redirect path in state to ensure it persists
+  const [redirectPath, setRedirectPath] = useState(location.state?.from?.pathname || "/dashboard");
 
   useEffect(() => {
-    // Check if user is already logged in, and redirect to the intended destination
+    // Update redirectPath if location.state changes
+    setRedirectPath(location.state?.from?.pathname || "/dashboard");
+  }, [location.state]);
+
+  useEffect(() => {
+    console.log("Current redirect path:", redirectPath); // Debug log
+    
     const checkSession = async () => {
       const { data: { session } } = await supabase.auth.getSession();
       if (session) {
-        // Redirect to the intended destination immediately
-        console.log("Already logged in. Redirecting to:", from);
-        navigate(from);
+        console.log("Already logged in. Redirecting to:", redirectPath);
+        navigate(redirectPath);
       }
     };
     
     checkSession();
-  }, [navigate, from]);
+  }, [navigate, redirectPath]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -53,10 +58,10 @@ const Auth = () => {
 
         if (user) {
           toast.success("Account created! Please check your email to verify your account.");
-          navigate(from);
+          navigate(redirectPath);
         }
       } else {
-        const { error: signInError } = await supabase.auth.signInWithPassword({
+        const { data, error: signInError } = await supabase.auth.signInWithPassword({
           email,
           password,
         });
@@ -64,8 +69,8 @@ const Auth = () => {
         if (signInError) throw signInError;
 
         toast.success("Successfully signed in");
-        console.log("Successfully signed in. Navigating to:", from);
-        navigate(from);
+        console.log("Successfully signed in. Navigating to:", redirectPath);
+        navigate(redirectPath);
       }
     } catch (error) {
       console.error("Auth error:", error);
