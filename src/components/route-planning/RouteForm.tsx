@@ -109,7 +109,7 @@ const RouteForm = ({ formData, isLoading, onFormDataChange, onPlanRoute }: Route
           </div>
           
           <div>
-            <label className="block text-sm font-medium mb-2">Miles per Day</label>
+            <label className="block text-sm font-medium mb-2">Max Miles Per Day</label>
             <div className="flex gap-2">
               <Input 
                 type="number" 
