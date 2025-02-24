@@ -78,11 +78,12 @@ const RoutePlanning = () => {
       });
 
       const pois = await findPointsOfInterest(route);
+      console.log('Setting suggestions:', pois); // Debug log
       setSuggestions(pois);
 
       toast({
         title: "Route Planned",
-        description: "Your route has been planned with named fuel stops added every 200 miles.",
+        description: "Your route has been planned with suggested stops and fuel stops.",
       });
     } catch (error) {
       console.error("Route planning error:", error);
@@ -146,10 +147,9 @@ const RoutePlanning = () => {
                     duration={routeDetails.duration}
                     fuelStops={fuelStops}
                   />
+                  <SuggestedStops suggestions={suggestions} />
                 </>
               )}
-
-              <SuggestedStops suggestions={suggestions} />
             </div>
           </div>
         </section>
