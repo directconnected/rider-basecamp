@@ -249,6 +249,53 @@ export type Database = {
         }
         Relationships: []
       }
+      service_records: {
+        Row: {
+          cost: number | null
+          created_at: string
+          id: string
+          mileage: number | null
+          next_service_date: string | null
+          notes: string | null
+          service_date: string
+          service_type: Database["public"]["Enums"]["service_type"]
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          cost?: number | null
+          created_at?: string
+          id?: string
+          mileage?: number | null
+          next_service_date?: string | null
+          notes?: string | null
+          service_date: string
+          service_type: Database["public"]["Enums"]["service_type"]
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          cost?: number | null
+          created_at?: string
+          id?: string
+          mileage?: number | null
+          next_service_date?: string | null
+          notes?: string | null
+          service_date?: string
+          service_type?: Database["public"]["Enums"]["service_type"]
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "service_records_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       subscriptions: {
         Row: {
           created_at: string
@@ -348,6 +395,14 @@ export type Database = {
       }
     }
     Enums: {
+      service_type:
+        | "oil_change"
+        | "tire_replacement"
+        | "brake_service"
+        | "chain_maintenance"
+        | "general_maintenance"
+        | "repair"
+        | "inspection"
       user_role: "admin" | "user"
     }
     CompositeTypes: {
