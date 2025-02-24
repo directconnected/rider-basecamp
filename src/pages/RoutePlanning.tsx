@@ -1,3 +1,4 @@
+
 import React, { useEffect, useRef, useState } from "react";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/layout/Footer";
@@ -36,12 +37,22 @@ const RoutePlanning = () => {
   useEffect(() => {
     const initializeMap = async () => {
       try {
+        // Fetch token from Edge Function
         const { data, error } = await supabase.functions.invoke('get-mapbox-token');
+        console.log("Edge function response:", data, error); // Debug log
         
-        if (error) throw error;
-        if (!data?.token) throw new Error('No token returned');
+        if (error) {
+          console.error('Edge function error:', error);
+          throw error;
+        }
+        
+        if (!data?.token) {
+          console.error('No token in response:', data);
+          throw new Error('No token returned from edge function');
+        }
 
         mapboxgl.accessToken = data.token;
+        console.log("Mapbox token set:", !!mapboxgl.accessToken); // Debug log
         
         if (!mapContainer.current) return;
 
@@ -72,16 +83,34 @@ const RoutePlanning = () => {
 
   const geocodeLocation = async (location: string): Promise<[number, number] | null> => {
     try {
+      console.log("Geocoding location:", location, "Token:", !!mapboxgl.accessToken); // Debug log
+      
+      if (!mapboxgl.accessToken) {
+        throw new Error('Mapbox token not initialized');
+      }
+
       const response = await fetch(
         `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(location)}.json?access_token=${mapboxgl.accessToken}`
       );
+      
+      if (!response.ok) {
+        throw new Error(`Geocoding failed: ${response.status} ${response.statusText}`);
+      }
+
       const data = await response.json();
+      console.log("Geocoding response:", data); // Debug log
+
       if (data.features && data.features.length > 0) {
         return data.features[0].center;
       }
       return null;
     } catch (error) {
       console.error("Geocoding error:", error);
+      toast({
+        title: "Geocoding Error",
+        description: `Could not find location: ${location}. Error: ${error.message}`,
+        variant: "destructive"
+      });
       return null;
     }
   };
@@ -117,6 +146,10 @@ const RoutePlanning = () => {
   const planRoute = async () => {
     setIsLoading(true);
     try {
+      if (!mapboxgl.accessToken) {
+        throw new Error('Mapbox token not initialized');
+      }
+
       // Geocode start and end points
       const startCoords = await geocodeLocation(formData.startPoint);
       const endCoords = await geocodeLocation(formData.destination);
@@ -131,10 +164,18 @@ const RoutePlanning = () => {
       }
 
       // Get route from Mapbox Directions API
+      console.log("Fetching route for coordinates:", startCoords, endCoords); // Debug log
+
       const routeResponse = await fetch(
         `https://api.mapbox.com/directions/v5/mapbox/driving/${startCoords[0]},${startCoords[1]};${endCoords[0]},${endCoords[1]}?geometries=geojson&access_token=${mapboxgl.accessToken}`
       );
+
+      if (!routeResponse.ok) {
+        throw new Error(`Route planning failed: ${routeResponse.status} ${routeResponse.statusText}`);
+      }
+
       const routeData = await routeResponse.json();
+      console.log("Route data:", routeData); // Debug log
 
       if (routeData.routes && routeData.routes.length > 0) {
         const route = routeData.routes[0];
@@ -196,7 +237,7 @@ const RoutePlanning = () => {
       console.error("Route planning error:", error);
       toast({
         title: "Error",
-        description: "There was an error planning your route. Please try again.",
+        description: `There was an error planning your route: ${error.message}`,
         variant: "destructive"
       });
     } finally {
