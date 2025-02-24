@@ -99,6 +99,8 @@ const findNearestGasStation = async (coordinates: [number, number]): Promise<Gas
 };
 
 const findNearestHotel = async (coordinates: [number, number]): Promise<{ name: string; location: [number, number] } | null> => {
+  console.log('Searching for hotels near coordinates:', coordinates);
+  
   try {
     if (!coordinates || coordinates.length !== 2 || 
         !isFinite(coordinates[0]) || !isFinite(coordinates[1])) {
@@ -106,32 +108,76 @@ const findNearestHotel = async (coordinates: [number, number]): Promise<{ name: 
       return null;
     }
 
-    const queryUrl = new URL('https://api.mapbox.com/geocoding/v5/mapbox.places/hotel.json');
-    queryUrl.searchParams.append('proximity', `${coordinates[0]},${coordinates[1]}`);
-    queryUrl.searchParams.append('types', 'poi');
-    queryUrl.searchParams.append('limit', '1');
-    queryUrl.searchParams.append('access_token', mapboxgl.accessToken);
+    // Configuration for search
+    const searchRadii = [5000, 10000, 15000]; // Search radii in meters
+    const searchTerms = ['hotel', 'motel', 'inn'];
+    let hotel = null;
 
-    const response = await fetch(queryUrl.toString());
-    
-    if (!response.ok) {
-      throw new Error(`Hotel search failed: ${response.status} ${response.statusText}`);
+    // Try different search radii if needed
+    for (const radius of searchRadii) {
+      for (const term of searchTerms) {
+        const queryUrl = new URL('https://api.mapbox.com/geocoding/v5/mapbox.places/' + encodeURIComponent(term) + '.json');
+        queryUrl.searchParams.append('proximity', `${coordinates[0]},${coordinates[1]}`);
+        queryUrl.searchParams.append('types', 'poi');
+        queryUrl.searchParams.append('limit', '5');
+        queryUrl.searchParams.append('access_token', mapboxgl.accessToken);
+        queryUrl.searchParams.append('radius', radius.toString());
+
+        console.log(`Trying search with term "${term}" and radius ${radius}m`);
+        
+        const response = await fetch(queryUrl.toString());
+
+        if (!response.ok) {
+          console.error(`Search failed for term "${term}" with radius ${radius}m:`, response.statusText);
+          continue;
+        }
+
+        const data = await response.json();
+        console.log(`API response for "${term}" (${radius}m radius):`, data);
+
+        if (data.features && data.features.length > 0) {
+          // Filter to ensure we have a lodging-related POI
+          const lodging = data.features.find(feature => 
+            feature.properties?.category?.toLowerCase().includes('lodging') ||
+            feature.properties?.category?.toLowerCase().includes('hotel') ||
+            (feature.place_type?.includes('poi') && 
+             (feature.text?.toLowerCase().includes('hotel') ||
+              feature.text?.toLowerCase().includes('inn') ||
+              feature.text?.toLowerCase().includes('motel')))
+          );
+
+          if (lodging) {
+            hotel = lodging;
+            console.log(`Found hotel with ${radius}m radius:`, lodging);
+            break;
+          }
+        }
+      }
+      
+      if (hotel) break; // Stop searching if we found a hotel
     }
 
-    const data = await response.json();
-    
-    if (!data.features || data.features.length === 0) {
-      console.log('No hotels found near:', coordinates);
+    if (!hotel) {
+      console.log('No hotels found near coordinates:', coordinates);
       return null;
     }
 
-    const hotel = data.features[0];
+    // Verify we have all required data
+    if (!hotel.text || !hotel.center) {
+      console.error('Invalid hotel data:', hotel);
+      return null;
+    }
+
     return {
       name: hotel.text,
       location: hotel.center as [number, number]
     };
   } catch (error) {
     console.error('Error finding hotel:', error);
+    console.error('Error details:', {
+      message: error.message,
+      stack: error.stack
+    });
     return null;
   }
 };
