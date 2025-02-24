@@ -26,8 +26,14 @@ const Navigation = () => {
 
   const handleAuthClick = async () => {
     if (isLoggedIn) {
-      await supabase.auth.signOut();
-      navigate('/');
+      const { error } = await supabase.auth.signOut();
+      if (error) {
+        console.error('Error signing out:', error);
+      } else {
+        navigate('/');
+      }
+    } else {
+      navigate('/auth');
     }
   };
 
@@ -76,16 +82,15 @@ const Navigation = () => {
                 Logout
               </Button>
             ) : (
-              <Link to="/auth">
-                <Button 
-                  variant="outline" 
-                  size="sm"
-                  className="ml-2"
-                >
-                  <LogIn className="mr-2 h-4 w-4" />
-                  Login
-                </Button>
-              </Link>
+              <Button 
+                variant="outline" 
+                size="sm"
+                className="ml-2"
+                onClick={handleAuthClick}
+              >
+                <LogIn className="mr-2 h-4 w-4" />
+                Login
+              </Button>
             )}
           </nav>
         </div>
