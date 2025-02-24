@@ -12,10 +12,7 @@ interface RouteDetailsProps {
 
 const RouteDetails = ({ startPoint, destination, distance, duration }: RouteDetailsProps) => {
   const capitalizeLocation = (location: string) => {
-    return location
-      .split(' ')
-      .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
-      .join(' ');
+    return location.toUpperCase();
   };
 
   return (
