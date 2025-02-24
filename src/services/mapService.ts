@@ -79,25 +79,65 @@ export const getLocationName = async (coordinates: [number, number]): Promise<st
 };
 
 export const findPointsOfInterest = async (route: any): Promise<PointOfInterest[]> => {
-  const mockPOIs: PointOfInterest[] = [
-    {
-      name: "Mountain View Campground",
-      type: "camping",
-      location: [-98.5795, 39.8283],
-      description: "Beautiful campground with full RV hookups and tent sites."
-    },
-    {
-      name: "Roadside Diner",
-      type: "restaurant",
-      location: [-98.5795, 39.8283],
-      description: "Classic American diner serving breakfast all day."
-    },
-    {
-      name: "Comfort Inn",
-      type: "hotel",
-      location: [-98.5795, 39.8283],
-      description: "Clean, comfortable rooms with free breakfast."
-    }
+  const pois: PointOfInterest[] = [];
+  const coordinates = route.geometry.coordinates;
+  const numPoints = coordinates.length;
+  
+  // Sample points along the route at intervals
+  const samplePoints = [
+    Math.floor(numPoints * 0.25),  // 25% along route
+    Math.floor(numPoints * 0.5),   // 50% along route
+    Math.floor(numPoints * 0.75)   // 75% along route
   ];
-  return mockPOIs;
+
+  const poiTypes = ['restaurant', 'hotel', 'campground'];
+  
+  for (const pointIndex of samplePoints) {
+    const [lng, lat] = coordinates[pointIndex];
+    
+    try {
+      // Search for POIs around this point
+      const response = await fetch(
+        `https://api.mapbox.com/geocoding/v5/mapbox.places/${lng},${lat}.json?types=poi&limit=3&access_token=${mapboxgl.accessToken}`
+      );
+
+      if (!response.ok) continue;
+
+      const data = await response.json();
+      
+      if (data.features) {
+        for (const feature of data.features) {
+          // Determine POI type based on Mapbox category
+          let type: 'restaurant' | 'hotel' | 'camping' = 'restaurant';
+          
+          if (feature.properties.category) {
+            if (feature.properties.category.includes('lodging')) {
+              type = 'hotel';
+            } else if (feature.properties.category.includes('campground')) {
+              type = 'camping';
+            }
+          }
+
+          pois.push({
+            name: feature.text || 'Unknown Location',
+            type,
+            location: feature.center as [number, number],
+            description: feature.properties?.description || 
+                        feature.place_name?.split(',').slice(1).join(',').trim() ||
+                        `${type} near route`
+          });
+        }
+      }
+    } catch (error) {
+      console.error('Error fetching POIs:', error);
+      continue;
+    }
+  }
+
+  // Filter to ensure we have a mix of different types and limit total suggestions
+  const uniquePois = pois.filter((poi, index, self) =>
+    index === self.findIndex((p) => p.name === poi.name)
+  );
+
+  return uniquePois.slice(0, 6); // Limit to 6 suggestions
 };
