@@ -9,178 +9,178 @@ import Breadcrumbs from "@/components/Breadcrumbs";
 const destinations = [
   {
     id: 1,
-    name: "Tail of the Dragon",
-    location: "Deals Gap, North Carolina",
-    description: "318 curves in 11 miles - America's most famous motorcycle road.",
-    highlights: ["318 curves", "11 miles long", "Professional photographers on-site"]
+    name: "Yellowstone National Park",
+    location: "Wyoming",
+    description: "America's first national park featuring geothermal wonders and wildlife.",
+    highlights: ["Geothermal features", "Wildlife viewing", "Camping facilities"]
   },
   {
     id: 2,
-    name: "Pacific Coast Highway",
-    location: "California",
-    description: "Stunning coastal views along California's iconic Highway 1.",
-    highlights: ["Ocean views", "Coastal cliffs", "Year-round riding"]
+    name: "Moab Desert Adventure",
+    location: "Utah",
+    description: "Red rock wonderland with countless off-road trails and stunning arches.",
+    highlights: ["Desert landscapes", "Off-road trails", "Natural arches"]
   },
   {
     id: 3,
-    name: "Blue Ridge Parkway",
-    location: "Virginia/North Carolina",
-    description: "469 miles of scenic mountain roads through the Appalachians.",
-    highlights: ["Mountain vistas", "No commercial traffic", "Multiple access points"]
+    name: "Great Smoky Mountains",
+    location: "Tennessee/North Carolina",
+    description: "America's most visited national park with diverse wildlife and scenery.",
+    highlights: ["Mountain vistas", "Wildlife encounters", "Historic buildings"]
   },
   {
     id: 4,
-    name: "Beartooth Highway",
-    location: "Montana/Wyoming",
-    description: "Nearly 11,000 feet of elevation with spectacular mountain views.",
-    highlights: ["Switchbacks", "High elevation", "Wildlife viewing"]
+    name: "Grand Canyon",
+    location: "Arizona",
+    description: "One of the world's most spectacular natural wonders.",
+    highlights: ["Rim camping", "Sunset viewing spots", "Helicopter tours"]
   },
   {
     id: 5,
-    name: "Going-to-the-Sun Road",
-    location: "Montana",
-    description: "50-mile road through Glacier National Park's most scenic areas.",
-    highlights: ["Glacier views", "Mountain passes", "National park scenery"]
+    name: "Mount Rushmore",
+    location: "South Dakota",
+    description: "Iconic monument surrounded by Black Hills attractions.",
+    highlights: ["Evening lighting ceremony", "Historic sites", "Nearby attractions"]
   },
   {
     id: 6,
-    name: "Skyline Drive",
-    location: "Virginia",
-    description: "105 miles through Shenandoah National Park's scenic beauty.",
-    highlights: ["75 scenic overlooks", "Wildlife sightings", "Fall foliage"]
+    name: "Glacier National Park",
+    location: "Montana",
+    description: "Crown of the Continent with stunning alpine scenery.",
+    highlights: ["Glacier views", "Alpine meadows", "Wildlife watching"]
   },
   {
     id: 7,
-    name: "Natchez Trace Parkway",
-    location: "Tennessee/Alabama/Mississippi",
-    description: "444 miles of historic pathway with scenic wilderness views.",
-    highlights: ["Historical sites", "No commercial traffic", "Rural scenery"]
+    name: "Death Valley",
+    location: "California",
+    description: "North America's lowest point with unique desert landscapes.",
+    highlights: ["Sand dunes", "Badwater Basin", "Stargazing"]
   },
   {
     id: 8,
-    name: "Million Dollar Highway",
-    location: "Colorado",
-    description: "Part of the San Juan Skyway with incredible mountain passes.",
-    highlights: ["Three mountain passes", "Historic mining towns", "Dramatic drops"]
+    name: "Olympic National Park",
+    location: "Washington",
+    description: "Diverse ecosystem from rainforest to coastal beaches.",
+    highlights: ["Rainforest trails", "Ocean beaches", "Mountain ridges"]
   },
   {
     id: 9,
-    name: "Needles Highway",
-    location: "South Dakota",
-    description: "14 miles through granite spires in the Black Hills.",
-    highlights: ["Granite tunnels", "Sharp curves", "Mount Rushmore nearby"]
+    name: "Joshua Tree",
+    location: "California",
+    description: "Unique desert landscape where two distinct deserts meet.",
+    highlights: ["Rock climbing", "Desert camping", "Stargazing"]
   },
   {
     id: 10,
-    name: "Twisted Sisters",
-    location: "Texas",
-    description: "Three challenging ranch roads in Texas Hill Country.",
-    highlights: ["Three loop route", "Technical riding", "Hill country views"]
+    name: "Acadia National Park",
+    location: "Maine",
+    description: "Atlantic coastal beauty with rocky beaches and granite peaks.",
+    highlights: ["Coastal views", "Historic lighthouses", "Scenic loops"]
   },
   {
     id: 11,
-    name: "Crater Lake Rim Drive",
-    location: "Oregon",
-    description: "33-mile loop around America's deepest lake.",
-    highlights: ["Lake views", "Volcanic landscape", "High elevation riding"]
+    name: "Monument Valley",
+    location: "Arizona/Utah",
+    description: "Iconic sandstone buttes in the heart of Navajo Nation.",
+    highlights: ["Tribal guided tours", "Desert camping", "Sunrise views"]
   },
   {
     id: 12,
-    name: "Peak to Peak Highway",
-    location: "Colorado",
-    description: "55 miles of Rocky Mountain scenic beauty.",
-    highlights: ["Mountain views", "Ghost towns", "National forest access"]
+    name: "Big Sur Coastline",
+    location: "California",
+    description: "Dramatic coastal cliffs and pristine beaches.",
+    highlights: ["Beach camping", "Coastal hiking", "Wildlife viewing"]
   },
   {
     id: 13,
-    name: "Tunnel of Trees",
-    location: "Michigan",
-    description: "20 miles of twisting road along Lake Michigan.",
-    highlights: ["Tree canopy", "Lake views", "Fall colors"]
+    name: "Badlands",
+    location: "South Dakota",
+    description: "Dramatic landscapes and fossil beds in the prairie.",
+    highlights: ["Fossil exhibits", "Prairie wildlife", "Scenic overlooks"]
   },
   {
     id: 14,
-    name: "Overseas Highway",
-    location: "Florida Keys",
-    description: "113 miles of island hopping through the Florida Keys.",
-    highlights: ["Ocean views", "Island hopping", "42 bridges"]
+    name: "Everglades",
+    location: "Florida",
+    description: "Unique wetland ecosystem with diverse wildlife.",
+    highlights: ["Airboat tours", "Alligator spotting", "Bird watching"]
   },
   {
     id: 15,
-    name: "Cascades Loop",
-    location: "Washington",
-    description: "440-mile loop through the Cascade Mountains.",
-    highlights: ["Mountain passes", "National forests", "Small towns"]
+    name: "Zion National Park",
+    location: "Utah",
+    description: "Massive sandstone cliffs and narrow canyons.",
+    highlights: ["Canyon views", "Rock formations", "Desert oasis"]
   },
   {
     id: 16,
-    name: "Cabot Trail",
-    location: "Nova Scotia, Canada",
-    description: "185-mile loop around Cape Breton Island.",
-    highlights: ["Coastal views", "Highland scenery", "Wildlife viewing"]
+    name: "Denali National Park",
+    location: "Alaska",
+    description: "Home to North America's highest peak and vast wilderness.",
+    highlights: ["Wildlife viewing", "Backcountry camping", "Mountain vistas"]
   },
   {
     id: 17,
-    name: "Mohawk Trail",
-    location: "Massachusetts",
-    description: "69 miles through the Berkshire Mountains.",
-    highlights: ["Historic route", "Fall foliage", "Mountain views"]
+    name: "Mammoth Cave",
+    location: "Kentucky",
+    description: "World's longest known cave system.",
+    highlights: ["Cave tours", "Underground rivers", "Historic trails"]
   },
   {
     id: 18,
-    name: "Coronado Trail",
-    location: "Arizona",
-    description: "123 miles of switchbacks through the Apache National Forest.",
-    highlights: ["460 curves", "Elevation changes", "Desert views"]
+    name: "Crater Lake",
+    location: "Oregon",
+    description: "America's deepest lake in a volcanic crater.",
+    highlights: ["Lake views", "Volcanic features", "Scenic trails"]
   },
   {
     id: 19,
-    name: "Coastal Route 1",
-    location: "Maine",
-    description: "Scenic coastal route past lighthouses and fishing villages.",
-    highlights: ["Lighthouse views", "Coastal towns", "Seafood stops"]
+    name: "Redwood National Park",
+    location: "California",
+    description: "Home to the world's tallest trees and coastal scenery.",
+    highlights: ["Giant redwoods", "Coastal trails", "Wildlife viewing"]
   },
   {
     id: 20,
-    name: "Pikes Peak Highway",
-    location: "Colorado",
-    description: "19-mile ascent to the summit of Pikes Peak.",
-    highlights: ["14,115 ft elevation", "156 turns", "Summit views"]
+    name: "White Mountains",
+    location: "New Hampshire",
+    description: "Rugged mountain range with diverse recreation options.",
+    highlights: ["Mountain camping", "Fall foliage", "Alpine zones"]
   },
   {
     id: 21,
-    name: "Lolo Pass",
-    location: "Idaho/Montana",
-    description: "Historic route following Lewis and Clark's trail.",
-    highlights: ["Historical sites", "Forest riding", "River views"]
+    name: "Carlsbad Caverns",
+    location: "New Mexico",
+    description: "Spectacular underground caves and rock formations.",
+    highlights: ["Cave tours", "Bat flights", "Underground chambers"]
   },
   {
     id: 22,
-    name: "Highway 36",
-    location: "Northern California",
-    description: "140 miles of curves through redwood forests.",
-    highlights: ["1,811 curves", "Forest scenery", "Coast access"]
+    name: "Bryce Canyon",
+    location: "Utah",
+    description: "Distinctive red rock hoodoos and amphitheaters.",
+    highlights: ["Rock formations", "Stargazing", "Scenic viewpoints"]
   },
   {
     id: 23,
-    name: "Apache Trail",
-    location: "Arizona",
-    description: "40-mile historic route through the Superstition Mountains.",
-    highlights: ["Desert views", "Lake vistas", "Historic route"]
+    name: "Great Sand Dunes",
+    location: "Colorado",
+    description: "North America's tallest sand dunes against mountain backdrop.",
+    highlights: ["Sand boarding", "Dune hiking", "Night sky viewing"]
   },
   {
     id: 24,
-    name: "Olympic Peninsula Loop",
-    location: "Washington",
-    description: "330-mile loop around Olympic National Park.",
-    highlights: ["Rainforest views", "Coastal riding", "Mountain vistas"]
+    name: "Mount Hood",
+    location: "Oregon",
+    description: "Iconic Pacific Northwest volcano with year-round activities.",
+    highlights: ["Alpine meadows", "Glacier views", "Forest camping"]
   },
   {
     id: 25,
-    name: "Kancamagus Highway",
-    location: "New Hampshire",
-    description: "34.5 miles through the White Mountain National Forest.",
-    highlights: ["Fall colors", "Mountain passes", "Scenic overlooks"]
+    name: "Grand Tetons",
+    location: "Wyoming",
+    description: "Dramatic mountain range with pristine lakes and valleys.",
+    highlights: ["Mountain vistas", "Lake activities", "Wildlife viewing"]
   }
 ];
 
