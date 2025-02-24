@@ -34,8 +34,8 @@ const features = [
   {
     icon: FileDown,
     title: "GPX Downloads",
-    description: "Download GPX files for your favorite motorcycle routes.",
-    link: "/gpx-downloads"
+    description: "Coming soon!",
+    link: "#"
   },
 ];
 
