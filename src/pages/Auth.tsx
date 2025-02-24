@@ -20,12 +20,16 @@ const Auth = () => {
   const from = location.state?.from?.pathname || "/dashboard";
 
   useEffect(() => {
-    // Check if user is already logged in
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    // Check if user is already logged in, and redirect to the intended destination
+    const checkSession = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
       if (session) {
+        // Redirect to the intended destination immediately
         navigate(from);
       }
-    });
+    };
+    
+    checkSession();
   }, [navigate, from]);
 
   const handleSubmit = async (e: React.FormEvent) => {
