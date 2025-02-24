@@ -24,35 +24,35 @@ const features = [
   {
     icon: Shield,
     title: "Gear Hub",
-    description: "Top riding gear for motorcycle riders & latest news.",
+    description: "Top riding & camping gear.",
     link: "/riding-gear",
     id: "riding-gear-feature"
   },
   {
     icon: Wrench,
     title: "Service Hub",
-    description: "Track maintenance records and service intervals.",
+    description: "Track maintenance records & service intervals.",
     link: "/service-landing",
     id: "service-feature"
   },
   {
     icon: Search,
     title: "Data Hub",
-    description: "Owner's manuals, service manuals, VIN lookup & data.",
+    description: "Owner's manuals, service manuals, VIN lookups & motorcycle data.",
     link: "/data",
     id: "data-feature"
   },
   {
     icon: Store,
     title: "Dealers Hub",
-    description: "Find local motorcycle dealers and repair shops near you.",
+    description: "Find local motorcycle dealers & repair shops near you.",
     link: "/dealers",
     id: "dealers-feature"
   },
   {
     icon: Settings,
     title: "Parts Hub",
-    description: "Find and compare motorcycle parts and accessories.",
+    description: "Find motorcycle parts and accessories.",
     link: "/parts",
     id: "parts-feature"
   },
@@ -73,7 +73,7 @@ const features = [
   {
     icon: Newspaper,
     title: "News Hub",
-    description: "Stay updated with the latest motorcycle news and reviews.",
+    description: "Stay updated with the latest motorcycle news.",
     link: "/news",
     id: "news-feature"
   }
