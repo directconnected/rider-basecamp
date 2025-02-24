@@ -1,4 +1,3 @@
-
 import React, { useEffect } from "react";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/layout/Footer";
@@ -34,7 +33,6 @@ const RoutePlanning = () => {
     toast
   } = useRoutePlanning();
 
-  // Debug log to check suggestions
   useEffect(() => {
     console.log('Current suggestions:', suggestions);
   }, [suggestions]);
@@ -82,7 +80,6 @@ const RoutePlanning = () => {
 
       setCurrentRoute(route);
       
-      // Calculate fuel stops based on motorcycle's fuel mileage
       const fuelMileage = parseInt(formData.fuelMileage);
       const calculatedFuelStops = await calculateFuelStops(route);
       setFuelStops(calculatedFuelStops);
@@ -94,58 +91,63 @@ const RoutePlanning = () => {
         destination: formData.destination
       });
 
-      // Calculate daily stops based on miles per day
       const totalMiles = Math.round(route.distance / 1609.34);
       const milesPerDay = parseInt(formData.milesPerDay);
       const numDays = Math.ceil(totalMiles / milesPerDay);
       const coordinates = route.geometry.coordinates;
       
-      // Generate suggestions for each day of travel
+      const getLocationName = async (location: [number, number]) => {
+        const response = await fetch(`https://api.mapbox.com/geocoding/v5/mapbox.places/${location[0]},${location[1]}.json?access_token=${mapboxgl.accessToken}`);
+        const data = await response.json();
+        return data.features[0].place_name;
+      };
+
       const sampleSuggestions = [];
       
-      // Safety check to ensure we have enough coordinates
       if (coordinates.length >= numDays) {
         for (let day = 1; day <= numDays; day++) {
           const progress = day / numDays;
           const stopIndex = Math.floor(coordinates.length * progress);
           
           if (stopIndex < coordinates.length && coordinates[stopIndex]?.length >= 2) {
-            // Add a hotel option for each day's end
+            const stopLocation = [
+              coordinates[stopIndex][0],
+              coordinates[stopIndex][1]
+            ] as [number, number];
+            
+            const locationName = await getLocationName(stopLocation);
+            
             sampleSuggestions.push({
-              name: `Day ${day} Hotel Option`,
+              name: `${locationName} Hotel`,
               type: "hotel" as const,
-              location: [
-                coordinates[stopIndex][0],
-                coordinates[stopIndex][1]
-              ] as [number, number],
-              description: `Lodging option after day ${day} (${Math.round(progress * totalMiles)} miles)`
+              location: stopLocation,
+              description: `Hotel in ${locationName} after day ${day} (${Math.round(progress * totalMiles)} miles)`
             });
 
-            // Add a camping option for each day's end
             sampleSuggestions.push({
-              name: `Day ${day} Camping Option`,
+              name: `${locationName} Campground`,
               type: "camping" as const,
-              location: [
-                coordinates[stopIndex][0],
-                coordinates[stopIndex][1]
-              ] as [number, number],
-              description: `Camping option after day ${day} (${Math.round(progress * totalMiles)} miles)`
+              location: stopLocation,
+              description: `Camping near ${locationName} after day ${day} (${Math.round(progress * totalMiles)} miles)`
             });
 
-            // Add a restaurant suggestion for lunch
             if (day < numDays) {
               const lunchProgress = (day - 0.5) / numDays;
               const lunchIndex = Math.floor(coordinates.length * lunchProgress);
               
               if (lunchIndex < coordinates.length && coordinates[lunchIndex]?.length >= 2) {
+                const lunchLocation = [
+                  coordinates[lunchIndex][0],
+                  coordinates[lunchIndex][1]
+                ] as [number, number];
+                
+                const lunchLocationName = await getLocationName(lunchLocation);
+                
                 sampleSuggestions.push({
-                  name: `Day ${day} Lunch Stop`,
+                  name: `${lunchLocationName} Restaurant`,
                   type: "restaurant" as const,
-                  location: [
-                    coordinates[lunchIndex][0],
-                    coordinates[lunchIndex][1]
-                  ] as [number, number],
-                  description: `Lunch stop on day ${day} (${Math.round(lunchProgress * totalMiles)} miles)`
+                  location: lunchLocation,
+                  description: `Restaurant in ${lunchLocationName} for lunch on day ${day} (${Math.round(lunchProgress * totalMiles)} miles)`
                 });
               }
             }
@@ -222,7 +224,6 @@ const RoutePlanning = () => {
                     duration={routeDetails.duration}
                     fuelStops={fuelStops}
                   />
-                  {/* Force render suggestions with debug info */}
                   <div>
                     <SuggestedStops suggestions={suggestions} />
                     {suggestions && suggestions.length > 0 ? (
