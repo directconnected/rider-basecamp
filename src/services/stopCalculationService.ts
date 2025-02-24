@@ -36,9 +36,11 @@ export const calculateFuelStops = async (route: any, fuelMileage: number): Promi
     
     try {
       const locationName = await getLocationName(coordinates);
+      const gasStation = await findNearbyGasStation(coordinates);
+      
       fuelStops.push({
         location: coordinates,
-        name: `Near ${locationName}`,
+        name: gasStation ? `${gasStation.name} near ${locationName}` : `Near ${locationName}`,
         distance: Math.round(progress * totalDistance)
       });
       console.log(`Added fuel stop ${i} near:`, locationName);

@@ -11,6 +11,7 @@ interface PlaceResult {
 
 export const findNearbyLodging = async (coordinates: [number, number], radius: number = 5000): Promise<PlaceResult | null> => {
   try {
+    console.log('Finding lodging near coordinates:', coordinates);
     const { data, error } = await supabase.functions.invoke('find-nearby-places', {
       body: {
         location: coordinates,
@@ -25,10 +26,13 @@ export const findNearbyLodging = async (coordinates: [number, number], radius: n
     }
 
     if (!data?.places?.[0]) {
+      console.log('No lodging found near coordinates:', coordinates);
       return null;
     }
 
     const place = data.places[0];
+    console.log('Found lodging:', place.name);
+    
     return {
       name: place.name,
       address: place.vicinity || place.formatted_address,
@@ -44,6 +48,7 @@ export const findNearbyLodging = async (coordinates: [number, number], radius: n
 
 export const findNearbyGasStation = async (coordinates: [number, number], radius: number = 5000): Promise<PlaceResult | null> => {
   try {
+    console.log('Finding gas station near coordinates:', coordinates);
     const { data, error } = await supabase.functions.invoke('find-nearby-places', {
       body: {
         location: coordinates,
@@ -58,10 +63,13 @@ export const findNearbyGasStation = async (coordinates: [number, number], radius
     }
 
     if (!data?.places?.[0]) {
+      console.log('No gas station found near coordinates:', coordinates);
       return null;
     }
 
     const place = data.places[0];
+    console.log('Found gas station:', place.name);
+    
     return {
       name: place.name,
       address: place.vicinity || place.formatted_address,
