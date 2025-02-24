@@ -3,7 +3,7 @@ import React, { useEffect, useRef } from 'react';
 import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { GasPump } from "lucide-react";
+import { Fuel } from "lucide-react";
 
 interface RouteMapProps {
   startCoords: [number, number];
@@ -101,7 +101,7 @@ const RouteMap = ({ startCoords, endCoords, route, fuelStops }: RouteMapProps) =
     <Card className="mt-8">
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
-          <GasPump className="h-5 w-5 text-theme-600" />
+          <Fuel className="h-5 w-5 text-theme-600" />
           Route Map & Fuel Stops
         </CardTitle>
       </CardHeader>
