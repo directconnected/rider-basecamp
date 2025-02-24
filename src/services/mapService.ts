@@ -1,3 +1,4 @@
+
 import mapboxgl from 'mapbox-gl';
 import { supabase } from "@/integrations/supabase/client";
 import { PointOfInterest } from "@/hooks/useRoutePlanning";
@@ -81,20 +82,26 @@ export const getLocationName = async (coordinates: [number, number], type?: 'hot
         );
         const cityName = cityFeature ? cityFeature.text : '';
         
-        // Return POI name if found, otherwise generate a generic name
+        // Return POI name if found, otherwise generate a descriptive name
         if (poi.text && poi.properties?.category) {
           return poi.text;
         } else {
-          switch (type) {
-            case 'hotel':
-              return `${cityName} Lodge`;
-            case 'restaurant':
-              return `${cityName} Diner`;
-            case 'camping':
-              return `${cityName} Campground`;
-            default:
-              return poi.text || cityName;
-          }
+          const adjectives = {
+            hotel: ['Grand', 'Royal', 'Comfort', 'Pleasant', 'Tranquil'],
+            restaurant: ['Tasty', 'Local', 'Fresh', 'Homestyle', 'Country'],
+            camping: ['Pine', 'Mountain', 'River', 'Valley', 'Lake']
+          };
+          
+          const nouns = {
+            hotel: ['Inn', 'Hotel', 'Lodge', 'Suites', 'Resort'],
+            restaurant: ['Diner', 'Cafe', 'Grill', 'Kitchen', 'Restaurant'],
+            camping: ['Campground', 'Camping', 'RV Park', 'Grounds', 'Camp']
+          };
+          
+          const randomAdjective = adjectives[type][Math.floor(Math.random() * adjectives[type].length)];
+          const randomNoun = nouns[type][Math.floor(Math.random() * nouns[type].length)];
+          
+          return `${cityName} ${randomAdjective} ${randomNoun}`.trim();
         }
       }
       
