@@ -102,10 +102,12 @@ export const findPointsOfInterest = async (route: any, milesPerDay: number): Pro
     try {
       console.log(`Searching POIs near point ${i}:`, { lng, lat });
       
+      // Changed to include more place types and removed the poi type restriction
       const url = `https://api.mapbox.com/geocoding/v5/mapbox.places/${lng},${lat}.json?` +
-        `types=poi&limit=10&` +
+        `types=poi,place,restaurant,hotel,lodging&` + // Include more place types
+        `limit=25&` + // Increased limit
         `proximity=${lng},${lat}&` +
-        `radius=20000&` + // Increased to 20km radius
+        `radius=40000&` + // Increased to 40km radius
         `access_token=${mapboxgl.accessToken}`;
       
       console.log('Mapbox API URL:', url);
@@ -125,38 +127,46 @@ export const findPointsOfInterest = async (route: any, milesPerDay: number): Pro
               continue;
             }
 
-            // Default to restaurant if no clear category is found
+            // Get all possible category information
+            const allProperties = {
+              ...feature.properties,
+              place_type: feature.place_type,
+              text: feature.text,
+              place_name: feature.place_name
+            };
+
+            // Convert all properties to a searchable string
+            const searchString = JSON.stringify(allProperties).toLowerCase();
+
+            // Determine type based on comprehensive search
             let type: 'restaurant' | 'hotel' | 'camping' = 'restaurant';
-            
-            const categories = [
-              ...(feature.properties?.category || []),
-              ...(feature.properties?.categories || []),
-              feature.place_type,
-              feature.properties?.type
-            ].flat().filter(Boolean).map(cat => String(cat).toLowerCase());
 
-            console.log('POI categories:', categories);
-
-            if (categories.some(cat => 
-              cat.includes('lodging') || 
-              cat.includes('hotel') || 
-              cat.includes('motel') ||
-              cat.includes('inn')
-            )) {
+            if (
+              searchString.includes('hotel') ||
+              searchString.includes('motel') ||
+              searchString.includes('inn') ||
+              searchString.includes('lodge') ||
+              searchString.includes('lodging') ||
+              searchString.includes('accommodation')
+            ) {
               type = 'hotel';
-            } else if (categories.some(cat => 
-              cat.includes('camp') || 
-              cat.includes('rv') ||
-              cat.includes('outdoor')
-            )) {
+            } else if (
+              searchString.includes('camp') ||
+              searchString.includes('rv') ||
+              searchString.includes('camping') ||
+              searchString.includes('outdoor') ||
+              searchString.includes('park')
+            ) {
               type = 'camping';
-            } else if (categories.some(cat => 
-              cat.includes('restaurant') || 
-              cat.includes('food') || 
-              cat.includes('cafe') ||
-              cat.includes('dining') ||
-              cat.includes('bar')
-            )) {
+            } else if (
+              searchString.includes('restaurant') ||
+              searchString.includes('food') ||
+              searchString.includes('cafe') ||
+              searchString.includes('dining') ||
+              searchString.includes('bar') ||
+              searchString.includes('grill') ||
+              searchString.includes('diner')
+            ) {
               type = 'restaurant';
             }
 
