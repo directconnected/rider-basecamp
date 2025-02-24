@@ -4,7 +4,7 @@ import Navigation from "@/components/Navigation";
 import Footer from "@/components/layout/Footer";
 import { Card } from "@/components/ui/card";
 import { Link } from "react-router-dom";
-import { Wrench, Clock, Tool } from "lucide-react";
+import { Wrench, Clock, Settings } from "lucide-react";
 import Breadcrumbs from "@/components/Breadcrumbs";
 
 const ServiceLanding = () => {
@@ -24,7 +24,7 @@ const ServiceLanding = () => {
       id: "maintenance-reminders"
     },
     {
-      icon: Tool,
+      icon: Settings,
       title: "DIY Guides",
       description: "Access maintenance guides and tutorials (Coming Soon).",
       link: "#",
