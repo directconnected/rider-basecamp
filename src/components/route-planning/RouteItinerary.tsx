@@ -33,9 +33,21 @@ const RouteItinerary = ({
   };
 
   const handleDownloadGPX = () => {
-    if (!currentRoute) return;
+    if (!currentRoute?.geometry?.coordinates) {
+      console.error('Cannot generate GPX: Missing route coordinates');
+      return;
+    }
+    if (!Array.isArray(fuelStops) || fuelStops.length === 0) {
+      console.warn('Generating GPX with no fuel stops');
+    }
     downloadGPX(startPoint, destination, currentRoute, fuelStops);
   };
+
+  // Validate required data
+  if (!startPoint || !destination || typeof distance !== 'number' || typeof duration !== 'number') {
+    console.error('Missing required route information');
+    return null;
+  }
 
   return (
     <Card className="mt-8">
@@ -44,7 +56,7 @@ const RouteItinerary = ({
           <List className="h-5 w-5 text-theme-600" />
           Route Itinerary
         </CardTitle>
-        {currentRoute && (
+        {currentRoute?.geometry?.coordinates && (
           <Button
             variant="outline"
             onClick={handleDownloadGPX}
@@ -73,7 +85,7 @@ const RouteItinerary = ({
               <p className="text-base">Start at {startPoint}</p>
             </div>
             
-            {fuelStops.map((stop, index) => (
+            {Array.isArray(fuelStops) && fuelStops.map((stop, index) => (
               <div key={index} className="flex items-center gap-4">
                 <div className="w-3 h-3 rounded-full bg-amber-500" />
                 <p className="text-base">
