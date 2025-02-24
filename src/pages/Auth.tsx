@@ -17,7 +17,7 @@ const Auth = () => {
   const location = useLocation();
 
   // Get the redirect path from the state, fallback to dashboard if none provided
-  const from = location.state?.from?.pathname || "/dashboard";
+  const from = location?.state?.from?.pathname || "/dashboard";
 
   useEffect(() => {
     // Check if user is already logged in, and redirect to the intended destination
@@ -26,7 +26,7 @@ const Auth = () => {
       if (session) {
         // Redirect to the intended destination immediately
         console.log("Already logged in. Redirecting to:", from);
-        navigate(from, { replace: true });
+        navigate(from);
       }
     };
     
@@ -53,7 +53,7 @@ const Auth = () => {
 
         if (user) {
           toast.success("Account created! Please check your email to verify your account.");
-          navigate(from, { replace: true });
+          navigate(from);
         }
       } else {
         const { error: signInError } = await supabase.auth.signInWithPassword({
@@ -65,7 +65,7 @@ const Auth = () => {
 
         toast.success("Successfully signed in");
         console.log("Successfully signed in. Navigating to:", from);
-        navigate(from, { replace: true });
+        navigate(from);
       }
     } catch (error) {
       console.error("Auth error:", error);
