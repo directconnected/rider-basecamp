@@ -33,7 +33,14 @@ const Navigation = () => {
         navigate('/');
       }
     } else {
-      navigate('/auth');
+      // Pass the current location as the redirect target after login
+      navigate('/auth', { 
+        state: { 
+          from: { 
+            pathname: location.pathname === '/auth' ? '/dashboard' : location.pathname 
+          } 
+        } 
+      });
     }
   };
 
