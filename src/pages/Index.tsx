@@ -91,10 +91,10 @@ const Index = () => {
           <div className="w-full px-4 z-10">
             <div className="text-center mb-12">
               <h2 className="text-4xl md:text-6xl font-bold text-white mb-4 animate-fade-in" id="hero-title">
-                Gear Up and Ride
+                RIDERS BASECAMP
               </h2>
               <p className="text-xl md:text-2xl text-gray-200 mb-8 animate-fade-in" id="hero-subtitle">
-                Your Home for Motorcycle Knowledge and Community
+                Hub for All Things Motorcyle
               </p>
             </div>
           </div>
