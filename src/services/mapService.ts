@@ -73,72 +73,77 @@ export const findPointsOfInterest = async (route: any, milesPerDay: number): Pro
   const totalDistance = route.distance / 1609.34; // Convert to miles
   const numDays = Math.ceil(totalDistance / milesPerDay);
   
-  // Calculate sample points for each day's journey
-  const samplePoints = Array.from({ length: numDays }, (_, i) => {
-    const progress = (i + 0.5) / numDays; // Sample at midday for each day
-    return Math.floor(coordinates.length * progress);
+  console.log('Finding POIs for route:', {
+    totalDistance,
+    milesPerDay,
+    numDays,
+    totalCoordinates: coordinates.length
   });
-
-  // Add evening stop points
-  const eveningStops = Array.from({ length: numDays }, (_, i) => {
-    const progress = (i + 1) / numDays;
-    return Math.floor(coordinates.length * progress);
-  });
-
-  // Combine all sampling points and remove duplicates
-  const allSamplePoints = [...new Set([...samplePoints, ...eveningStops])];
   
-  for (const pointIndex of allSamplePoints) {
-    if (pointIndex >= coordinates.length) continue;
-    
+  // Sample fewer points to avoid rate limiting
+  const numSamplePoints = Math.min(numDays * 2, 10); // Max 10 sample points
+  const step = Math.floor(coordinates.length / numSamplePoints);
+  
+  for (let i = 1; i < numSamplePoints - 1; i++) {
+    const pointIndex = i * step;
     const [lng, lat] = coordinates[pointIndex];
     
     try {
-      // Updated query parameters to get more relevant POIs
+      console.log(`Searching POIs near: ${lng},${lat}`);
+      
+      // Query with expanded search radius and specific POI types
       const response = await fetch(
-        `https://api.mapbox.com/geocoding/v5/mapbox.places/${lng},${lat}.json?types=poi&limit=5&access_token=${mapboxgl.accessToken}`
+        `https://api.mapbox.com/geocoding/v5/mapbox.places/${lng},${lat}.json?` +
+        `types=poi&limit=10&` +
+        `proximity=${lng},${lat}&` +
+        `radius=10000&` + // 10km radius
+        `access_token=${mapboxgl.accessToken}`
       );
 
-      if (!response.ok) continue;
+      if (!response.ok) {
+        console.error('Mapbox API error:', await response.text());
+        continue;
+      }
 
       const data = await response.json();
+      console.log('Mapbox response:', data);
       
       if (data.features && data.features.length > 0) {
         for (const feature of data.features) {
+          // Skip features without a name
+          if (!feature.text && !feature.place_name) continue;
+
           // Default to restaurant if no clear category is found
           let type: 'restaurant' | 'hotel' | 'camping' = 'restaurant';
           
-          // Check the place type from properties and categories
-          if (feature.properties) {
-            const categories = [
-              ...(feature.properties.category || []),
-              ...(feature.properties.categories || []),
-              feature.place_type
-            ].flat();
+          const categories = [
+            ...(feature.properties?.category || []),
+            ...(feature.properties?.categories || []),
+            feature.place_type,
+            feature.properties?.type
+          ].flat().filter(Boolean).map(cat => String(cat).toLowerCase());
 
-            // Determine the type based on various possible category names
-            if (categories.some(cat => 
-              typeof cat === 'string' && (
-                cat.includes('lodging') || 
-                cat.includes('hotel') || 
-                cat.includes('motel')
-              ))) {
-              type = 'hotel';
-            } else if (categories.some(cat => 
-              typeof cat === 'string' && (
-                cat.includes('camp') || 
-                cat.includes('rv_park')
-              ))) {
-              type = 'camping';
-            } else if (categories.some(cat => 
-              typeof cat === 'string' && (
-                cat.includes('restaurant') || 
-                cat.includes('food') || 
-                cat.includes('cafe') ||
-                cat.includes('dining')
-              ))) {
-              type = 'restaurant';
-            }
+          if (categories.some(cat => 
+            cat.includes('lodging') || 
+            cat.includes('hotel') || 
+            cat.includes('motel') ||
+            cat.includes('inn')
+          )) {
+            type = 'hotel';
+          } else if (categories.some(cat => 
+            cat.includes('camp') || 
+            cat.includes('rv') ||
+            cat.includes('outdoor')
+          )) {
+            type = 'camping';
+          } else if (categories.some(cat => 
+            cat.includes('restaurant') || 
+            cat.includes('food') || 
+            cat.includes('cafe') ||
+            cat.includes('dining') ||
+            cat.includes('bar')
+          )) {
+            type = 'restaurant';
           }
 
           const progress = pointIndex / coordinates.length;
@@ -161,22 +166,41 @@ export const findPointsOfInterest = async (route: any, milesPerDay: number): Pro
     }
   }
 
-  // Filter unique POIs and ensure we have a good mix of types
+  // Remove duplicates and sort by type
   const uniquePois = pois.filter((poi, index, self) =>
-    index === self.findIndex((p) => p.name === poi.name)
+    index === self.findIndex((p) => (
+      p.name === poi.name && p.type === poi.type
+    ))
   );
 
-  // Sort POIs by type to ensure a good mix
+  // Sort POIs to ensure a good mix of types
   const sortedPois = uniquePois.sort((a, b) => {
     if (a.type === b.type) return 0;
-    // Prioritize lodging options first
-    if (a.type === 'hotel' || a.type === 'camping') return -1;
-    if (b.type === 'hotel' || b.type === 'camping') return 1;
+    if (a.type === 'hotel') return -1;
+    if (b.type === 'hotel') return 1;
+    if (a.type === 'camping') return -1;
+    if (b.type === 'camping') return 1;
     return 0;
   });
 
-  // Limit to 12 suggestions (2 per day: midday and evening)
-  const finalPois = sortedPois.slice(0, Math.min(12, numDays * 2));
-  console.log('Found POIs:', finalPois);
+  console.log('Found POIs before filtering:', sortedPois);
+
+  // Take the top N suggestions, ensuring at least one of each type if available
+  const finalPois: PointOfInterest[] = [];
+  const typeCounts = { hotel: 0, camping: 0, restaurant: 0 };
+  const maxPerType = Math.ceil(Math.min(12, numDays * 2) / 3);
+
+  for (const poi of sortedPois) {
+    if (typeCounts[poi.type] < maxPerType) {
+      finalPois.push(poi);
+      typeCounts[poi.type]++;
+    }
+    
+    if (Object.values(typeCounts).reduce((a, b) => a + b) >= Math.min(12, numDays * 2)) {
+      break;
+    }
+  }
+
+  console.log('Final POIs:', finalPois);
   return finalPois;
 };
