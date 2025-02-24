@@ -44,14 +44,14 @@ const RouteItinerary = ({ startPoint, destination, distance, duration, fuelStops
           <div className="space-y-3">
             <div className="flex items-center gap-4">
               <div className="w-3 h-3 rounded-full bg-green-500" />
-              <p className="text-base">Start at <span className="font-medium">{startPoint}</span></p>
+              <p className="text-base">Start at {startPoint}</p>
             </div>
             
             {fuelStops.map((stop, index) => (
               <div key={index} className="flex items-center gap-4">
                 <div className="w-3 h-3 rounded-full bg-amber-500" />
                 <p className="text-base">
-                  <span className="font-medium">{stop.name}</span> - {Math.round(stop.distance)} miles from start
+                  {stop.name} - {Math.round(stop.distance)} miles from start
                 </p>
               </div>
             ))}
@@ -59,7 +59,7 @@ const RouteItinerary = ({ startPoint, destination, distance, duration, fuelStops
             <div className="flex items-center gap-4">
               <div className="w-3 h-3 rounded-full bg-red-500" />
               <p className="text-base">
-                Arrive at <span className="font-medium">{destination}</span> - <span className="font-medium">{distance} miles</span> total
+                Arrive at {destination} - {distance} miles total
               </p>
             </div>
           </div>

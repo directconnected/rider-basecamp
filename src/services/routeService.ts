@@ -130,32 +130,18 @@ export const calculateFuelStops = async (route: any, fuelMileage: number): Promi
     console.log(`Progress: ${Math.round(progress * 100)}%, Point index: ${pointIndex}`);
     
     try {
-      const gasStation = await findNearestGasStation(coordinates);
-      
-      if (gasStation) {
-        fuelStops.push({
-          location: gasStation.coordinates,
-          name: gasStation.address,
-          distance: Math.round(progress * totalDistance)
-        });
-        console.log(`Added fuel stop ${i}:`, gasStation);
-      } else {
-        // Fallback to approximate location if no gas station found
-        const locationName = await getLocationName(coordinates);
-        fuelStops.push({
-          location: coordinates,
-          name: `Near ${locationName}`,
-          distance: Math.round(progress * totalDistance)
-        });
-        console.log(`Added fallback fuel stop ${i} near:`, locationName);
-      }
-    } catch (error) {
-      console.error(`Error processing stop ${i}:`, error);
-      // Still add a fallback stop in case of error
       const locationName = await getLocationName(coordinates);
       fuelStops.push({
         location: coordinates,
         name: `Near ${locationName}`,
+        distance: Math.round(progress * totalDistance)
+      });
+      console.log(`Added fuel stop ${i} near:`, locationName);
+    } catch (error) {
+      console.error(`Error processing stop ${i}:`, error);
+      fuelStops.push({
+        location: coordinates,
+        name: `Near Unknown Location`,
         distance: Math.round(progress * totalDistance)
       });
     }
