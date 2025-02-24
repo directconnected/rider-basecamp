@@ -44,16 +44,25 @@ serve(async (req) => {
       throw new Error('Google Places API key not configured');
     }
 
-    // Using the Google Places Nearby Search endpoint
+    // Extract coordinates and ensure they're valid numbers
     const [lat, lng] = location;
+    if (typeof lat !== 'number' || typeof lng !== 'number' || 
+        isNaN(lat) || isNaN(lng) ||
+        lat < -90 || lat > 90 || lng < -180 || lng > 180) {
+      throw new Error('Invalid latitude or longitude values');
+    }
+
+    // Format coordinates as string in "lat,lng" format
+    const locationString = `${lat},${lng}`;
+
+    // Using the Google Places Nearby Search endpoint
     const url = new URL('https://maps.googleapis.com/maps/api/place/nearbysearch/json');
-    url.searchParams.append('location', `${lat},${lng}`);
+    url.searchParams.append('location', locationString);
     url.searchParams.append('radius', radius.toString());
     url.searchParams.append('type', type);
     url.searchParams.append('key', apiKey);
-    url.searchParams.append('rankby', 'rating'); // Get the highest rated places first
 
-    console.log(`Searching for ${type} near ${lat},${lng} within ${radius}m`);
+    console.log(`Searching for ${type} near ${locationString} within ${radius}m`);
     
     const response = await fetch(url.toString());
     if (!response.ok) {
