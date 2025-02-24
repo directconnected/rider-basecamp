@@ -14,30 +14,39 @@ const findNearestGasStation = async (coordinates: [number, number]): Promise<Gas
   console.log('Searching for gas stations near coordinates:', coordinates);
   
   try {
-    // Swap coordinates for Mapbox API (it expects longitude,latitude)
-    const response = await fetch(
-      `https://api.mapbox.com/geocoding/v5/mapbox.places/gas%20station.json?` + 
-      `proximity=${coordinates[1]},${coordinates[0]}&` + // Swapped order here
-      `types=poi&` +
-      `limit=1&` +
-      `access_token=${mapboxgl.accessToken}`
-    );
+    // Try multiple search terms to increase chances of finding fuel stations
+    const searchTerms = ['gas station', 'fuel', 'petrol station'];
+    let station = null;
 
-    if (!response.ok) {
-      console.error('Gas station search failed:', response.statusText);
-      return null;
+    for (const term of searchTerms) {
+      // Swap coordinates for Mapbox API (it expects longitude,latitude)
+      const response = await fetch(
+        `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(term)}.json?` + 
+        `proximity=${coordinates[1]},${coordinates[0]}&` + // Swapped order here
+        `types=poi&` +
+        `limit=1&` +
+        `access_token=${mapboxgl.accessToken}`
+      );
+
+      if (!response.ok) {
+        console.error('Gas station search failed:', response.statusText);
+        continue;
+      }
+
+      const data = await response.json();
+      console.log(`Mapbox Places API response for "${term}":`, data);
+
+      if (data.features && data.features.length > 0) {
+        station = data.features[0];
+        break;
+      }
     }
 
-    const data = await response.json();
-    console.log('Mapbox Places API response:', data);
-
-    if (!data.features || data.features.length === 0) {
+    if (!station) {
       console.log('No gas stations found near coordinates:', coordinates);
       return null;
     }
 
-    const station = data.features[0];
-    
     // Verify we have all required data
     if (!station.text || !station.place_name || !station.center) {
       console.error('Invalid station data:', station);
