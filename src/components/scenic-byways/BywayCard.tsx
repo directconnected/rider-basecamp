@@ -8,14 +8,12 @@ interface BywayCardProps {
   byway: ScenicByway;
   getFullStateName: (stateAbbr: string) => string;
   capitalizeWords: (str: string) => string;
-  getFallbackImage: (byway: string) => string;
 }
 
 const BywayCard: React.FC<BywayCardProps> = ({
   byway,
   getFullStateName,
   capitalizeWords,
-  getFallbackImage,
 }) => {
   return (
     <Card className="hover-card">
@@ -25,13 +23,6 @@ const BywayCard: React.FC<BywayCardProps> = ({
           {capitalizeWords(byway.byway_name)}
         </CardTitle>
       </CardHeader>
-      <div className="px-6">
-        <img
-          src={getFallbackImage(byway.byway_name)}
-          alt={byway.byway_name}
-          className="w-full h-48 object-cover rounded-md mb-4"
-        />
-      </div>
       <CardContent>
         <div className="space-y-4">
           <div className="space-y-2">

@@ -14,7 +14,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import BywayCard from "@/components/scenic-byways/BywayCard";
 import { ScenicByway, stateAbbreviations } from "@/components/scenic-byways/types";
-import { capitalizeWords, getFallbackImage } from "@/components/scenic-byways/utils";
+import { capitalizeWords } from "@/components/scenic-byways/utils";
 
 const getFullStateName = (stateAbbr: string) => {
   return stateAbbreviations[stateAbbr.toUpperCase()] || stateAbbr;
@@ -91,7 +91,6 @@ const ScenicByways = () => {
                     byway={byway}
                     getFullStateName={getFullStateName}
                     capitalizeWords={capitalizeWords}
-                    getFallbackImage={getFallbackImage}
                   />
                 ))}
               </div>
