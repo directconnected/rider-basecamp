@@ -42,8 +42,13 @@ const ServiceLanding = () => {
     const { data: { session } } = await supabase.auth.getSession();
     
     if (!session) {
-      // Store the intended destination and redirect to auth
-      navigate('/auth', { state: { from: { pathname: link } } });
+      // Pass the current URL as the redirect destination
+      navigate('/auth', { 
+        state: { 
+          from: { pathname: link } 
+        },
+        replace: false  // Don't replace the history entry
+      });
     } else {
       // If already authenticated, go directly to the page
       navigate(link);
