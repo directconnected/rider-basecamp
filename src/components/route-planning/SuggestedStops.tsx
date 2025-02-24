@@ -15,7 +15,9 @@ interface SuggestedStopsProps {
 }
 
 const SuggestedStops = ({ suggestions }: SuggestedStopsProps) => {
-  if (suggestions.length === 0) return null;
+  if (!suggestions || suggestions.length === 0) {
+    return null;
+  }
 
   const getIcon = (type: string) => {
     switch (type) {
