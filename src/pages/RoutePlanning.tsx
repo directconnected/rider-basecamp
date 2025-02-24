@@ -70,6 +70,16 @@ const RoutePlanning = () => {
       setEndCoords(end);
 
       const route = await planRoute(start, end);
+      
+      if (!route?.geometry?.coordinates || route.geometry.coordinates.length === 0) {
+        toast({
+          title: "Route Error",
+          description: "Could not calculate a valid route between these locations.",
+          variant: "destructive"
+        });
+        return;
+      }
+
       setCurrentRoute(route);
       
       // Calculate fuel stops based on motorcycle's fuel mileage
@@ -92,44 +102,54 @@ const RoutePlanning = () => {
       
       // Generate suggestions for each day of travel
       const sampleSuggestions = [];
-      for (let day = 1; day <= numDays; day++) {
-        const progress = day / numDays;
-        const stopIndex = Math.floor(coordinates.length * progress);
-        
-        // Add a hotel or camping option for each day's end
-        sampleSuggestions.push({
-          name: `Day ${day} Hotel Option`,
-          type: "hotel" as const,
-          location: [
-            coordinates[stopIndex][0],
-            coordinates[stopIndex][1]
-          ] as [number, number],
-          description: `Lodging option after day ${day} (${Math.round(progress * totalMiles)} miles)`
-        });
+      
+      // Safety check to ensure we have enough coordinates
+      if (coordinates.length >= numDays) {
+        for (let day = 1; day <= numDays; day++) {
+          const progress = day / numDays;
+          const stopIndex = Math.floor(coordinates.length * progress);
+          
+          if (stopIndex < coordinates.length && coordinates[stopIndex]?.length >= 2) {
+            // Add a hotel option for each day's end
+            sampleSuggestions.push({
+              name: `Day ${day} Hotel Option`,
+              type: "hotel" as const,
+              location: [
+                coordinates[stopIndex][0],
+                coordinates[stopIndex][1]
+              ] as [number, number],
+              description: `Lodging option after day ${day} (${Math.round(progress * totalMiles)} miles)`
+            });
 
-        sampleSuggestions.push({
-          name: `Day ${day} Camping Option`,
-          type: "camping" as const,
-          location: [
-            coordinates[stopIndex][0],
-            coordinates[stopIndex][1]
-          ] as [number, number],
-          description: `Camping option after day ${day} (${Math.round(progress * totalMiles)} miles)`
-        });
+            // Add a camping option for each day's end
+            sampleSuggestions.push({
+              name: `Day ${day} Camping Option`,
+              type: "camping" as const,
+              location: [
+                coordinates[stopIndex][0],
+                coordinates[stopIndex][1]
+              ] as [number, number],
+              description: `Camping option after day ${day} (${Math.round(progress * totalMiles)} miles)`
+            });
 
-        // Add a restaurant suggestion for lunch
-        if (day < numDays) {
-          const lunchProgress = (day - 0.5) / numDays;
-          const lunchIndex = Math.floor(coordinates.length * lunchProgress);
-          sampleSuggestions.push({
-            name: `Day ${day} Lunch Stop`,
-            type: "restaurant" as const,
-            location: [
-              coordinates[lunchIndex][0],
-              coordinates[lunchIndex][1]
-            ] as [number, number],
-            description: `Lunch stop on day ${day} (${Math.round(lunchProgress * totalMiles)} miles)`
-          });
+            // Add a restaurant suggestion for lunch
+            if (day < numDays) {
+              const lunchProgress = (day - 0.5) / numDays;
+              const lunchIndex = Math.floor(coordinates.length * lunchProgress);
+              
+              if (lunchIndex < coordinates.length && coordinates[lunchIndex]?.length >= 2) {
+                sampleSuggestions.push({
+                  name: `Day ${day} Lunch Stop`,
+                  type: "restaurant" as const,
+                  location: [
+                    coordinates[lunchIndex][0],
+                    coordinates[lunchIndex][1]
+                  ] as [number, number],
+                  description: `Lunch stop on day ${day} (${Math.round(lunchProgress * totalMiles)} miles)`
+                });
+              }
+            }
+          }
         }
       }
 
