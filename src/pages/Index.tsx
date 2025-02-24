@@ -10,7 +10,7 @@ const features = [
   {
     icon: Route,
     title: "Destination Hub",
-    description: "Top motorcycle roads, routes, destinations & GPX files.",
+    description: "Top motorcycle roads, route planning & GPX files.",
     link: "/destinations",
     id: "destinations-feature"
   },
