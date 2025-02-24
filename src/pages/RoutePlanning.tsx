@@ -1,15 +1,14 @@
-import React, { useEffect, useRef, useState } from "react";
+
+import React, { useState } from "react";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/layout/Footer";
-import { Compass, MapPin, Clock, Calendar, Search } from "lucide-react";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { useToast } from "@/components/ui/use-toast";
 import Breadcrumbs from "@/components/Breadcrumbs";
-import mapboxgl from 'mapbox-gl';
-import 'mapbox-gl/dist/mapbox-gl.css';
+import { useToast } from "@/components/ui/use-toast";
+import RouteForm from "@/components/route-planning/RouteForm";
+import RouteDetails from "@/components/route-planning/RouteDetails";
+import SuggestedStops from "@/components/route-planning/SuggestedStops";
 import { supabase } from "@/integrations/supabase/client";
+import mapboxgl from 'mapbox-gl';
 
 interface PointOfInterest {
   name: string;
@@ -26,71 +25,19 @@ interface RouteDetails {
 }
 
 const RoutePlanning = () => {
-  const mapContainer = useRef<HTMLDivElement>(null);
-  const map = useRef<mapboxgl.Map | null>(null);
   const { toast } = useToast();
-
+  const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
     startPoint: "",
     destination: "",
     startDate: "",
     duration: "1"
   });
-
-  const [isLoading, setIsLoading] = useState(false);
-  const [suggestions, setSuggestions] = useState<PointOfInterest[]>([]);
   const [routeDetails, setRouteDetails] = useState<RouteDetails | null>(null);
-
-  useEffect(() => {
-    const initializeMap = async () => {
-      try {
-        const { data, error } = await supabase.functions.invoke('get-mapbox-token');
-        console.log("Edge function response:", data, error);
-
-        if (error) {
-          console.error('Edge function error:', error);
-          throw error;
-        }
-        
-        if (!data?.token) {
-          console.error('No token in response:', data);
-          throw new Error('No token returned from edge function');
-        }
-
-        mapboxgl.accessToken = data.token;
-        console.log("Mapbox token set:", !!mapboxgl.accessToken);
-
-        if (!mapContainer.current) return;
-
-        map.current = new mapboxgl.Map({
-          container: mapContainer.current,
-          style: 'mapbox://styles/mapbox/streets-v12',
-          center: [-98.5795, 39.8283],
-          zoom: 3
-        });
-
-        map.current.addControl(new mapboxgl.NavigationControl(), 'top-right');
-      } catch (error) {
-        console.error('Map initialization error:', error);
-        toast({
-          title: "Map Error",
-          description: "Could not initialize the map. Please try again later.",
-          variant: "destructive"
-        });
-      }
-    };
-
-    initializeMap();
-
-    return () => {
-      map.current?.remove();
-    };
-  }, [toast]);
+  const [suggestions, setSuggestions] = useState<PointOfInterest[]>([]);
 
   const geocodeLocation = async (location: string): Promise<[number, number] | null> => {
     try {
-      console.log("Geocoding location:", location, "Token:", !!mapboxgl.accessToken);
-
       if (!mapboxgl.accessToken) {
         throw new Error('Mapbox token not initialized');
       }
@@ -104,7 +51,6 @@ const RoutePlanning = () => {
       }
 
       const data = await response.json();
-      console.log("Geocoding response:", data);
 
       if (data.features && data.features.length > 0) {
         return data.features[0].center;
@@ -145,11 +91,38 @@ const RoutePlanning = () => {
     return mockPOIs;
   };
 
+  const initializeMapbox = async () => {
+    try {
+      const { data, error } = await supabase.functions.invoke('get-mapbox-token');
+      
+      if (error) {
+        throw error;
+      }
+      
+      if (!data?.token) {
+        throw new Error('No token returned from edge function');
+      }
+
+      mapboxgl.accessToken = data.token;
+      return true;
+    } catch (error) {
+      console.error('Mapbox initialization error:', error);
+      toast({
+        title: "Map Error",
+        description: "Could not initialize the map service. Please try again later.",
+        variant: "destructive"
+      });
+      return false;
+    }
+  };
+
   const planRoute = async () => {
     setIsLoading(true);
     try {
+      // Initialize Mapbox if not already initialized
       if (!mapboxgl.accessToken) {
-        throw new Error('Mapbox token not initialized');
+        const initialized = await initializeMapbox();
+        if (!initialized) return;
       }
 
       const startCoords = await geocodeLocation(formData.startPoint);
@@ -178,53 +151,11 @@ const RoutePlanning = () => {
         const route = routeData.routes[0];
         
         setRouteDetails({
-          distance: Math.round(route.distance / 1609.34), // Convert meters to miles
-          duration: Math.round(route.duration / 3600), // Convert seconds to hours
+          distance: Math.round(route.distance / 1609.34),
+          duration: Math.round(route.duration / 3600),
           startPoint: formData.startPoint,
           destination: formData.destination
         });
-
-        if (map.current) {
-          if (map.current.getSource('route')) {
-            (map.current.getSource('route') as mapboxgl.GeoJSONSource).setData({
-              type: 'Feature',
-              properties: {},
-              geometry: route.geometry
-            });
-          } else {
-            map.current.addSource('route', {
-              type: 'geojson',
-              data: {
-                type: 'Feature',
-                properties: {},
-                geometry: route.geometry
-              }
-            });
-
-            map.current.addLayer({
-              id: 'route',
-              type: 'line',
-              source: 'route',
-              layout: {
-                'line-join': 'round',
-                'line-cap': 'round'
-              },
-              paint: {
-                'line-color': '#0084ff',
-                'line-width': 4
-              }
-            });
-          }
-
-          const coordinates = route.geometry.coordinates;
-          const bounds = coordinates.reduce((bounds: mapboxgl.LngLatBounds, coord: number[]) => {
-            return bounds.extend(coord as mapboxgl.LngLatLike);
-          }, new mapboxgl.LngLatBounds(coordinates[0], coordinates[0]));
-
-          map.current.fitBounds(bounds, {
-            padding: 50
-          });
-        }
 
         const pois = await findPointsOfInterest(route);
         setSuggestions(pois);
@@ -244,6 +175,10 @@ const RoutePlanning = () => {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleFormDataChange = (newData: Partial<typeof formData>) => {
+    setFormData(prev => ({ ...prev, ...newData }));
   };
 
   return (
@@ -268,138 +203,23 @@ const RoutePlanning = () => {
         <section className="py-12">
           <div className="container mx-auto px-4">
             <div className="max-w-2xl mx-auto">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Compass className="h-5 w-5 text-theme-600" />
-                    Plan Your Route
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div>
-                    <label className="block text-sm font-medium mb-2">Starting Point</label>
-                    <div className="flex gap-2">
-                      <Input 
-                        placeholder="Enter starting location"
-                        value={formData.startPoint}
-                        onChange={(e) => setFormData(prev => ({ ...prev, startPoint: e.target.value }))}
-                      />
-                      <Button variant="outline" size="icon">
-                        <MapPin className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </div>
-                  
-                  <div>
-                    <label className="block text-sm font-medium mb-2">Destination</label>
-                    <div className="flex gap-2">
-                      <Input 
-                        placeholder="Enter destination"
-                        value={formData.destination}
-                        onChange={(e) => setFormData(prev => ({ ...prev, destination: e.target.value }))}
-                      />
-                      <Button variant="outline" size="icon">
-                        <MapPin className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-sm font-medium mb-2">Start Date</label>
-                      <div className="flex gap-2">
-                        <Input 
-                          type="date"
-                          value={formData.startDate}
-                          onChange={(e) => setFormData(prev => ({ ...prev, startDate: e.target.value }))}
-                        />
-                        <Button variant="outline" size="icon">
-                          <Calendar className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </div>
-                    
-                    <div>
-                      <label className="block text-sm font-medium mb-2">Duration (Days)</label>
-                      <div className="flex gap-2">
-                        <Input 
-                          type="number" 
-                          placeholder="Days" 
-                          min="1"
-                          value={formData.duration}
-                          onChange={(e) => setFormData(prev => ({ ...prev, duration: e.target.value }))}
-                        />
-                        <Button variant="outline" size="icon">
-                          <Clock className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </div>
-                  </div>
-
-                  <Button 
-                    className="w-full"
-                    onClick={planRoute}
-                    disabled={isLoading}
-                  >
-                    {isLoading ? "Planning Route..." : "Plan Route"}
-                  </Button>
-                </CardContent>
-              </Card>
-
+              <RouteForm 
+                formData={formData}
+                isLoading={isLoading}
+                onFormDataChange={handleFormDataChange}
+                onPlanRoute={planRoute}
+              />
+              
               {routeDetails && (
-                <Card className="mt-8">
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <MapPin className="h-5 w-5 text-theme-600" />
-                      Route Details
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="space-y-2">
-                        <p className="text-sm font-medium text-gray-500">From</p>
-                        <p className="text-lg font-semibold">{routeDetails.startPoint}</p>
-                      </div>
-                      <div className="space-y-2">
-                        <p className="text-sm font-medium text-gray-500">To</p>
-                        <p className="text-lg font-semibold">{routeDetails.destination}</p>
-                      </div>
-                    </div>
-                    <div className="grid grid-cols-2 gap-4 pt-4 border-t">
-                      <div className="space-y-2">
-                        <p className="text-sm font-medium text-gray-500">Distance</p>
-                        <p className="text-lg font-semibold">{routeDetails.distance} miles</p>
-                      </div>
-                      <div className="space-y-2">
-                        <p className="text-sm font-medium text-gray-500">Estimated Duration</p>
-                        <p className="text-lg font-semibold">{routeDetails.duration} hours</p>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
+                <RouteDetails 
+                  startPoint={routeDetails.startPoint}
+                  destination={routeDetails.destination}
+                  distance={routeDetails.distance}
+                  duration={routeDetails.duration}
+                />
               )}
 
-              {suggestions.length > 0 && (
-                <Card className="mt-8 mb-12">
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <Search className="h-5 w-5 text-theme-600" />
-                      Suggested Stops
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-4">
-                      {suggestions.map((poi, index) => (
-                        <div key={index} className="p-4 border rounded-lg">
-                          <h3 className="font-semibold">{poi.name}</h3>
-                          <p className="text-sm text-gray-600 capitalize">Type: {poi.type}</p>
-                          <p className="text-sm text-gray-600">{poi.description}</p>
-                        </div>
-                      ))}
-                    </div>
-                  </CardContent>
-                </Card>
-              )}
+              <SuggestedStops suggestions={suggestions} />
             </div>
           </div>
         </section>
