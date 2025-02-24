@@ -6,7 +6,7 @@ import {
   Settings, 
   Search, 
   ShoppingCart, 
-  Tool, 
+  Wrench, 
   Package 
 } from "lucide-react";
 import Navigation from "@/components/Navigation";
@@ -33,7 +33,7 @@ const features = [
     link: "/price-compare"
   },
   {
-    icon: Tool,
+    icon: Wrench,
     title: "Installation Guides",
     description: "Step-by-step installation guides for common parts.",
     link: "/installation-guides"
