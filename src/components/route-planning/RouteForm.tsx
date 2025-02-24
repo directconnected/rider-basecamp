@@ -1,4 +1,4 @@
-
+e
 import React from "react";
 import { Compass, MapPin, Clock, Calendar, Fuel, LayoutGrid } from "lucide-react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
@@ -93,7 +93,7 @@ const RouteForm = ({ formData, isLoading, onFormDataChange, onPlanRoute }: Route
 
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium mb-2">Motorcycle Fuel Mileage</label>
+            <label className="block text-sm font-medium mb-2">Vehicle Fuel Mileage</label>
             <div className="flex gap-2">
               <Input 
                 type="number" 
