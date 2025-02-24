@@ -36,21 +36,22 @@ const ServiceLanding = () => {
   ];
 
   const handleFeatureClick = async (link: string, e: React.MouseEvent) => {
+    e.preventDefault();
+    console.log("Feature clicked, link:", link); // Debug log
+    
     if (link === "#") return;
     
-    e.preventDefault();
     const { data: { session } } = await supabase.auth.getSession();
     
     if (!session) {
-      // Pass the current URL as the redirect destination
+      console.log("Not authenticated, redirecting to auth with state:", { pathname: link }); // Debug log
+      // Use state object format that matches what Auth component expects
       navigate('/auth', { 
-        state: { 
-          from: { pathname: link } 
-        },
-        replace: false  // Don't replace the history entry
+        state: { from: { pathname: link } },
+        replace: false
       });
     } else {
-      // If already authenticated, go directly to the page
+      console.log("Authenticated, navigating directly to:", link); // Debug log
       navigate(link);
     }
   };
@@ -78,8 +79,9 @@ const ServiceLanding = () => {
           <div className="container mx-auto px-4">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
               {serviceFeatures.map((feature) => (
-                <div 
+                <a 
                   key={feature.id}
+                  href={feature.link}
                   onClick={(e) => handleFeatureClick(feature.link, e)}
                   className={`block h-[300px] ${feature.link === "#" ? "cursor-not-allowed" : "cursor-pointer"}`}
                 >
@@ -96,7 +98,7 @@ const ServiceLanding = () => {
                       </div>
                     </div>
                   </Card>
-                </div>
+                </a>
               ))}
             </div>
           </div>
