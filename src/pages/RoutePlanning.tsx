@@ -1,3 +1,4 @@
+
 import React, { useEffect } from "react";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/layout/Footer";
@@ -8,7 +9,7 @@ import SuggestedStops from "@/components/route-planning/SuggestedStops";
 import RouteMap from "@/components/route-planning/RouteMap";
 import RouteItinerary from "@/components/route-planning/RouteItinerary";
 import { useRoutePlanning } from "@/hooks/useRoutePlanning";
-import { initializeMapbox, geocodeLocation, findPointsOfInterest } from "@/services/mapService";
+import { initializeMapbox, geocodeLocation } from "@/services/mapService";
 import { calculateFuelStops, planRoute } from "@/services/routeService";
 import mapboxgl from 'mapbox-gl';
 
@@ -83,16 +84,60 @@ const RoutePlanning = () => {
       const calculatedFuelStops = await calculateFuelStops(route);
       setFuelStops(calculatedFuelStops);
 
+      const totalMiles = Math.round(route.distance / 1609.34);
+      const milesPerDay = parseInt(formData.milesPerDay);
+      const numDays = Math.ceil(totalMiles / milesPerDay);
+      const coordinates = route.geometry.coordinates;
+      const suggestions = [];
+
+      // Calculate stops based on days
+      for (let i = 1; i <= numDays; i++) {
+        const progress = i / numDays;
+        const index = Math.floor(coordinates.length * progress);
+        if (index < coordinates.length) {
+          const coord = coordinates[index];
+          
+          // Add restaurant for lunch (midday)
+          if (i < numDays) {
+            const lunchProgress = (i - 0.5) / numDays;
+            const lunchIndex = Math.floor(coordinates.length * lunchProgress);
+            if (lunchIndex < coordinates.length) {
+              const lunchCoord = coordinates[lunchIndex];
+              suggestions.push({
+                name: `Restaurant Stop ${i}`,
+                type: 'restaurant' as const,
+                location: [lunchCoord[0], lunchCoord[1]],
+                description: `Lunch stop on day ${i} (${Math.round(lunchProgress * totalMiles)} miles)`
+              });
+            }
+          }
+
+          // Add accommodation options for overnight
+          suggestions.push({
+            name: `Hotel Option ${i}`,
+            type: 'hotel' as const,
+            location: [coord[0], coord[1]],
+            description: `Overnight stay after day ${i} (${Math.round(progress * totalMiles)} miles)`
+          });
+
+          suggestions.push({
+            name: `Camping Option ${i}`,
+            type: 'camping' as const,
+            location: [coord[0], coord[1]],
+            description: `Alternative camping spot for night ${i} (${Math.round(progress * totalMiles)} miles)`
+          });
+        }
+      }
+
       setRouteDetails({
-        distance: Math.round(route.distance / 1609.34),
+        distance: totalMiles,
         duration: Math.round(route.duration / 3600),
         startPoint: formData.startPoint,
         destination: formData.destination
       });
 
-      const foundPois = await findPointsOfInterest(route);
-      console.log('Found POIs:', foundPois);
-      setSuggestions(foundPois);
+      console.log('Setting suggestions:', suggestions);
+      setSuggestions(suggestions);
 
       toast({
         title: "Route Planned",
