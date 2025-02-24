@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useToast } from "@/components/ui/use-toast";
 import mapboxgl from 'mapbox-gl';
@@ -9,6 +8,8 @@ interface FormData {
   destination: string;
   startDate: string;
   duration: string;
+  fuelMileage: string;
+  milesPerDay: string;
 }
 
 interface RouteDetails {
@@ -38,7 +39,9 @@ export const useRoutePlanning = () => {
     startPoint: "",
     destination: "",
     startDate: "",
-    duration: "1"
+    duration: "1",
+    fuelMileage: "150",
+    milesPerDay: "300"
   });
   const [routeDetails, setRouteDetails] = useState<RouteDetails | null>(null);
   const [suggestions, setSuggestions] = useState<PointOfInterest[]>([]);

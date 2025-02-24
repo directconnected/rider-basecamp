@@ -1,6 +1,6 @@
 
 import React from "react";
-import { Compass, MapPin, Clock, Calendar } from "lucide-react";
+import { Compass, MapPin, Clock, Calendar, Fuel, LayoutGrid } from "lucide-react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -10,6 +10,8 @@ interface FormData {
   destination: string;
   startDate: string;
   duration: string;
+  fuelMileage: string;
+  milesPerDay: string;
 }
 
 interface RouteFormProps {
@@ -84,6 +86,40 @@ const RouteForm = ({ formData, isLoading, onFormDataChange, onPlanRoute }: Route
               />
               <Button variant="outline" size="icon">
                 <Clock className="h-4 w-4" />
+              </Button>
+            </div>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <label className="block text-sm font-medium mb-2">Motorcycle Fuel Mileage</label>
+            <div className="flex gap-2">
+              <Input 
+                type="number" 
+                placeholder="Miles per tank" 
+                min="50"
+                value={formData.fuelMileage}
+                onChange={(e) => onFormDataChange({ fuelMileage: e.target.value })}
+              />
+              <Button variant="outline" size="icon">
+                <Fuel className="h-4 w-4" />
+              </Button>
+            </div>
+          </div>
+          
+          <div>
+            <label className="block text-sm font-medium mb-2">Miles per Day</label>
+            <div className="flex gap-2">
+              <Input 
+                type="number" 
+                placeholder="Daily miles" 
+                min="50"
+                value={formData.milesPerDay}
+                onChange={(e) => onFormDataChange({ milesPerDay: e.target.value })}
+              />
+              <Button variant="outline" size="icon">
+                <LayoutGrid className="h-4 w-4" />
               </Button>
             </div>
           </div>
