@@ -102,7 +102,7 @@ const Index = () => {
 
         <section className="py-24 bg-white" id="features-section">
           <div className="container mx-auto px-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 max-w-7xl mx-auto">
               {features.map((feature) => (
                 <Link 
                   to={feature.link}
@@ -112,14 +112,14 @@ const Index = () => {
                 >
                   <Card className="p-6 text-center h-full hover:shadow-lg transition-shadow duration-200">
                     <div className="flex flex-col h-full">
-                      <div className="mb-6">
+                      <div className="mb-4">
                         <div className="w-12 h-12 rounded-full bg-theme-100 text-theme-600 flex items-center justify-center mx-auto">
                           <feature.icon size={24} />
                         </div>
                       </div>
                       <div className="flex-1 flex flex-col">
-                        <h3 className="text-xl font-bold mb-3">{feature.title}</h3>
-                        <p className="text-gray-600">{feature.description}</p>
+                        <h3 className="text-lg font-bold mb-2">{feature.title}</h3>
+                        <p className="text-sm text-gray-600">{feature.description}</p>
                       </div>
                     </div>
                   </Card>
