@@ -23,6 +23,8 @@ const RouteResults: React.FC<RouteResultsProps> = ({
   fuelStops,
   suggestions
 }) => {
+  console.log('Suggestions in RouteResults:', suggestions); // Debug log
+
   return (
     <>
       <RouteDetails 
@@ -44,14 +46,7 @@ const RouteResults: React.FC<RouteResultsProps> = ({
         duration={routeDetails.duration}
         fuelStops={fuelStops}
       />
-      <div>
-        <SuggestedStops suggestions={suggestions} />
-        {suggestions && suggestions.length > 0 ? (
-          <p className="text-xs text-gray-500 mt-2">Suggestions loaded: {suggestions.length}</p>
-        ) : (
-          <p className="text-xs text-gray-500 mt-2">No suggestions available</p>
-        )}
-      </div>
+      <SuggestedStops suggestions={suggestions} />
     </>
   );
 };

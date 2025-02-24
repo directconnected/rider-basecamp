@@ -15,8 +15,22 @@ interface SuggestedStopsProps {
 }
 
 const SuggestedStops = ({ suggestions }: SuggestedStopsProps) => {
+  console.log('Suggestions received in SuggestedStops:', suggestions); // Debug log
+
   if (!suggestions || suggestions.length === 0) {
-    return null;
+    return (
+      <Card className="mt-8 mb-12">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Search className="h-5 w-5 text-theme-600" />
+            Suggested Stops
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p className="text-gray-500">No suggestions available at this time.</p>
+        </CardContent>
+      </Card>
+    );
   }
 
   const getIcon = (type: string) => {
@@ -56,7 +70,7 @@ const SuggestedStops = ({ suggestions }: SuggestedStopsProps) => {
       <CardContent>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {suggestions.map((poi, index) => (
-            <div key={index} className="p-4 border rounded-lg hover:shadow-md transition-shadow">
+            <div key={`${poi.name}-${index}`} className="p-4 border rounded-lg hover:shadow-md transition-shadow">
               <div className="flex items-start gap-3">
                 <div className={`mt-1 ${getTypeColor(poi.type)}`}>
                   {getIcon(poi.type)}
