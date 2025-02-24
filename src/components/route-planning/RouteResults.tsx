@@ -3,8 +3,7 @@ import React from 'react';
 import RouteDetails from './RouteDetails';
 import RouteMap from './RouteMap';
 import RouteItinerary from './RouteItinerary';
-import SuggestedStops from './SuggestedStops';
-import { RouteDetails as RouteDetailsType, PointOfInterest, FuelStop } from '@/hooks/useRoutePlanning';
+import { RouteDetails as RouteDetailsType, FuelStop } from '@/hooks/useRoutePlanning';
 
 interface RouteResultsProps {
   routeDetails: RouteDetailsType;
@@ -12,7 +11,6 @@ interface RouteResultsProps {
   endCoords: [number, number];
   currentRoute: any;
   fuelStops: FuelStop[];
-  suggestions: PointOfInterest[];
 }
 
 const RouteResults: React.FC<RouteResultsProps> = ({
@@ -21,10 +19,7 @@ const RouteResults: React.FC<RouteResultsProps> = ({
   endCoords,
   currentRoute,
   fuelStops,
-  suggestions
 }) => {
-  console.log('Suggestions in RouteResults:', suggestions); // Debug log
-
   return (
     <>
       <RouteDetails 
@@ -46,7 +41,6 @@ const RouteResults: React.FC<RouteResultsProps> = ({
         duration={routeDetails.duration}
         fuelStops={fuelStops}
       />
-      <SuggestedStops suggestions={suggestions} />
     </>
   );
 };

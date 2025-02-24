@@ -1,8 +1,6 @@
 
 import { useState } from "react";
 import { useToast } from "@/components/ui/use-toast";
-import mapboxgl from 'mapbox-gl';
-import { supabase } from "@/integrations/supabase/client";
 
 interface FormData {
   startPoint: string;
@@ -26,13 +24,6 @@ interface FuelStop {
   distance: number;
 }
 
-interface PointOfInterest {
-  name: string;
-  type: 'restaurant' | 'hotel' | 'camping';
-  location: [number, number];
-  description: string;
-}
-
 export const useRoutePlanning = () => {
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
@@ -45,7 +36,6 @@ export const useRoutePlanning = () => {
     milesPerDay: "300"
   });
   const [routeDetails, setRouteDetails] = useState<RouteDetails | null>(null);
-  const [suggestions, setSuggestions] = useState<PointOfInterest[]>([]);
   const [currentRoute, setCurrentRoute] = useState<any>(null);
   const [startCoords, setStartCoords] = useState<[number, number] | null>(null);
   const [endCoords, setEndCoords] = useState<[number, number] | null>(null);
@@ -59,7 +49,6 @@ export const useRoutePlanning = () => {
     isLoading,
     formData,
     routeDetails,
-    suggestions,
     currentRoute,
     startCoords,
     endCoords,
@@ -67,7 +56,6 @@ export const useRoutePlanning = () => {
     handleFormDataChange,
     setIsLoading,
     setRouteDetails,
-    setSuggestions,
     setCurrentRoute,
     setStartCoords,
     setEndCoords,
@@ -76,4 +64,4 @@ export const useRoutePlanning = () => {
   };
 };
 
-export type { FormData, RouteDetails, FuelStop, PointOfInterest };
+export type { FormData, RouteDetails, FuelStop };
