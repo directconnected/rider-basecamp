@@ -19,7 +19,7 @@ export const DocumentationSection = ({ onManualDownload }: DocumentationSectionP
           name="owners-manual"
         >
           <FileDown className="mr-2 h-4 w-4" />
-          View Owner's Manual
+          Owner's Manual
         </Button>
         <Button 
           variant="outline" 
@@ -29,7 +29,7 @@ export const DocumentationSection = ({ onManualDownload }: DocumentationSectionP
           name="service-manual"
         >
           <FileDown className="mr-2 h-4 w-4" />
-          View Service Manual
+          Service Manual
         </Button>
         <Button 
           variant="outline" 
@@ -39,7 +39,7 @@ export const DocumentationSection = ({ onManualDownload }: DocumentationSectionP
           name="quickstart-guide"
         >
           <FileDown className="mr-2 h-4 w-4" />
-          View Quickstart Guide
+          Quickstart Guide
         </Button>
       </div>
     </div>
