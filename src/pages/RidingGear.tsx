@@ -1,9 +1,11 @@
+
 import React from "react";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/layout/Footer";
 import { Card } from "@/components/ui/card";
-import { Shield, Wind, Sun, Cloud } from "lucide-react";
+import { Shield, Wind, Sun, Cloud, Tent } from "lucide-react";
 import Breadcrumbs from "@/components/Breadcrumbs";
+import { Link } from "react-router-dom";
 
 const RidingGear = () => {
   return (
@@ -41,29 +43,35 @@ const RidingGear = () => {
                   {
                     icon: Shield,
                     title: "Protection",
-                    description: "Safety-certified gear"
+                    description: "Safety-certified gear",
+                    link: "#"
                   },
                   {
                     icon: Wind,
                     title: "Ventilation",
-                    description: "Climate control"
+                    description: "Climate control",
+                    link: "#"
                   },
                   {
                     icon: Sun,
                     title: "All-Season",
-                    description: "Year-round comfort"
+                    description: "Year-round comfort",
+                    link: "#"
                   },
                   {
-                    icon: Cloud,
-                    title: "Weather Protection",
-                    description: "Rain & wind ready"
+                    icon: Tent,
+                    title: "Motorcycle Tents",
+                    description: "Adventure-ready camping",
+                    link: "/tents"
                   }
                 ].map((item) => (
-                  <Card key={item.title} className="p-6 text-center hover-card">
-                    <item.icon className="w-8 h-8 mx-auto mb-4 text-theme-600" />
-                    <h3 className="font-bold mb-2">{item.title}</h3>
-                    <p className="text-gray-600">{item.description}</p>
-                  </Card>
+                  <Link to={item.link} key={item.title}>
+                    <Card className="p-6 text-center hover:shadow-lg transition-shadow duration-200 h-full">
+                      <item.icon className="w-8 h-8 mx-auto mb-4 text-theme-600" />
+                      <h3 className="font-bold mb-2">{item.title}</h3>
+                      <p className="text-gray-600">{item.description}</p>
+                    </Card>
+                  </Link>
                 ))}
               </div>
             </div>
