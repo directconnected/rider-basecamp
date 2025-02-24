@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/layout/Footer";
@@ -7,6 +6,7 @@ import { useToast } from "@/components/ui/use-toast";
 import RouteForm from "@/components/route-planning/RouteForm";
 import RouteDetails from "@/components/route-planning/RouteDetails";
 import SuggestedStops from "@/components/route-planning/SuggestedStops";
+import RouteMap from "@/components/route-planning/RouteMap";
 import { supabase } from "@/integrations/supabase/client";
 import mapboxgl from 'mapbox-gl';
 
@@ -24,6 +24,12 @@ interface RouteDetails {
   destination: string;
 }
 
+interface FuelStop {
+  location: [number, number];
+  name: string;
+  distance: number;
+}
+
 const RoutePlanning = () => {
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
@@ -35,6 +41,10 @@ const RoutePlanning = () => {
   });
   const [routeDetails, setRouteDetails] = useState<RouteDetails | null>(null);
   const [suggestions, setSuggestions] = useState<PointOfInterest[]>([]);
+  const [currentRoute, setCurrentRoute] = useState<any>(null);
+  const [startCoords, setStartCoords] = useState<[number, number] | null>(null);
+  const [endCoords, setEndCoords] = useState<[number, number] | null>(null);
+  const [fuelStops, setFuelStops] = useState<FuelStop[]>([]);
 
   const geocodeLocation = async (location: string): Promise<[number, number] | null> => {
     try {
@@ -116,19 +126,39 @@ const RoutePlanning = () => {
     }
   };
 
+  const calculateFuelStops = (route: any) => {
+    const fuelStops: FuelStop[] = [];
+    const totalDistance = route.distance / 1609.34; // Convert to miles
+    const numStops = Math.floor(totalDistance / 200);
+    
+    for (let i = 1; i <= numStops; i++) {
+      const progress = i / (numStops + 1);
+      const coordinates = route.geometry.coordinates[
+        Math.floor(progress * route.geometry.coordinates.length)
+      ];
+      
+      fuelStops.push({
+        location: coordinates as [number, number],
+        name: `Fuel Stop ${i}`,
+        distance: progress * totalDistance
+      });
+    }
+
+    return fuelStops;
+  };
+
   const planRoute = async () => {
     setIsLoading(true);
     try {
-      // Initialize Mapbox if not already initialized
       if (!mapboxgl.accessToken) {
         const initialized = await initializeMapbox();
         if (!initialized) return;
       }
 
-      const startCoords = await geocodeLocation(formData.startPoint);
-      const endCoords = await geocodeLocation(formData.destination);
+      const start = await geocodeLocation(formData.startPoint);
+      const end = await geocodeLocation(formData.destination);
 
-      if (!startCoords || !endCoords) {
+      if (!start || !end) {
         toast({
           title: "Location Error",
           description: "Could not find one or both locations. Please check your input and try again.",
@@ -137,8 +167,11 @@ const RoutePlanning = () => {
         return;
       }
 
+      setStartCoords(start);
+      setEndCoords(end);
+
       const routeResponse = await fetch(
-        `https://api.mapbox.com/directions/v5/mapbox/driving/${startCoords[0]},${startCoords[1]};${endCoords[0]},${endCoords[1]}?geometries=geojson&access_token=${mapboxgl.accessToken}`
+        `https://api.mapbox.com/directions/v5/mapbox/driving/${start[0]},${start[1]};${end[0]},${end[1]}?geometries=geojson&access_token=${mapboxgl.accessToken}`
       );
 
       if (!routeResponse.ok) {
@@ -149,7 +182,12 @@ const RoutePlanning = () => {
 
       if (routeData.routes && routeData.routes.length > 0) {
         const route = routeData.routes[0];
+        setCurrentRoute(route);
         
+        // Calculate fuel stops
+        const calculatedFuelStops = calculateFuelStops(route);
+        setFuelStops(calculatedFuelStops);
+
         setRouteDetails({
           distance: Math.round(route.distance / 1609.34),
           duration: Math.round(route.duration / 3600),
@@ -162,7 +200,7 @@ const RoutePlanning = () => {
 
         toast({
           title: "Route Planned",
-          description: "Your route has been planned and points of interest have been found.",
+          description: "Your route has been planned with fuel stops added every 200 miles.",
         });
       }
     } catch (error) {
@@ -202,7 +240,7 @@ const RoutePlanning = () => {
 
         <section className="py-12">
           <div className="container mx-auto px-4">
-            <div className="max-w-2xl mx-auto">
+            <div className="max-w-4xl mx-auto">
               <RouteForm 
                 formData={formData}
                 isLoading={isLoading}
@@ -210,13 +248,21 @@ const RoutePlanning = () => {
                 onPlanRoute={planRoute}
               />
               
-              {routeDetails && (
-                <RouteDetails 
-                  startPoint={routeDetails.startPoint}
-                  destination={routeDetails.destination}
-                  distance={routeDetails.distance}
-                  duration={routeDetails.duration}
-                />
+              {routeDetails && startCoords && endCoords && currentRoute && (
+                <>
+                  <RouteDetails 
+                    startPoint={routeDetails.startPoint}
+                    destination={routeDetails.destination}
+                    distance={routeDetails.distance}
+                    duration={routeDetails.duration}
+                  />
+                  <RouteMap
+                    startCoords={startCoords}
+                    endCoords={endCoords}
+                    route={currentRoute}
+                    fuelStops={fuelStops}
+                  />
+                </>
               )}
 
               <SuggestedStops suggestions={suggestions} />
