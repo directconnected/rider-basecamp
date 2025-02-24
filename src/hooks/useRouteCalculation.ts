@@ -3,8 +3,8 @@ import { useState } from "react";
 import { useToast } from "@/components/ui/use-toast";
 import mapboxgl from 'mapbox-gl';
 import { initializeMapbox, geocodeLocation } from "@/services/mapService";
-import { calculateFuelStops, planRoute } from "@/services/routeService";
-import { FormData, RouteDetails, FuelStop } from "./useRoutePlanning";
+import { calculateFuelStops, calculateHotelStops, planRoute } from "@/services/routeService";
+import { FormData, RouteDetails, FuelStop, HotelStop } from "./useRoutePlanning";
 
 export const useRouteCalculation = () => {
   const { toast } = useToast();
@@ -17,6 +17,7 @@ export const useRouteCalculation = () => {
       setEndCoords: (coords: [number, number]) => void;
       setCurrentRoute: (route: any) => void;
       setFuelStops: (stops: FuelStop[]) => void;
+      setHotelStops: (stops: HotelStop[]) => void;
       setRouteDetails: (details: RouteDetails) => void;
     }
   ) => {
@@ -26,6 +27,7 @@ export const useRouteCalculation = () => {
       setEndCoords,
       setCurrentRoute,
       setFuelStops,
+      setHotelStops,
       setRouteDetails,
     } = callbacks;
 
@@ -72,11 +74,15 @@ export const useRouteCalculation = () => {
       setCurrentRoute(route);
       
       const fuelMileage = parseInt(formData.fuelMileage);
+      const milesPerDay = parseInt(formData.milesPerDay);
+      
       const calculatedFuelStops = await calculateFuelStops(route, fuelMileage);
+      const calculatedHotelStops = await calculateHotelStops(route, milesPerDay);
+      
       setFuelStops(calculatedFuelStops);
+      setHotelStops(calculatedHotelStops);
 
       const totalMiles = Math.round(route.distance / 1609.34);
-      const milesPerDay = parseInt(formData.milesPerDay);
       const numDays = Math.ceil(totalMiles / milesPerDay);
 
       setRouteDetails({
@@ -88,7 +94,7 @@ export const useRouteCalculation = () => {
 
       toast({
         title: "Route Planned",
-        description: "Your route has been planned with suggested refueling stops.",
+        description: `Your route has been planned with ${calculatedFuelStops.length} fuel stops and ${calculatedHotelStops.length} overnight stays.`,
       });
     } catch (error) {
       console.error("Route planning error:", error);

@@ -14,9 +14,14 @@ interface RouteMapProps {
     name: string;
     distance: number;
   }>;
+  hotelStops: Array<{
+    location: [number, number];
+    name: string;
+    distance: number;
+  }>;
 }
 
-const RouteMap = ({ startCoords, endCoords, route, fuelStops }: RouteMapProps) => {
+const RouteMap = ({ startCoords, endCoords, route, fuelStops, hotelStops }: RouteMapProps) => {
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<mapboxgl.Map | null>(null);
 
@@ -78,12 +83,26 @@ const RouteMap = ({ startCoords, endCoords, route, fuelStops }: RouteMapProps) =
           .addTo(map.current!);
       });
 
-      // Fit the map to show the entire route
+      // Add hotel markers
+      hotelStops.forEach((stop) => {
+        new mapboxgl.Marker({ color: '#8b5cf6' })
+          .setLngLat(stop.location)
+          .setPopup(new mapboxgl.Popup().setHTML(
+            `<p>Overnight Stay: ${stop.name}</p><p>Distance: ${Math.round(stop.distance)} miles</p>`
+          ))
+          .addTo(map.current!);
+      });
+
+      // Fit the map to show all points
       const bounds = new mapboxgl.LngLatBounds()
         .extend(startCoords)
         .extend(endCoords);
 
       fuelStops.forEach(stop => {
+        bounds.extend(stop.location);
+      });
+
+      hotelStops.forEach(stop => {
         bounds.extend(stop.location);
       });
 
@@ -95,14 +114,14 @@ const RouteMap = ({ startCoords, endCoords, route, fuelStops }: RouteMapProps) =
     return () => {
       map.current?.remove();
     };
-  }, [startCoords, endCoords, route, fuelStops]);
+  }, [startCoords, endCoords, route, fuelStops, hotelStops]);
 
   return (
     <Card className="mt-8">
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Fuel className="h-5 w-5 text-theme-600" />
-          Route Map & Fuel Stops
+          Route Map & Stops
         </CardTitle>
       </CardHeader>
       <CardContent>

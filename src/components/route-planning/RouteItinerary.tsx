@@ -1,7 +1,7 @@
 
 import React from "react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { List, FileDown } from "lucide-react";
+import { List, FileDown, Hotel } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { downloadGPX } from "@/utils/gpxGenerator";
 
@@ -15,6 +15,11 @@ interface RouteItineraryProps {
     location: [number, number];
     distance: number;
   }>;
+  hotelStops: Array<{
+    name: string;
+    location: [number, number];
+    distance: number;
+  }>;
   currentRoute?: any;
 }
 
@@ -24,6 +29,7 @@ const RouteItinerary = ({
   distance, 
   duration, 
   fuelStops,
+  hotelStops,
   currentRoute 
 }: RouteItineraryProps) => {
   const formatDuration = (hours: number) => {
@@ -37,17 +43,8 @@ const RouteItinerary = ({
       console.error('Cannot generate GPX: Missing route coordinates');
       return;
     }
-    if (!Array.isArray(fuelStops) || fuelStops.length === 0) {
-      console.warn('Generating GPX with no fuel stops');
-    }
     downloadGPX(startPoint, destination, currentRoute, fuelStops);
   };
-
-  // Validate required data
-  if (!startPoint || !destination || typeof distance !== 'number' || typeof duration !== 'number') {
-    console.error('Missing required route information');
-    return null;
-  }
 
   return (
     <Card className="mt-8">
@@ -86,27 +83,42 @@ const RouteItinerary = ({
             </div>
             
             {Array.isArray(fuelStops) && fuelStops.map((stop, index) => (
-              <div key={index} className="flex items-center gap-4">
+              <div key={`fuel-${index}`} className="flex items-center gap-4">
                 <div className="w-3 h-3 rounded-full bg-amber-500" />
                 <p className="text-base">
                   {stop.name} - {Math.round(stop.distance)} miles from start
                 </p>
               </div>
             ))}
-
-            <div className="flex items-center gap-4">
-              <div className="w-3 h-3 rounded-full bg-red-500" />
-              <p className="text-base">
-                Arrive at {destination} - {distance} miles total
-              </p>
-            </div>
           </div>
+        </div>
+
+        <div className="space-y-4">
+          <h3 className="text-lg font-semibold">Suggested Stays:</h3>
+          <div className="space-y-3">
+            {Array.isArray(hotelStops) && hotelStops.map((stop, index) => (
+              <div key={`hotel-${index}`} className="flex items-center gap-4">
+                <div className="w-3 h-3 rounded-full bg-purple-500" />
+                <p className="text-base">
+                  Overnight in {stop.name} - {Math.round(stop.distance)} miles from start
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="flex items-center gap-4">
+          <div className="w-3 h-3 rounded-full bg-red-500" />
+          <p className="text-base">
+            Arrive at {destination} - {distance} miles total
+          </p>
         </div>
 
         <div className="bg-gray-50 p-4 rounded-lg">
           <h3 className="text-lg font-semibold mb-2">Travel Tips:</h3>
           <ul className="list-disc list-inside space-y-2 text-gray-700">
             <li>Plan to refuel at each suggested fuel stop to ensure you don't run low on gas</li>
+            <li>Book accommodations in advance at the suggested overnight stops</li>
             <li>Take regular breaks every 2-3 hours to stay alert</li>
             <li>Check weather conditions before departing</li>
             <li>Keep emergency contacts and roadside assistance numbers handy</li>

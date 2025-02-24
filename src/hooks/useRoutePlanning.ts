@@ -24,6 +24,12 @@ interface FuelStop {
   distance: number;
 }
 
+interface HotelStop {
+  location: [number, number];
+  name: string;
+  distance: number;
+}
+
 export const useRoutePlanning = () => {
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
@@ -40,6 +46,7 @@ export const useRoutePlanning = () => {
   const [startCoords, setStartCoords] = useState<[number, number] | null>(null);
   const [endCoords, setEndCoords] = useState<[number, number] | null>(null);
   const [fuelStops, setFuelStops] = useState<FuelStop[]>([]);
+  const [hotelStops, setHotelStops] = useState<HotelStop[]>([]);
 
   const handleFormDataChange = (newData: Partial<FormData>) => {
     setFormData(prev => ({ ...prev, ...newData }));
@@ -53,6 +60,7 @@ export const useRoutePlanning = () => {
     startCoords,
     endCoords,
     fuelStops,
+    hotelStops,
     handleFormDataChange,
     setIsLoading,
     setRouteDetails,
@@ -60,8 +68,9 @@ export const useRoutePlanning = () => {
     setStartCoords,
     setEndCoords,
     setFuelStops,
+    setHotelStops,
     toast
   };
 };
 
-export type { FormData, RouteDetails, FuelStop };
+export type { FormData, RouteDetails, FuelStop, HotelStop };

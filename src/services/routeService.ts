@@ -1,6 +1,6 @@
 import mapboxgl from 'mapbox-gl';
 import { getLocationName } from './mapService';
-import { FuelStop } from "@/hooks/useRoutePlanning";
+import { FuelStop, HotelStop } from "@/hooks/useRoutePlanning";
 
 interface GasStation {
   name: string;
@@ -149,6 +149,56 @@ export const calculateFuelStops = async (route: any, fuelMileage: number): Promi
 
   console.log('Final fuel stops:', fuelStops);
   return fuelStops;
+};
+
+export const calculateHotelStops = async (route: any, milesPerDay: number): Promise<HotelStop[]> => {
+  console.log('Calculating hotel stops with miles per day:', milesPerDay);
+  console.log('Route data:', route);
+  
+  const hotelStops: HotelStop[] = [];
+  const totalDistance = route.distance / 1609.34; // Convert to miles
+  
+  // Calculate number of hotel stops needed
+  const numStops = Math.floor(totalDistance / milesPerDay);
+  
+  console.log('Number of hotel stops needed:', numStops);
+  
+  if (numStops <= 0) {
+    console.log('No hotel stops needed - destination within daily range');
+    return [];
+  }
+  
+  // Calculate evenly spaced stops
+  for (let i = 1; i <= numStops; i++) {
+    const progress = (i * milesPerDay) / totalDistance;
+    if (progress >= 1) break;
+    
+    const pointIndex = Math.floor(progress * route.geometry.coordinates.length);
+    const coordinates = route.geometry.coordinates[pointIndex] as [number, number];
+    
+    console.log(`Looking for hotel at stop ${i}:`, coordinates);
+    console.log(`Progress: ${Math.round(progress * 100)}%, Point index: ${pointIndex}`);
+    
+    try {
+      const locationName = await getLocationName(coordinates);
+      hotelStops.push({
+        location: coordinates,
+        name: `${locationName}`,
+        distance: Math.round(progress * totalDistance)
+      });
+      console.log(`Added hotel stop ${i} at:`, locationName);
+    } catch (error) {
+      console.error(`Error processing hotel stop ${i}:`, error);
+      hotelStops.push({
+        location: coordinates,
+        name: `Unknown Location`,
+        distance: Math.round(progress * totalDistance)
+      });
+    }
+  }
+
+  console.log('Final hotel stops:', hotelStops);
+  return hotelStops;
 };
 
 export const planRoute = async (start: [number, number], end: [number, number]) => {
