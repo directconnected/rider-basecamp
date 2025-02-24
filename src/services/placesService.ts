@@ -22,7 +22,9 @@ const findPlace = async (
       console.log(`Searching for ${type} near coordinates:`, coordinates, 'with radius:', radius);
       const { data, error } = await supabase.functions.invoke('find-nearby-places', {
         body: {
-          location: [coordinates[1], coordinates[0]], // Swap to [lat, lng] for Google Places API
+          // coordinates[0] is longitude, coordinates[1] is latitude
+          // Google Places API expects [latitude, longitude]
+          location: [coordinates[1], coordinates[0]], 
           type,
           radius
         }
@@ -39,12 +41,13 @@ const findPlace = async (
       }
 
       const place = data.places[0];
-      console.log(`Found ${type}:`, place.name, 'at radius:', radius);
+      console.log(`Found ${type}:`, place.name, 'at radius:', radius, 'coordinates:', place.geometry.location);
       
+      // Convert Google Places API response (which uses lat/lng) back to [lng, lat] format
       return {
         name: place.name,
         address: place.vicinity || place.formatted_address,
-        location: [place.geometry.location.lng, place.geometry.location.lat],
+        location: [place.geometry.location.lng, place.geometry.location.lat], // Ensure correct order
         rating: place.rating,
         price_level: place.price_level
       };

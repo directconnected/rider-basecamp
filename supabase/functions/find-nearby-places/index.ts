@@ -7,7 +7,7 @@ const corsHeaders = {
 }
 
 interface RequestBody {
-  location: [number, number];
+  location: [number, number]; // [latitude, longitude]
   type: 'lodging' | 'gas_station';
   radius?: number;
 }
@@ -19,41 +19,18 @@ serve(async (req) => {
   }
 
   try {
-    let requestData: RequestBody;
+    const body = await req.json();
+    console.log('Received request body:', body);
     
-    if (req.method === 'GET') {
-      // Test coordinates for Pittsburgh, PA
-      requestData = {
-        location: [40.4406, -79.9959],
-        type: 'lodging',
-        radius: 5000
-      };
-      console.log('Using test coordinates:', requestData);
-    } else {
-      const body = await req.json();
-      console.log('Received request body:', body);
-      
-      // Validate location data
-      if (!body.location || !Array.isArray(body.location) || body.location.length !== 2) {
-        throw new Error(`Invalid location format. Expected [lat, lng] array, got: ${JSON.stringify(body.location)}`);
-      }
-      
-      requestData = {
-        location: body.location.map(Number) as [number, number],
-        type: body.type || 'lodging',
-        radius: body.radius || 5000
-      };
+    // Validate location data
+    if (!body.location || !Array.isArray(body.location) || body.location.length !== 2) {
+      throw new Error(`Invalid location format. Expected [lat, lng] array, got: ${JSON.stringify(body.location)}`);
     }
-
-    console.log('Processed request data:', requestData);
-
-    const { location, type, radius } = requestData;
-    const [lat, lng] = location;
-
+    
+    const [lat, lng] = body.location.map(Number);
+    
     // Validate coordinates
-    if (typeof lat !== 'number' || typeof lng !== 'number' || 
-        isNaN(lat) || isNaN(lng) ||
-        lat < -90 || lat > 90 || lng < -180 || lng > 180) {
+    if (isNaN(lat) || isNaN(lng) || lat < -90 || lat > 90 || lng < -180 || lng > 180) {
       throw new Error(`Invalid coordinates: lat=${lat}, lng=${lng}`);
     }
 
@@ -64,15 +41,16 @@ serve(async (req) => {
 
     // Format coordinates as string
     const locationString = `${lat},${lng}`;
+    console.log('Making request with location:', locationString);
 
     // Build Places API URL
     const url = new URL('https://maps.googleapis.com/maps/api/place/nearbysearch/json');
     url.searchParams.append('location', locationString);
-    url.searchParams.append('radius', radius.toString());
-    url.searchParams.append('type', type);
+    url.searchParams.append('radius', (body.radius || 5000).toString());
+    url.searchParams.append('type', body.type);
     url.searchParams.append('key', apiKey);
 
-    console.log(`Making request to Places API: ${type} near ${locationString} within ${radius}m`);
+    console.log(`Making request to Places API: ${body.type} near ${locationString} within ${body.radius}m`);
     
     const response = await fetch(url.toString());
     if (!response.ok) {
@@ -82,7 +60,7 @@ serve(async (req) => {
 
     const data = await response.json();
     console.log('Places API Response status:', data.status);
-
+    
     if (data.status === 'ZERO_RESULTS') {
       console.log('No places found');
       return new Response(
