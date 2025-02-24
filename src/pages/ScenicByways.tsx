@@ -84,7 +84,7 @@ const ScenicByways = () => {
             {isLoading ? (
               <div className="text-center text-gray-600">Loading scenic byways...</div>
             ) : (
-              <div className="grid gap-6 md:grid-cols-2">
+              <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
                 {filteredByways?.map((byway, index) => (
                   <BywayCard
                     key={index}
