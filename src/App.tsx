@@ -39,6 +39,7 @@ import Parts from "@/pages/Parts";
 import GroupRides from "@/pages/GroupRides";
 import Rentals from "@/pages/Rentals";
 import News from "@/pages/News";
+import Tents from "@/pages/Tents";
 
 const queryClient = new QueryClient();
 
@@ -94,6 +95,7 @@ function App() {
             <Route path="/group-rides" element={<GroupRides />} />
             <Route path="/rentals" element={<Rentals />} />
             <Route path="/news" element={<News />} />
+            <Route path="/tents" element={<Tents />} />
             <Route path="*" element={<NotFound />} />
           </RouterRoutes>
           <Toaster />
