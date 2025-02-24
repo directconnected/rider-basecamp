@@ -40,6 +40,7 @@ const RouteResults: React.FC<RouteResultsProps> = ({
         distance={routeDetails.distance}
         duration={routeDetails.duration}
         fuelStops={fuelStops}
+        currentRoute={currentRoute}
       />
     </>
   );

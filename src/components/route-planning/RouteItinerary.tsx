@@ -1,7 +1,9 @@
 
 import React from "react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { List } from "lucide-react";
+import { List, FileDown } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { downloadGPX } from "@/utils/gpxGenerator";
 
 interface RouteItineraryProps {
   startPoint: string;
@@ -10,24 +12,48 @@ interface RouteItineraryProps {
   duration: number;
   fuelStops: Array<{
     name: string;
+    location: [number, number];
     distance: number;
   }>;
+  currentRoute?: any;
 }
 
-const RouteItinerary = ({ startPoint, destination, distance, duration, fuelStops }: RouteItineraryProps) => {
+const RouteItinerary = ({ 
+  startPoint, 
+  destination, 
+  distance, 
+  duration, 
+  fuelStops,
+  currentRoute 
+}: RouteItineraryProps) => {
   const formatDuration = (hours: number) => {
     const wholeHours = Math.floor(hours);
     const minutes = Math.round((hours - wholeHours) * 60);
     return `${wholeHours}h ${minutes}m`;
   };
 
+  const handleDownloadGPX = () => {
+    if (!currentRoute) return;
+    downloadGPX(startPoint, destination, currentRoute, fuelStops);
+  };
+
   return (
     <Card className="mt-8">
-      <CardHeader>
+      <CardHeader className="flex flex-row items-center justify-between">
         <CardTitle className="flex items-center gap-2">
           <List className="h-5 w-5 text-theme-600" />
           Route Itinerary
         </CardTitle>
+        {currentRoute && (
+          <Button
+            variant="outline"
+            onClick={handleDownloadGPX}
+            className="flex items-center gap-2"
+          >
+            <FileDown className="h-4 w-4" />
+            Download GPX
+          </Button>
+        )}
       </CardHeader>
       <CardContent className="space-y-6">
         <div className="prose max-w-none">
