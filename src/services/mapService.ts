@@ -1,4 +1,3 @@
-
 import mapboxgl from 'mapbox-gl';
 import { supabase } from "@/integrations/supabase/client";
 import { PointOfInterest } from "@/hooks/useRoutePlanning";
@@ -82,8 +81,7 @@ export const findPointsOfInterest = async (route: any, milesPerDay: number): Pro
     totalDistance,
     milesPerDay,
     numDays,
-    totalCoordinates: coordinates.length,
-    mapboxToken: mapboxgl.accessToken ? 'Present' : 'Missing'
+    totalCoordinates: coordinates.length
   });
 
   if (!mapboxgl.accessToken) {
@@ -104,94 +102,41 @@ export const findPointsOfInterest = async (route: any, milesPerDay: number): Pro
       
       // Changed to include more place types and removed the poi type restriction
       const url = `https://api.mapbox.com/geocoding/v5/mapbox.places/${lng},${lat}.json?` +
-        `types=poi,place,restaurant,hotel,lodging&` + // Include more place types
-        `limit=25&` + // Increased limit
-        `proximity=${lng},${lat}&` +
-        `radius=40000&` + // Increased to 40km radius
+        `types=poi,place&` + // Simple type filter
+        `limit=25&` + 
         `access_token=${mapboxgl.accessToken}`;
       
-      console.log('Mapbox API URL:', url);
-      
       const response = await fetch(url);
-      const responseText = await response.text();
+      const data = await response.json();
       
-      try {
-        const data = JSON.parse(responseText);
-        console.log(`POI data for point ${i}:`, data);
-        
-        if (data.features && data.features.length > 0) {
-          for (const feature of data.features) {
-            // Skip features without a name
-            if (!feature.text && !feature.place_name) {
-              console.log('Skipping POI - no name:', feature);
-              continue;
-            }
+      if (data.features && data.features.length > 0) {
+        for (const feature of data.features) {
+          if (!feature.text && !feature.place_name) continue;
 
-            // Get all possible category information
-            const allProperties = {
-              ...feature.properties,
-              place_type: feature.place_type,
-              text: feature.text,
-              place_name: feature.place_name
-            };
+          const searchString = JSON.stringify(feature).toLowerCase();
+          let type: 'restaurant' | 'hotel' | 'camping';
 
-            // Convert all properties to a searchable string
-            const searchString = JSON.stringify(allProperties).toLowerCase();
-
-            // Determine type based on comprehensive search
-            let type: 'restaurant' | 'hotel' | 'camping' = 'restaurant';
-
-            if (
-              searchString.includes('hotel') ||
-              searchString.includes('motel') ||
-              searchString.includes('inn') ||
-              searchString.includes('lodge') ||
-              searchString.includes('lodging') ||
-              searchString.includes('accommodation')
-            ) {
-              type = 'hotel';
-            } else if (
-              searchString.includes('camp') ||
-              searchString.includes('rv') ||
-              searchString.includes('camping') ||
-              searchString.includes('outdoor') ||
-              searchString.includes('park')
-            ) {
-              type = 'camping';
-            } else if (
-              searchString.includes('restaurant') ||
-              searchString.includes('food') ||
-              searchString.includes('cafe') ||
-              searchString.includes('dining') ||
-              searchString.includes('bar') ||
-              searchString.includes('grill') ||
-              searchString.includes('diner')
-            ) {
-              type = 'restaurant';
-            }
-
-            const progress = pointIndex / coordinates.length;
-            const distanceFromStart = Math.round(totalDistance * progress);
-
-            const name = feature.text || feature.place_name?.split(',')[0] || 'Unknown Location';
-            const fullAddress = feature.place_name || feature.text;
-
-            const poi = {
-              name,
-              type,
-              location: feature.center as [number, number],
-              description: `${fullAddress} (${distanceFromStart} miles from start)`
-            };
-
-            console.log('Adding POI:', poi);
-            pois.push(poi);
+          // Simpler type determination
+          if (searchString.includes('hotel') || searchString.includes('motel') || searchString.includes('lodging')) {
+            type = 'hotel';
+          } else if (searchString.includes('camp') || searchString.includes('park')) {
+            type = 'camping';
+          } else {
+            type = 'restaurant'; // Default to restaurant for other POIs
           }
-        } else {
-          console.log(`No POIs found for point ${i}`);
+
+          const progress = pointIndex / coordinates.length;
+          const distanceFromStart = Math.round(totalDistance * progress);
+          const name = feature.text || feature.place_name?.split(',')[0] || 'Unknown Location';
+          const fullAddress = feature.place_name || feature.text;
+
+          pois.push({
+            name,
+            type,
+            location: feature.center as [number, number],
+            description: `${fullAddress} (${distanceFromStart} miles from start)`
+          });
         }
-      } catch (parseError) {
-        console.error('Error parsing Mapbox response:', parseError);
-        console.log('Raw response:', responseText);
       }
     } catch (error) {
       console.error(`Error fetching POIs for point ${i}:`, error);
@@ -199,43 +144,17 @@ export const findPointsOfInterest = async (route: any, milesPerDay: number): Pro
     }
   }
 
-  console.log('Total POIs found:', pois.length);
-
-  // Remove duplicates and sort by type
-  const uniquePois = pois.filter((poi, index, self) =>
-    index === self.findIndex((p) => (
-      p.name === poi.name && p.type === poi.type
-    ))
-  );
-
-  console.log('Unique POIs:', uniquePois.length);
-
-  // Sort POIs to ensure a good mix of types
+  // Remove duplicates
+  const uniquePois = Array.from(new Map(pois.map(poi => [poi.name, poi])).values());
+  
+  // Sort POIs to ensure a good mix of types (prefer hotels and camping spots)
   const sortedPois = uniquePois.sort((a, b) => {
-    if (a.type === b.type) return 0;
-    if (a.type === 'hotel') return -1;
-    if (b.type === 'hotel') return 1;
-    if (a.type === 'camping') return -1;
-    if (b.type === 'camping') return 1;
+    if (a.type === 'hotel' && b.type !== 'hotel') return -1;
+    if (a.type === 'camping' && b.type !== 'camping') return -1;
     return 0;
   });
 
-  // Take the top N suggestions, ensuring at least one of each type if available
-  const finalPois: PointOfInterest[] = [];
-  const typeCounts = { hotel: 0, camping: 0, restaurant: 0 };
-  const maxPerType = Math.ceil(Math.min(12, numDays * 2) / 3);
-
-  for (const poi of sortedPois) {
-    if (typeCounts[poi.type] < maxPerType) {
-      finalPois.push(poi);
-      typeCounts[poi.type]++;
-    }
-    
-    if (Object.values(typeCounts).reduce((a, b) => a + b) >= Math.min(12, numDays * 2)) {
-      break;
-    }
-  }
-
-  console.log('Final POIs:', finalPois);
-  return finalPois;
+  // Limit the number of POIs
+  const maxPois = Math.min(12, numDays * 2);
+  return sortedPois.slice(0, maxPois);
 };
