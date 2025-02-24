@@ -1,3 +1,4 @@
+
 import mapboxgl from 'mapbox-gl';
 import { supabase } from "@/integrations/supabase/client";
 import { PointOfInterest } from "@/hooks/useRoutePlanning";
@@ -84,8 +85,8 @@ export const findPointsOfInterest = async (route: any, milesPerDay: number): Pro
     return Math.floor(coordinates.length * progress);
   });
 
-  // Combine all sampling points
-  const allSamplePoints = [...samplePoints, ...eveningStops];
+  // Combine all sampling points and remove duplicates
+  const allSamplePoints = [...new Set([...samplePoints, ...eveningStops])];
   
   for (const pointIndex of allSamplePoints) {
     if (pointIndex >= coordinates.length) continue;
@@ -93,32 +94,49 @@ export const findPointsOfInterest = async (route: any, milesPerDay: number): Pro
     const [lng, lat] = coordinates[pointIndex];
     
     try {
+      // Updated query parameters to get more relevant POIs
       const response = await fetch(
-        `https://api.mapbox.com/geocoding/v5/mapbox.places/${lng},${lat}.json?types=poi&limit=3&access_token=${mapboxgl.accessToken}`
+        `https://api.mapbox.com/geocoding/v5/mapbox.places/${lng},${lat}.json?types=poi&limit=5&access_token=${mapboxgl.accessToken}`
       );
 
       if (!response.ok) continue;
 
       const data = await response.json();
       
-      if (data.features) {
+      if (data.features && data.features.length > 0) {
         for (const feature of data.features) {
+          // Default to restaurant if no clear category is found
           let type: 'restaurant' | 'hotel' | 'camping' = 'restaurant';
           
-          if (feature.properties && feature.properties.category) {
-            const categories = Array.isArray(feature.properties.category) 
-              ? feature.properties.category 
-              : [feature.properties.category];
-            
-            if (categories.some(cat => cat.includes('lodging'))) {
+          // Check the place type from properties and categories
+          if (feature.properties) {
+            const categories = [
+              ...(feature.properties.category || []),
+              ...(feature.properties.categories || []),
+              feature.place_type
+            ].flat();
+
+            // Determine the type based on various possible category names
+            if (categories.some(cat => 
+              typeof cat === 'string' && (
+                cat.includes('lodging') || 
+                cat.includes('hotel') || 
+                cat.includes('motel')
+              ))) {
               type = 'hotel';
-            } else if (categories.some(cat => cat.includes('campground'))) {
+            } else if (categories.some(cat => 
+              typeof cat === 'string' && (
+                cat.includes('camp') || 
+                cat.includes('rv_park')
+              ))) {
               type = 'camping';
             } else if (categories.some(cat => 
-              cat.includes('restaurant') || 
-              cat.includes('food') || 
-              cat.includes('cafe')
-            )) {
+              typeof cat === 'string' && (
+                cat.includes('restaurant') || 
+                cat.includes('food') || 
+                cat.includes('cafe') ||
+                cat.includes('dining')
+              ))) {
               type = 'restaurant';
             }
           }
@@ -126,12 +144,14 @@ export const findPointsOfInterest = async (route: any, milesPerDay: number): Pro
           const progress = pointIndex / coordinates.length;
           const distanceFromStart = Math.round(totalDistance * progress);
 
+          const name = feature.text || feature.place_name?.split(',')[0] || 'Unknown Location';
+          const fullAddress = feature.place_name || feature.text;
+
           pois.push({
-            name: feature.text || 'Unknown Location',
+            name,
             type,
             location: feature.center as [number, number],
-            description: feature.properties?.description || 
-                        `${feature.text} (${distanceFromStart} miles from start)`
+            description: `${fullAddress} (${distanceFromStart} miles from start)`
           });
         }
       }
@@ -141,12 +161,22 @@ export const findPointsOfInterest = async (route: any, milesPerDay: number): Pro
     }
   }
 
+  // Filter unique POIs and ensure we have a good mix of types
   const uniquePois = pois.filter((poi, index, self) =>
     index === self.findIndex((p) => p.name === poi.name)
   );
 
+  // Sort POIs by type to ensure a good mix
+  const sortedPois = uniquePois.sort((a, b) => {
+    if (a.type === b.type) return 0;
+    // Prioritize lodging options first
+    if (a.type === 'hotel' || a.type === 'camping') return -1;
+    if (b.type === 'hotel' || b.type === 'camping') return 1;
+    return 0;
+  });
+
   // Limit to 12 suggestions (2 per day: midday and evening)
-  const finalPois = uniquePois.slice(0, Math.min(12, numDays * 2));
+  const finalPois = sortedPois.slice(0, Math.min(12, numDays * 2));
   console.log('Found POIs:', finalPois);
   return finalPois;
 };
