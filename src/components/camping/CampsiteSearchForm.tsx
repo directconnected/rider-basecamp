@@ -7,13 +7,9 @@ import { Search } from "lucide-react";
 interface CampsiteSearchFormProps {
   searchParams: {
     state: string;
-    nforg: string;
-    town: string;
   };
   setSearchParams: (params: Partial<{
     state: string;
-    nforg: string;
-    town: string;
   }>) => void;
   isSearching: boolean;
   onSearch: () => void;
@@ -35,20 +31,6 @@ const CampsiteSearchForm = ({
           onChange={(e) => setSearchParams({ state: e.target.value.toUpperCase() })}
           className="flex-1 bg-white"
           maxLength={2}
-        />
-        <Input
-          type="text"
-          placeholder="Zip Code"
-          value={searchParams.nforg}
-          onChange={(e) => setSearchParams({ nforg: e.target.value })}
-          className="flex-1 bg-white"
-        />
-        <Input
-          type="text"
-          placeholder="Town"
-          value={searchParams.town}
-          onChange={(e) => setSearchParams({ town: e.target.value })}
-          className="flex-1 bg-white"
         />
         <Button 
           className="button-gradient text-white px-8 py-6"

@@ -3,8 +3,6 @@ import { create } from "zustand";
 
 interface CampsiteSearchParams {
   state: string;
-  nforg: string;
-  town: string;
 }
 
 interface CampsiteSearchStore {
@@ -15,8 +13,6 @@ interface CampsiteSearchStore {
 export const useCampsiteSearchStore = create<CampsiteSearchStore>((set) => ({
   searchParams: {
     state: "",
-    nforg: "",
-    town: "",
   },
   setSearchParams: (params) =>
     set((state) => ({
