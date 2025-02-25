@@ -17,21 +17,17 @@ export const useCampsiteSearch = () => {
         .from('campsites')
         .select('*');
 
-      // Add filters if values are provided
+      // Add filters if values are provided, with proper trimming and case handling
       if (searchParams.state.trim()) {
-        const stateSearch = searchParams.state.trim().toUpperCase();
-        query = query.or(`state.eq.${stateSearch},state.ilike.${stateSearch}`);
+        query = query.ilike('state', `%${searchParams.state.trim().toUpperCase()}%`);
       }
-      
       if (searchParams.nforg) {
         query = query.eq('nforg', parseInt(searchParams.nforg));
       }
-      
       if (searchParams.town.trim()) {
         query = query.ilike('town', `%${searchParams.town.trim()}%`);
       }
 
-      console.log('Executing query...'); // Debug log
       const { data, error } = await query;
 
       if (error) {
@@ -39,7 +35,7 @@ export const useCampsiteSearch = () => {
         throw error;
       }
 
-      console.log('Search results:', data); // Debug log
+      console.log('Search results:', data); // Add logging to help debug
       setSearchResults(data || []);
       toast.success(`Found ${data?.length || 0} campsites`);
 
