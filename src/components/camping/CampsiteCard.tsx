@@ -2,7 +2,7 @@
 import React from "react";
 import { Card } from "@/components/ui/card";
 import { Database } from "@/integrations/supabase/types";
-import { MapPin, Phone, Compass, Trees, Dog, Droplet, Droplets, DoorOpen, Bath } from "lucide-react";
+import { MapPin, Phone, Compass, Trees, Dog, Droplet, Droplets, DoorOpen, Bath, Info } from "lucide-react";
 
 type Campsite = Database['public']['Tables']['campsites']['Row'];
 
@@ -69,6 +69,25 @@ const CampsiteCard = ({ campsite }: CampsiteCardProps) => {
             <div className="flex items-center text-gray-600">
               <Bath className="w-4 h-4 mr-2" />
               <span>Toilets: {campsite.toilets || 'N/A'}</span>
+            </div>
+          </div>
+
+          {/* Legend */}
+          <div className="mt-4 p-3 bg-gray-50 rounded-md text-xs space-y-1.5">
+            <div className="flex items-start gap-1">
+              <Info className="w-3 h-3 text-theme-600 mt-0.5 flex-shrink-0" />
+              <div className="text-gray-600">
+                <span className="font-medium">Legend:</span>
+                <ul className="mt-1 space-y-1">
+                  <li><span className="font-medium">Y</span> - Yes/Available</li>
+                  <li><span className="font-medium">N</span> - No/Not Available</li>
+                  <li><span className="font-medium">S</span> - Seasonal</li>
+                  <li><span className="font-medium">V</span> - Vault Toilets</li>
+                  <li><span className="font-medium">P</span> - Pit Toilets</li>
+                  <li><span className="font-medium">F</span> - Flush Toilets</li>
+                  <li><span className="font-medium">$</span> - Fee Required</li>
+                </ul>
+              </div>
             </div>
           </div>
         </div>
