@@ -14,24 +14,17 @@ export const useCampsiteSearch = () => {
 
   const handleSearch = async () => {
     setIsSearching(true);
+    setSearchResults([]); // Clear previous results
+    
     try {
       console.log('Starting search with params:', searchParams);
       
       if (!searchParams.state.trim()) {
-        setSearchResults([]);
         toast.error('Please enter a state');
         return;
       }
 
-      // First, let's check what data exists in the database
-      const { data: allData } = await supabase
-        .from('campsites')
-        .select('state')
-        .limit(100);
-      
-      console.log('Available states in database:', allData?.map(d => d.state));
-
-      const stateSearch = searchParams.state.trim().toUpperCase();
+      const stateSearch = searchParams.state.trim();
       console.log('Searching for state:', stateSearch);
       
       const { data, error } = await supabase
@@ -45,9 +38,9 @@ export const useCampsiteSearch = () => {
       }
 
       console.log('Search results:', data);
-      setSearchResults(data || []);
       
       if (data && data.length > 0) {
+        setSearchResults(data);
         toast.success(`Found ${data.length} campsites`);
       } else {
         toast.info(`No campsites found in ${stateSearch}`);
