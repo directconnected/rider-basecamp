@@ -17,15 +17,15 @@ export const useCampsiteSearch = () => {
         .from('campsites')
         .select('*');
 
-      // Add filters if values are provided
-      if (searchParams.state) {
-        query = query.ilike('state', `%${searchParams.state}%`);
+      // Add filters if values are provided, with proper trimming and case handling
+      if (searchParams.state.trim()) {
+        query = query.ilike('state', `%${searchParams.state.trim().toUpperCase()}%`);
       }
       if (searchParams.nforg) {
         query = query.eq('nforg', parseInt(searchParams.nforg));
       }
-      if (searchParams.town) {
-        query = query.ilike('town', `%${searchParams.town}%`);
+      if (searchParams.town.trim()) {
+        query = query.ilike('town', `%${searchParams.town.trim()}%`);
       }
 
       const { data, error } = await query;
@@ -35,6 +35,7 @@ export const useCampsiteSearch = () => {
         throw error;
       }
 
+      console.log('Search results:', data); // Add logging to help debug
       setSearchResults(data || []);
       toast.success(`Found ${data?.length || 0} campsites`);
 
