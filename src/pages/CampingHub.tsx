@@ -4,8 +4,6 @@ import { Link } from "react-router-dom";
 import { Card } from "@/components/ui/card";
 import { 
   Tent,
-  MapPin,
-  Compass,
   Map,
   ShieldCheck
 } from "lucide-react";
@@ -19,18 +17,6 @@ const features = [
     title: "Campgrounds",
     description: "Find motorcycle-friendly campgrounds and RV parks.",
     link: "/campgrounds"
-  },
-  {
-    icon: MapPin,
-    title: "Nearby Sites",
-    description: "Discover camping spots close to popular riding routes.",
-    link: "/nearby-sites"
-  },
-  {
-    icon: Compass,
-    title: "Adventure Planning",
-    description: "Plan your motorcycle camping adventure.",
-    link: "/adventure-planning"
   },
   {
     icon: Map,
@@ -68,7 +54,7 @@ const CampingHub = () => {
 
         <section className="py-24 bg-white">
           <div className="container mx-auto px-4">
-            <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-8 max-w-6xl mx-auto">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
               {features.map((feature) => (
                 <Link 
                   to={feature.link}
