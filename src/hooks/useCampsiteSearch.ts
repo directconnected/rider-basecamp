@@ -21,17 +21,27 @@ export const useCampsiteSearch = () => {
     setCurrentPage(1); // Reset to first page on new search
     
     try {
-      if (!searchParams.state.trim()) {
-        toast.error('Please enter a state');
+      if (!searchParams.state.trim() && !searchParams.city.trim() && !searchParams.zipCode.trim()) {
+        toast.error('Please enter at least one search criteria');
         return;
       }
 
-      const stateCode = searchParams.state.trim().toUpperCase();
-      
-      const { data: searchData, error: searchError, count } = await supabase
+      let query = supabase
         .from('campsites')
-        .select('*', { count: 'exact' })
-        .ilike('state', `%${stateCode}%`)
+        .select('*', { count: 'exact' });
+
+      // Add filters based on provided search params
+      if (searchParams.state.trim()) {
+        query = query.ilike('state', `%${searchParams.state.trim().toUpperCase()}%`);
+      }
+      if (searchParams.city.trim()) {
+        query = query.ilike('town', `%${searchParams.city.trim()}%`);
+      }
+      if (searchParams.zipCode.trim()) {
+        query = query.eq('nforg', parseInt(searchParams.zipCode.trim()));
+      }
+
+      const { data: searchData, error: searchError, count } = await query
         .range(0, ITEMS_PER_PAGE - 1);
 
       if (searchError) {
@@ -44,7 +54,7 @@ export const useCampsiteSearch = () => {
         setTotalResults(count || 0);
         toast.success(`Found ${count} campsites`);
       } else {
-        toast.info(`No campsites found in ${searchParams.state.trim()}`);
+        toast.info('No campsites found matching your criteria');
       }
 
     } catch (error) {
@@ -61,10 +71,22 @@ export const useCampsiteSearch = () => {
       const start = (page - 1) * ITEMS_PER_PAGE;
       const end = start + ITEMS_PER_PAGE - 1;
       
-      const { data: searchData, error: searchError } = await supabase
+      let query = supabase
         .from('campsites')
-        .select('*')
-        .ilike('state', `%${searchParams.state.trim().toUpperCase()}%`)
+        .select('*');
+
+      // Add filters based on provided search params
+      if (searchParams.state.trim()) {
+        query = query.ilike('state', `%${searchParams.state.trim().toUpperCase()}%`);
+      }
+      if (searchParams.city.trim()) {
+        query = query.ilike('town', `%${searchParams.city.trim()}%`);
+      }
+      if (searchParams.zipCode.trim()) {
+        query = query.eq('nforg', parseInt(searchParams.zipCode.trim()));
+      }
+
+      const { data: searchData, error: searchError } = await query
         .range(start, end);
 
       if (searchError) throw searchError;

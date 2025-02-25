@@ -7,9 +7,13 @@ import { Search } from "lucide-react";
 interface CampsiteSearchFormProps {
   searchParams: {
     state: string;
+    city: string;
+    zipCode: string;
   };
   setSearchParams: (params: Partial<{
     state: string;
+    city: string;
+    zipCode: string;
   }>) => void;
   isSearching: boolean;
   onSearch: () => void;
@@ -31,6 +35,21 @@ const CampsiteSearchForm = ({
           onChange={(e) => setSearchParams({ state: e.target.value.toUpperCase() })}
           className="w-full md:w-32 bg-white text-center"
           maxLength={2}
+        />
+        <Input
+          type="text"
+          placeholder="City"
+          value={searchParams.city}
+          onChange={(e) => setSearchParams({ city: e.target.value })}
+          className="w-full md:w-48 bg-white"
+        />
+        <Input
+          type="text"
+          placeholder="Zip Code"
+          value={searchParams.zipCode}
+          onChange={(e) => setSearchParams({ zipCode: e.target.value })}
+          className="w-full md:w-32 bg-white text-center"
+          maxLength={5}
         />
         <Button 
           className="button-gradient text-white px-8 py-6"
