@@ -9,6 +9,78 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      campsites: {
+        Row: {
+          air_mi_from_town: number | null
+          camp: string | null
+          devel: number | null
+          dir_from_town: string | null
+          dump: string | null
+          fee: string | null
+          id: number
+          lat: number | null
+          lon: number | null
+          name: string | null
+          nforg: number | null
+          pets: string | null
+          phone: string | null
+          ra_number: number | null
+          rv_length: number | null
+          season: string | null
+          showers: string | null
+          sites: number | null
+          state: string | null
+          town: string | null
+          type: string | null
+        }
+        Insert: {
+          air_mi_from_town?: number | null
+          camp?: string | null
+          devel?: number | null
+          dir_from_town?: string | null
+          dump?: string | null
+          fee?: string | null
+          id?: number
+          lat?: number | null
+          lon?: number | null
+          name?: string | null
+          nforg?: number | null
+          pets?: string | null
+          phone?: string | null
+          ra_number?: number | null
+          rv_length?: number | null
+          season?: string | null
+          showers?: string | null
+          sites?: number | null
+          state?: string | null
+          town?: string | null
+          type?: string | null
+        }
+        Update: {
+          air_mi_from_town?: number | null
+          camp?: string | null
+          devel?: number | null
+          dir_from_town?: string | null
+          dump?: string | null
+          fee?: string | null
+          id?: number
+          lat?: number | null
+          lon?: number | null
+          name?: string | null
+          nforg?: number | null
+          pets?: string | null
+          phone?: string | null
+          ra_number?: number | null
+          rv_length?: number | null
+          season?: string | null
+          showers?: string | null
+          sites?: number | null
+          state?: string | null
+          town?: string | null
+          type?: string | null
+        }
+        Relationships: []
+      }
       data_2025: {
         Row: {
           clutch: string | null
