@@ -1,7 +1,7 @@
 
 import { findNearestPointIndex } from './routeUtils';
 import { findNearbyLodging } from '../placesService';
-import { HotelStop } from '@/components/route-planning/types';  // Update the import to use the correct path
+import { HotelStop } from '@/components/route-planning/types';
 
 export const calculateHotelStops = async (route: any, milesPerDay: number): Promise<HotelStop[]> => {
   console.log('Calculating hotel stops with miles per day:', milesPerDay);
