@@ -22,34 +22,8 @@ export const useCampsiteSearch = () => {
         return;
       }
 
-      // First, let's check if we have any data at all
-      const { count, error: countError } = await supabase
-        .from('campsites')
-        .select('*', { count: 'exact', head: true });
-
-      if (countError) {
-        console.error('Error checking database:', countError);
-        throw countError;
-      }
-
-      console.log('Total records in database:', count);
-
-      const { data, error } = await supabase
-        .from('campsites')
-        .select()
-        .limit(1);
-
-      console.log('Sample record:', data);
-
-      if (count === 0) {
-        toast.error('The campsite database appears to be empty');
-        return;
-      }
-
-      // If we have data, proceed with the search
       const stateCode = searchParams.state.trim().toUpperCase();
-      console.log('Searching for state code:', stateCode);
-
+      
       const { data: searchData, error: searchError } = await supabase
         .from('campsites')
         .select('*')
@@ -59,8 +33,6 @@ export const useCampsiteSearch = () => {
         console.error('Search error:', searchError);
         throw searchError;
       }
-
-      console.log('Search results:', searchData);
       
       if (searchData && searchData.length > 0) {
         setSearchResults(searchData);
