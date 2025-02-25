@@ -24,13 +24,17 @@ export const calculateAttractionStops = async (route: any, interval: number): Pr
       const attraction = await findNearbyAttraction(coordinates);
       
       if (attraction) {
+        console.log(`Attraction data for stop ${i}:`, attraction);
         attractionStops.push({
           location: coordinates,
           name: attraction.address,
           attractionName: attraction.name,
           distance: Math.round(progress * totalDistance),
-          rating: attraction.rating
+          rating: attraction.rating,
+          website: attraction.website,
+          phone_number: attraction.phone_number
         });
+        console.log(`Added attraction stop ${i}: ${attraction.name} with website: ${attraction.website} and phone: ${attraction.phone_number}`);
       }
     } catch (error) {
       console.error('Error finding attraction:', error);

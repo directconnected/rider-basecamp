@@ -24,13 +24,17 @@ export const calculateCampingStops = async (route: any, milesPerDay: number): Pr
       const campground = await findNearbyCampground(coordinates);
       
       if (campground) {
+        console.log(`Campground data for stop ${i}:`, campground);
         campingStops.push({
           location: coordinates,
           name: campground.address,
           campgroundName: campground.name,
           distance: Math.round(progress * totalDistance),
-          rating: campground.rating
+          rating: campground.rating,
+          website: campground.website,
+          phone_number: campground.phone_number
         });
+        console.log(`Added campground stop ${i}: ${campground.name} with website: ${campground.website} and phone: ${campground.phone_number}`);
       }
     } catch (error) {
       console.error('Error finding campground:', error);
