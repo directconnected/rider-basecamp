@@ -22,14 +22,27 @@ export const useCampsiteSearch = () => {
         return;
       }
 
-      // Try a more flexible search approach using textSearch
+      // First, let's check what data exists in the database
+      const { data: allData, error: countError } = await supabase
+        .from('campsites')
+        .select('state')
+        .limit(10);
+
+      if (countError) {
+        console.error('Error checking database:', countError);
+        throw countError;
+      }
+
+      console.log('Sample of states in database:', allData?.map(d => d.state));
+
+      // Try searching with the exact state code
+      const stateCode = searchParams.state.trim().toUpperCase();
+      console.log('Searching for state code:', stateCode);
+
       const { data, error } = await supabase
         .from('campsites')
         .select('*')
-        .textSearch('state', searchParams.state.trim(), {
-          config: 'english',
-          type: 'plain'
-        });
+        .or(`state.eq.${stateCode},state.eq.${searchParams.state.trim()}`);
 
       if (error) {
         console.error('Search error:', error);
@@ -42,22 +55,22 @@ export const useCampsiteSearch = () => {
         setSearchResults(data);
         toast.success(`Found ${data.length} campsites`);
       } else {
-        // If no results with textSearch, try a direct comparison
-        const { data: directData, error: directError } = await supabase
+        // Try one more time with ilike for case-insensitive match
+        const { data: ilikeData, error: ilikeError } = await supabase
           .from('campsites')
           .select('*')
-          .eq('state', searchParams.state.trim().toUpperCase());
+          .ilike('state', `%${stateCode}%`);
 
-        if (directError) {
-          console.error('Direct search error:', directError);
-          throw directError;
+        if (ilikeError) {
+          console.error('ILIKE search error:', ilikeError);
+          throw ilikeError;
         }
 
-        console.log('Direct search results:', directData);
+        console.log('ILIKE search results:', ilikeData);
 
-        if (directData && directData.length > 0) {
-          setSearchResults(directData);
-          toast.success(`Found ${directData.length} campsites`);
+        if (ilikeData && ilikeData.length > 0) {
+          setSearchResults(ilikeData);
+          toast.success(`Found ${ilikeData.length} campsites`);
         } else {
           toast.info(`No campsites found in ${searchParams.state.trim()}`);
         }
