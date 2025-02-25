@@ -41,7 +41,7 @@ const CampsiteSearchForm = ({
           placeholder="City"
           value={searchParams.city}
           onChange={(e) => setSearchParams({ city: e.target.value })}
-          className="w-full bg-white"
+          className="w-full bg-white text-center"
         />
         <Input
           type="text"
