@@ -7,6 +7,8 @@ interface PlaceResult {
   location: [number, number];
   rating?: number;
   price_level?: number;
+  website?: string;
+  phone?: string;
 }
 
 const findPlace = async (
@@ -47,7 +49,9 @@ const findPlace = async (
         address: place.vicinity || place.formatted_address,
         location: [place.geometry.location.lng, place.geometry.location.lat],
         rating: place.rating,
-        price_level: place.price_level
+        price_level: place.price_level,
+        website: place.website,
+        phone: place.formatted_phone_number || place.international_phone_number
       };
     } catch (error) {
       console.error(`Error in findPlace for ${type}:`, error);

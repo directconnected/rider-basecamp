@@ -7,6 +7,8 @@ export interface Stop {
 
 export interface RatedStop extends Stop {
   rating?: number;
+  website?: string;
+  phone?: string;
 }
 
 export interface HotelStop extends RatedStop {
