@@ -1,7 +1,7 @@
 
 import React from "react";
 import { Card } from "@/components/ui/card";
-import { MapPin, Phone, Shower, DollarSign } from "lucide-react";
+import { MapPin, Phone, Droplets, DollarSign } from "lucide-react";
 
 interface Campsite {
   id: number;
@@ -56,7 +56,7 @@ const CampsiteSearchResults = ({ results }: CampsiteSearchResultsProps) => {
                 
                 {campsite.showers && (
                   <div className="flex items-center gap-2">
-                    <Shower className="w-4 h-4" />
+                    <Droplets className="w-4 h-4" />
                     <span>Showers: {campsite.showers}</span>
                   </div>
                 )}
