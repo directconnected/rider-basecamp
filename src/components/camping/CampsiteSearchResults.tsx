@@ -22,13 +22,13 @@ interface CampsiteSearchResultsProps {
   isLoading?: boolean;
 }
 
-const CampsiteSearchResults = ({ 
+const CampsiteSearchResults: React.FC<CampsiteSearchResultsProps> = ({ 
   results, 
   currentPage, 
   totalPages, 
   onPageChange,
   isLoading 
-}: CampsiteSearchResultsProps) => {
+}) => {
   return (
     <section className="w-full bg-white py-16">
       {(!results || results.length === 0) ? (
@@ -170,7 +170,7 @@ const CampsiteSearchResults = ({
                           {page}
                         </PaginationLink>
                       </PaginationItem>
-                    )}
+                    ))}
                     
                     {currentPage < totalPages && (
                       <PaginationItem>
