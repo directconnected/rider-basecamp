@@ -8,7 +8,13 @@ const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
 // Create a single client instance
 export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_ANON_KEY, {
   auth: {
-    persistSession: true, // Enable session persistence
-    autoRefreshToken: true, // Enable token auto-refresh
+    persistSession: true,
+    autoRefreshToken: true,
+  },
+  db: {
+    schema: 'public'
+  },
+  headers: {
+    'X-Client-Info': 'supabase-js-web/2.49.1'
   }
 });

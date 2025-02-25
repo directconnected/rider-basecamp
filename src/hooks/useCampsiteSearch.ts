@@ -12,38 +12,35 @@ export const useCampsiteSearch = () => {
   const handleSearch = async () => {
     setIsSearching(true);
     try {
-      console.log('Starting search with params:', searchParams); // Debug log
+      console.log('Starting search with params:', searchParams);
       
-      // Start with a base query
-      let query = supabase
+      if (!searchParams.state.trim()) {
+        setSearchResults([]);
+        toast.error('Please enter a state');
+        return;
+      }
+
+      const stateSearch = searchParams.state.trim().toUpperCase();
+      
+      // Execute the query
+      const { data, error } = await supabase
         .from('campsites')
-        .select('*');
-
-      // Add filters if values are provided
-      if (searchParams.state.trim()) {
-        const stateSearch = searchParams.state.trim().toUpperCase();
-        query = query.eq('state', stateSearch);
-      }
-      
-      if (searchParams.nforg) {
-        query = query.eq('nforg', parseInt(searchParams.nforg));
-      }
-      
-      if (searchParams.town.trim()) {
-        query = query.ilike('town', `%${searchParams.town.trim()}%`);
-      }
-
-      console.log('Executing query:', query); // Debug log
-      const { data, error } = await query;
+        .select('*')
+        .eq('state', stateSearch);
 
       if (error) {
         console.error('Search error:', error);
         throw error;
       }
 
-      console.log('Search results:', data); // Debug log
+      console.log('Search results:', data);
       setSearchResults(data || []);
-      toast.success(`Found ${data?.length || 0} campsites`);
+      
+      if (data && data.length > 0) {
+        toast.success(`Found ${data.length} campsites`);
+      } else {
+        toast.info(`No campsites found in ${stateSearch}`);
+      }
 
     } catch (error) {
       console.error('Error in handleSearch:', error);
