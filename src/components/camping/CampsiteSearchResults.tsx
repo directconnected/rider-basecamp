@@ -45,7 +45,7 @@ const CampsiteSearchResults = ({
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {results.map((campsite) => (
                 <Card key={campsite.id} className="p-6 hover:shadow-lg transition-shadow">
-                  <h3 className="text-xl font-bold mb-2">{campsite.name || 'Unnamed Campsite'}</h3>
+                  <h3 className="text-xl font-bold mb-2">{campsite.camp || 'Unnamed Campsite'}</h3>
                   
                   <div className="space-y-2 text-gray-600">
                     {(campsite.town || campsite.state) && (
