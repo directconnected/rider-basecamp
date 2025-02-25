@@ -20,7 +20,8 @@ export const useCampsiteSearch = () => {
       // Add filters if values are provided
       if (searchParams.state.trim()) {
         const stateSearch = searchParams.state.trim().toUpperCase();
-        query = query.or(`state.eq.${stateSearch},state.ilike.${stateSearch}`);
+        // Use ilike for case-insensitive search
+        query = query.ilike('state', `%${stateSearch}%`);
       }
       
       if (searchParams.nforg) {
