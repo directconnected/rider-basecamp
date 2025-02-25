@@ -64,9 +64,7 @@ const findPlace = async (
 };
 
 export const findNearbyLodging = async (coordinates: [number, number], radius: number = 5000): Promise<PlaceResult | null> => {
-  console.log('Finding nearby lodging at:', coordinates);
   const result = await findPlace(coordinates, 'lodging', radius);
-  console.log('Found lodging result:', result);
   return result;
 };
 
