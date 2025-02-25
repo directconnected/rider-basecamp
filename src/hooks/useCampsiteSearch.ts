@@ -22,58 +22,51 @@ export const useCampsiteSearch = () => {
         return;
       }
 
-      // First, let's check what data exists in the database
-      const { data: allData, error: countError } = await supabase
+      // First, let's check if we have any data at all
+      const { count, error: countError } = await supabase
         .from('campsites')
-        .select('state')
-        .limit(10);
+        .select('*', { count: 'exact', head: true });
 
       if (countError) {
         console.error('Error checking database:', countError);
         throw countError;
       }
 
-      console.log('Sample of states in database:', allData?.map(d => d.state));
-
-      // Try searching with the exact state code
-      const stateCode = searchParams.state.trim().toUpperCase();
-      console.log('Searching for state code:', stateCode);
+      console.log('Total records in database:', count);
 
       const { data, error } = await supabase
         .from('campsites')
-        .select('*')
-        .or(`state.eq.${stateCode},state.eq.${searchParams.state.trim()}`);
+        .select()
+        .limit(1);
 
-      if (error) {
-        console.error('Search error:', error);
-        throw error;
+      console.log('Sample record:', data);
+
+      if (count === 0) {
+        toast.error('The campsite database appears to be empty');
+        return;
       }
 
-      console.log('Search results:', data);
+      // If we have data, proceed with the search
+      const stateCode = searchParams.state.trim().toUpperCase();
+      console.log('Searching for state code:', stateCode);
+
+      const { data: searchData, error: searchError } = await supabase
+        .from('campsites')
+        .select('*')
+        .ilike('state', `%${stateCode}%`);
+
+      if (searchError) {
+        console.error('Search error:', searchError);
+        throw searchError;
+      }
+
+      console.log('Search results:', searchData);
       
-      if (data && data.length > 0) {
-        setSearchResults(data);
-        toast.success(`Found ${data.length} campsites`);
+      if (searchData && searchData.length > 0) {
+        setSearchResults(searchData);
+        toast.success(`Found ${searchData.length} campsites`);
       } else {
-        // Try one more time with ilike for case-insensitive match
-        const { data: ilikeData, error: ilikeError } = await supabase
-          .from('campsites')
-          .select('*')
-          .ilike('state', `%${stateCode}%`);
-
-        if (ilikeError) {
-          console.error('ILIKE search error:', ilikeError);
-          throw ilikeError;
-        }
-
-        console.log('ILIKE search results:', ilikeData);
-
-        if (ilikeData && ilikeData.length > 0) {
-          setSearchResults(ilikeData);
-          toast.success(`Found ${ilikeData.length} campsites`);
-        } else {
-          toast.info(`No campsites found in ${searchParams.state.trim()}`);
-        }
+        toast.info(`No campsites found in ${searchParams.state.trim()}`);
       }
 
     } catch (error) {
