@@ -47,15 +47,15 @@ const features = [
     icon: Store,
     title: "Dealers Hub",
     description: "(Coming Soon)",
-    link: "/dealers",
-    id: "#"
+    link: "#",
+    id: "dealers-feature"
   },
   {
     icon: Settings,
     title: "Parts Hub",
     description: "(Coming Soon)",
-    link: "/parts",
-    id: "#"
+    link: "#",
+    id: "parts-feature"
   },
   {
     icon: Group,
@@ -67,15 +67,15 @@ const features = [
   {
     icon: Bike,
     title: "Rentals Hub",
-    description: "Find motorcycle rentals & compare prices.",
-    link: "/rentals",
+    description: "(Coming Soon)",
+    link: "#",
     id: "rentals-feature"
   },
   {
     icon: Newspaper,
     title: "News Hub",
-    description: "Stay updated with the latest motorcycle news.",
-    link: "/news",
+    description: "(Coming Soon)",
+    link: "#",
     id: "news-feature"
   }
 ];
