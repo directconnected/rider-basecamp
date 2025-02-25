@@ -4,16 +4,20 @@ import { supabase } from "@/integrations/supabase/client";
 
 export const initializeMapbox = async () => {
   try {
+    console.log('Initializing Mapbox...');
     const { data, error } = await supabase.functions.invoke('get-mapbox-token');
     
     if (error) {
+      console.error('Error fetching Mapbox token:', error);
       throw error;
     }
     
     if (!data?.token) {
+      console.error('No token returned from edge function');
       throw new Error('No token returned from edge function');
     }
 
+    console.log('Successfully received Mapbox token');
     mapboxgl.accessToken = data.token;
     return true;
   } catch (error) {
