@@ -12,6 +12,8 @@ export const useCampsiteSearch = () => {
   const handleSearch = async () => {
     setIsSearching(true);
     try {
+      console.log('Starting search with params:', searchParams); // Debug log
+      
       // Start with a base query
       let query = supabase
         .from('campsites')
@@ -20,8 +22,7 @@ export const useCampsiteSearch = () => {
       // Add filters if values are provided
       if (searchParams.state.trim()) {
         const stateSearch = searchParams.state.trim().toUpperCase();
-        // Use ilike for case-insensitive search
-        query = query.ilike('state', `%${stateSearch}%`);
+        query = query.eq('state', stateSearch);
       }
       
       if (searchParams.nforg) {
@@ -32,7 +33,7 @@ export const useCampsiteSearch = () => {
         query = query.ilike('town', `%${searchParams.town.trim()}%`);
       }
 
-      console.log('Executing query...'); // Debug log
+      console.log('Executing query:', query); // Debug log
       const { data, error } = await query;
 
       if (error) {
