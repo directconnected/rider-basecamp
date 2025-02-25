@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Card } from "@/components/ui/card";
 import { MapPin, Phone, Droplets, DollarSign, Globe, PawPrint } from "lucide-react";
@@ -29,7 +28,11 @@ const CampsiteSearchResults: React.FC<CampsiteSearchResultsProps> = ({
   onPageChange,
   isLoading 
 }) => {
-  // Calculate visible page range
+  const formatUrl = (url: string | null) => {
+    if (!url) return null;
+    return url.startsWith('http') ? url : `https://${url}`;
+  };
+
   const getVisiblePages = () => {
     const delta = 2; // Number of pages to show on each side of current page
     const range = [];
@@ -149,7 +152,7 @@ const CampsiteSearchResults: React.FC<CampsiteSearchResultsProps> = ({
                         <div>
                           <p className="font-semibold">URL:</p>
                           <a 
-                            href={campsite.url} 
+                            href={formatUrl(campsite.url)} 
                             target="_blank" 
                             rel="noopener noreferrer"
                             className="text-blue-600 hover:underline"
