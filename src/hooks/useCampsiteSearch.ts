@@ -22,48 +22,45 @@ export const useCampsiteSearch = () => {
         return;
       }
 
-      // First, let's get a sample of the data to see what we're working with
-      const { data: sampleData } = await supabase
+      // Try a more flexible search approach using textSearch
+      const { data, error } = await supabase
         .from('campsites')
-        .select('state')
-        .limit(5);
-      
-      console.log('Sample data states:', sampleData?.map(d => d.state));
-
-      // Try search with the state code as is
-      let { data, error } = await supabase
-        .from('campsites')
-        .select()
-        .ilike('state', searchParams.state.trim());
+        .select('*')
+        .textSearch('state', searchParams.state.trim(), {
+          config: 'english',
+          type: 'plain'
+        });
 
       if (error) {
         console.error('Search error:', error);
         throw error;
       }
 
-      // If no results, try with uppercase
-      if (!data?.length) {
-        const upperState = searchParams.state.trim().toUpperCase();
-        console.log('Trying uppercase state:', upperState);
-        
-        ({ data, error } = await supabase
-          .from('campsites')
-          .select()
-          .ilike('state', upperState));
-
-        if (error) {
-          console.error('Uppercase search error:', error);
-          throw error;
-        }
-      }
-
-      console.log('Final search results:', data);
+      console.log('Search results:', data);
       
       if (data && data.length > 0) {
         setSearchResults(data);
         toast.success(`Found ${data.length} campsites`);
       } else {
-        toast.info(`No campsites found in ${searchParams.state.trim()}`);
+        // If no results with textSearch, try a direct comparison
+        const { data: directData, error: directError } = await supabase
+          .from('campsites')
+          .select('*')
+          .eq('state', searchParams.state.trim().toUpperCase());
+
+        if (directError) {
+          console.error('Direct search error:', directError);
+          throw directError;
+        }
+
+        console.log('Direct search results:', directData);
+
+        if (directData && directData.length > 0) {
+          setSearchResults(directData);
+          toast.success(`Found ${directData.length} campsites`);
+        } else {
+          toast.info(`No campsites found in ${searchParams.state.trim()}`);
+        }
       }
 
     } catch (error) {
