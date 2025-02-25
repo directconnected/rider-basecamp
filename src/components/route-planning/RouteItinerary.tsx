@@ -1,7 +1,7 @@
 
 import React from "react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { List, FileDown, Hotel, UtensilsCrossed, Tent } from "lucide-react";
+import { List, FileDown, Hotel, UtensilsCrossed, Tent, Landmark, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { downloadGPX } from "@/utils/gpxGenerator";
 
@@ -33,6 +33,13 @@ interface RouteItineraryProps {
     distance: number;
     campgroundName: string;
   }>;
+  attractionStops?: Array<{
+    name: string;
+    location: [number, number];
+    distance: number;
+    attractionName: string;
+    rating?: number;
+  }>;
   currentRoute?: any;
 }
 
@@ -45,6 +52,7 @@ const RouteItinerary = ({
   hotelStops,
   restaurantStops = [],
   campingStops = [],
+  attractionStops = [],
   currentRoute 
 }: RouteItineraryProps) => {
   const formatDuration = (hours: number) => {
@@ -154,6 +162,31 @@ const RouteItinerary = ({
                 <p className="text-base">
                   {stop.campgroundName} in {stop.name} - {Math.round(stop.distance)} miles from start
                 </p>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="space-y-4">
+          <h3 className="text-lg font-semibold flex items-center gap-2">
+            <Landmark className="h-5 w-5" />
+            Suggested Things to Do:
+          </h3>
+          <div className="space-y-3">
+            {Array.isArray(attractionStops) && attractionStops.map((stop, index) => (
+              <div key={`attraction-${index}`} className="flex items-center gap-4">
+                <div className="w-3 h-3 rounded-full bg-blue-500" />
+                <div className="flex items-center gap-2">
+                  <p className="text-base">
+                    {stop.attractionName} in {stop.name} - {Math.round(stop.distance)} miles from start
+                  </p>
+                  {stop.rating && (
+                    <div className="flex items-center gap-1 text-yellow-500">
+                      <Star className="h-4 w-4 fill-current" />
+                      <span className="text-sm font-medium">{stop.rating}</span>
+                    </div>
+                  )}
+                </div>
               </div>
             ))}
           </div>

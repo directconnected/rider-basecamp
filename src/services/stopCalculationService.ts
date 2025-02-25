@@ -1,5 +1,5 @@
 import { getLocationName } from './mapService';
-import { findNearbyGasStation, findNearbyLodging, findNearbyRestaurant, findNearbyCampground } from './placesService';
+import { findNearbyGasStation, findNearbyLodging, findNearbyRestaurant, findNearbyCampground, findNearbyAttraction } from './placesService';
 import { FuelStop, HotelStop } from "@/hooks/useRoutePlanning";
 
 export interface RestaurantStop {
@@ -13,6 +13,14 @@ export interface CampingStop {
   location: [number, number];
   name: string;
   campgroundName: string;
+  distance: number;
+}
+
+export interface AttractionStop {
+  location: [number, number];
+  name: string;
+  attractionName: string;
+  rating?: number;
   distance: number;
 }
 
@@ -200,4 +208,42 @@ export const calculateCampingStops = async (route: any, milesPerDay: number): Pr
   }
 
   return campingStops;
+};
+
+export const calculateAttractionStops = async (route: any, interval: number): Promise<AttractionStop[]> => {
+  console.log('Calculating attraction stops every:', interval, 'miles');
+  
+  const attractionStops: AttractionStop[] = [];
+  const totalDistance = route.distance / 1609.34; // Convert to miles
+  
+  const numStops = Math.floor(totalDistance / interval);
+  
+  console.log('Number of attraction stops needed:', numStops);
+  
+  if (numStops <= 0) return [];
+  
+  for (let i = 1; i <= numStops; i++) {
+    const progress = (i * interval) / totalDistance;
+    if (progress >= 1) break;
+    
+    const pointIndex = Math.floor(progress * route.geometry.coordinates.length);
+    const coordinates = route.geometry.coordinates[pointIndex] as [number, number];
+    
+    try {
+      const locationName = await getLocationName(coordinates);
+      const attraction = await findNearbyAttraction(coordinates);
+      
+      attractionStops.push({
+        location: coordinates,
+        name: locationName,
+        attractionName: attraction ? attraction.name : "No attractions found",
+        rating: attraction?.rating,
+        distance: Math.round(progress * totalDistance)
+      });
+    } catch (error) {
+      console.error('Error finding attraction:', error);
+    }
+  }
+
+  return attractionStops;
 };

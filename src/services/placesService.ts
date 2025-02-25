@@ -11,7 +11,7 @@ interface PlaceResult {
 
 const findPlace = async (
   coordinates: [number, number], 
-  type: 'lodging' | 'gas_station' | 'restaurant' | 'campground', 
+  type: 'lodging' | 'gas_station' | 'restaurant' | 'campground' | 'tourist_attraction', 
   initialRadius: number = 5000
 ): Promise<PlaceResult | null> => {
   // Try with increasingly larger search radii
@@ -24,7 +24,8 @@ const findPlace = async (
         body: {
           location: [coordinates[1], coordinates[0]], 
           type,
-          radius
+          radius,
+          rankby: 'rating' // Add ranking parameter to get top-rated places
         }
       });
 
@@ -72,3 +73,8 @@ export const findNearbyRestaurant = async (coordinates: [number, number], radius
 export const findNearbyCampground = async (coordinates: [number, number], radius: number = 5000): Promise<PlaceResult | null> => {
   return findPlace(coordinates, 'campground', radius);
 };
+
+export const findNearbyAttraction = async (coordinates: [number, number], radius: number = 5000): Promise<PlaceResult | null> => {
+  return findPlace(coordinates, 'tourist_attraction', radius);
+};
+
