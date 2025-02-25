@@ -2,7 +2,7 @@
 import React from "react";
 import { Card } from "@/components/ui/card";
 import { Database } from "@/integrations/supabase/types";
-import { MapPin, Phone, Compass, Trees, Dog, Shower, Droplets, DoorOpen, Bath } from "lucide-react";
+import { MapPin, Phone, Compass, Trees, Dog, Droplet, Droplets, DoorOpen, Bath } from "lucide-react";
 
 type Campsite = Database['public']['Tables']['campsites']['Row'];
 
@@ -55,7 +55,7 @@ const CampsiteCard = ({ campsite }: CampsiteCardProps) => {
               <span>Pets: {campsite.pets || 'N/A'}</span>
             </div>
             <div className="flex items-center text-gray-600">
-              <Shower className="w-4 h-4 mr-2" />
+              <Droplet className="w-4 h-4 mr-2" />
               <span>Showers: {campsite.showers || 'N/A'}</span>
             </div>
             <div className="flex items-center text-gray-600">
