@@ -79,13 +79,12 @@ const CampsiteCard = ({ campsite }: CampsiteCardProps) => {
               <div className="text-gray-600">
                 <span className="font-medium">Legend:</span>
                 <ul className="mt-1 space-y-1">
-                  <li><span className="font-medium">Y</span> - Yes/Available</li>
-                  <li><span className="font-medium">N</span> - No/Not Available</li>
-                  <li><span className="font-medium">S</span> - Seasonal</li>
-                  <li><span className="font-medium">V</span> - Vault Toilets</li>
-                  <li><span className="font-medium">P</span> - Pit Toilets</li>
-                  <li><span className="font-medium">F</span> - Flush Toilets</li>
-                  <li><span className="font-medium">$</span> - Fee Required</li>
+                  <li><span className="font-medium">PA</span> - Pets Allowed</li>
+                  <li><span className="font-medium">DW</span> - Drinking Water</li>
+                  <li><span className="font-medium">SH</span> - Shower House</li>
+                  <li><span className="font-medium">E</span> - Electric Available</li>
+                  <li><span className="font-medium">NH</span> - No Hookups</li>
+                  <li><span className="font-medium">N/A</span> - Data Not Available</li>
                 </ul>
               </div>
             </div>
