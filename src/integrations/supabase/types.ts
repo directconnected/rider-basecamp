@@ -11,12 +11,18 @@ export type Database = {
     Tables: {
       campsites: {
         Row: {
-          air_mi_from_town: number | null
+          air_mi_from_town: string | null
           camp: string | null
+          camp_id: number | null
+          comments: string | null
+          date: string | null
           devel: number | null
           dir_from_town: string | null
+          directions: string | null
           dump: string | null
+          elev: number | null
           fee: string | null
+          hookups: string | null
           id: number
           lat: number | null
           lon: number | null
@@ -25,21 +31,33 @@ export type Database = {
           pets: string | null
           phone: string | null
           ra_number: number | null
+          reservations: string | null
           rv_length: number | null
           season: string | null
           showers: string | null
-          sites: number | null
+          sites: string | null
           state: string | null
+          toilets: string | null
           town: string | null
           type: string | null
+          upd: string | null
+          url: string | null
+          url_confirmed: number | null
+          water: string | null
         }
         Insert: {
-          air_mi_from_town?: number | null
+          air_mi_from_town?: string | null
           camp?: string | null
+          camp_id?: number | null
+          comments?: string | null
+          date?: string | null
           devel?: number | null
           dir_from_town?: string | null
+          directions?: string | null
           dump?: string | null
+          elev?: number | null
           fee?: string | null
+          hookups?: string | null
           id?: number
           lat?: number | null
           lon?: number | null
@@ -48,21 +66,33 @@ export type Database = {
           pets?: string | null
           phone?: string | null
           ra_number?: number | null
+          reservations?: string | null
           rv_length?: number | null
           season?: string | null
           showers?: string | null
-          sites?: number | null
+          sites?: string | null
           state?: string | null
+          toilets?: string | null
           town?: string | null
           type?: string | null
+          upd?: string | null
+          url?: string | null
+          url_confirmed?: number | null
+          water?: string | null
         }
         Update: {
-          air_mi_from_town?: number | null
+          air_mi_from_town?: string | null
           camp?: string | null
+          camp_id?: number | null
+          comments?: string | null
+          date?: string | null
           devel?: number | null
           dir_from_town?: string | null
+          directions?: string | null
           dump?: string | null
+          elev?: number | null
           fee?: string | null
+          hookups?: string | null
           id?: number
           lat?: number | null
           lon?: number | null
@@ -71,13 +101,19 @@ export type Database = {
           pets?: string | null
           phone?: string | null
           ra_number?: number | null
+          reservations?: string | null
           rv_length?: number | null
           season?: string | null
           showers?: string | null
-          sites?: number | null
+          sites?: string | null
           state?: string | null
+          toilets?: string | null
           town?: string | null
           type?: string | null
+          upd?: string | null
+          url?: string | null
+          url_confirmed?: number | null
+          water?: string | null
         }
         Relationships: []
       }
