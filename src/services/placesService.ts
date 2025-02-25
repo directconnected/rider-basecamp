@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 
 interface PlaceResult {
@@ -40,7 +39,7 @@ const findPlace = async (
       }
 
       const place = data.places[0];
-      console.log(`Found ${type}:`, place.name, 'at radius:', radius, 'coordinates:', place.geometry.location);
+      console.log(`Found ${type}:`, place.name, 'with rating:', place.rating, 'at radius:', radius);
       
       return {
         name: place.name,
@@ -59,7 +58,10 @@ const findPlace = async (
 };
 
 export const findNearbyLodging = async (coordinates: [number, number], radius: number = 5000): Promise<PlaceResult | null> => {
-  return findPlace(coordinates, 'lodging', radius);
+  console.log('Finding nearby lodging at:', coordinates);
+  const result = await findPlace(coordinates, 'lodging', radius);
+  console.log('Found lodging result:', result);
+  return result;
 };
 
 export const findNearbyGasStation = async (coordinates: [number, number], radius: number = 5000): Promise<PlaceResult | null> => {
@@ -77,4 +79,3 @@ export const findNearbyCampground = async (coordinates: [number, number], radius
 export const findNearbyAttraction = async (coordinates: [number, number], radius: number = 5000): Promise<PlaceResult | null> => {
   return findPlace(coordinates, 'tourist_attraction', radius);
 };
-
