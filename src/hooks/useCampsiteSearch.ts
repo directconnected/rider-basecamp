@@ -23,13 +23,13 @@ export const useCampsiteSearch = () => {
         return;
       }
 
-      const stateSearch = searchParams.state.trim().toUpperCase();
+      const stateSearch = searchParams.state.trim();
       
-      // Execute the query with proper type casting
+      // Execute the query with case-insensitive search
       const { data, error } = await supabase
         .from('campsites')
         .select()
-        .eq('state', stateSearch as string);
+        .ilike('state', `%${stateSearch}%`);
 
       if (error) {
         console.error('Search error:', error);
