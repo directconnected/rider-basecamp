@@ -1,3 +1,4 @@
+
 import { supabase } from "@/integrations/supabase/client";
 
 interface PlaceResult {
@@ -6,6 +7,8 @@ interface PlaceResult {
   location: [number, number];
   rating?: number;
   price_level?: number;
+  website?: string;
+  phone_number?: string;
 }
 
 const findPlace = async (
@@ -24,7 +27,8 @@ const findPlace = async (
           location: [coordinates[1], coordinates[0]], 
           type,
           radius,
-          rankby: 'rating' // Add ranking parameter to get top-rated places
+          rankby: 'rating',
+          fields: ['name', 'vicinity', 'formatted_address', 'geometry', 'rating', 'price_level', 'website', 'formatted_phone_number']
         }
       });
 
@@ -39,14 +43,16 @@ const findPlace = async (
       }
 
       const place = data.places[0];
-      console.log(`Found ${type}:`, place.name, 'with rating:', place.rating, 'at radius:', radius);
+      console.log(`Found ${type}:`, place);
       
       return {
         name: place.name,
         address: place.vicinity || place.formatted_address,
         location: [place.geometry.location.lng, place.geometry.location.lat],
         rating: place.rating,
-        price_level: place.price_level
+        price_level: place.price_level,
+        website: place.website,
+        phone_number: place.formatted_phone_number
       };
     } catch (error) {
       console.error(`Error in findPlace for ${type}:`, error);
