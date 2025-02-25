@@ -2,18 +2,9 @@
 import React from "react";
 import { Card } from "@/components/ui/card";
 import { MapPin, Phone, Droplets, DollarSign } from "lucide-react";
+import { Database } from "@/integrations/supabase/types";
 
-interface Campsite {
-  id: number;
-  name: string | null;
-  state: string | null;
-  town: string | null;
-  phone: string | null;
-  fee: string | null;
-  showers: string | null;
-  sites: number | null;
-  season: string | null;
-}
+type Campsite = Database['public']['Tables']['campsites']['Row'];
 
 interface CampsiteSearchResultsProps {
   results: Campsite[];
