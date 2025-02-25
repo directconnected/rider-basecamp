@@ -23,13 +23,13 @@ const CampsiteSearchForm = ({
 }: CampsiteSearchFormProps) => {
   return (
     <div className="flex flex-col gap-4 animate-fade-in">
-      <div className="flex flex-col md:flex-row gap-4">
+      <div className="flex flex-col md:flex-row gap-4 justify-center">
         <Input
           type="text"
           placeholder="State (e.g., CA)"
           value={searchParams.state}
           onChange={(e) => setSearchParams({ state: e.target.value.toUpperCase() })}
-          className="flex-1 bg-white"
+          className="w-full md:w-32 bg-white text-center"
           maxLength={2}
         />
         <Button 

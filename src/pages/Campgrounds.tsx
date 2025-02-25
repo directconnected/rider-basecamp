@@ -27,7 +27,7 @@ const Campgrounds = () => {
                 Find Campgrounds
               </h1>
               <p className="text-xl text-gray-300 max-w-2xl mx-auto">
-                Search for campgrounds by state, zip code, or town
+                Search for campgrounds by state
               </p>
             </div>
             
