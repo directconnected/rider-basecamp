@@ -13,6 +13,9 @@ const Campgrounds = () => {
     searchResults,
     isSearching,
     handleSearch,
+    currentPage,
+    totalPages,
+    handlePageChange,
   } = useCampsiteSearch();
 
   return (
@@ -42,7 +45,13 @@ const Campgrounds = () => {
           </div>
         </section>
 
-        <CampsiteSearchResults results={searchResults} />
+        <CampsiteSearchResults 
+          results={searchResults}
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={handlePageChange}
+          isLoading={isSearching}
+        />
       </main>
 
       <Footer />

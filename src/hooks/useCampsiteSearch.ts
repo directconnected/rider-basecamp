@@ -11,10 +11,14 @@ export const useCampsiteSearch = () => {
   const { searchParams, setSearchParams } = useCampsiteSearchStore();
   const [searchResults, setSearchResults] = useState<Campsite[]>([]);
   const [isSearching, setIsSearching] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalResults, setTotalResults] = useState(0);
+  const ITEMS_PER_PAGE = 10;
 
   const handleSearch = async () => {
     setIsSearching(true);
     setSearchResults([]); // Clear previous results
+    setCurrentPage(1); // Reset to first page on new search
     
     try {
       if (!searchParams.state.trim()) {
@@ -24,10 +28,11 @@ export const useCampsiteSearch = () => {
 
       const stateCode = searchParams.state.trim().toUpperCase();
       
-      const { data: searchData, error: searchError } = await supabase
+      const { data: searchData, error: searchError, count } = await supabase
         .from('campsites')
-        .select('*')
-        .ilike('state', `%${stateCode}%`);
+        .select('*', { count: 'exact' })
+        .ilike('state', `%${stateCode}%`)
+        .range(0, ITEMS_PER_PAGE - 1);
 
       if (searchError) {
         console.error('Search error:', searchError);
@@ -36,7 +41,8 @@ export const useCampsiteSearch = () => {
       
       if (searchData && searchData.length > 0) {
         setSearchResults(searchData);
-        toast.success(`Found ${searchData.length} campsites`);
+        setTotalResults(count || 0);
+        toast.success(`Found ${count} campsites`);
       } else {
         toast.info(`No campsites found in ${searchParams.state.trim()}`);
       }
@@ -49,11 +55,40 @@ export const useCampsiteSearch = () => {
     }
   };
 
+  const handlePageChange = async (page: number) => {
+    setIsSearching(true);
+    try {
+      const start = (page - 1) * ITEMS_PER_PAGE;
+      const end = start + ITEMS_PER_PAGE - 1;
+      
+      const { data: searchData, error: searchError } = await supabase
+        .from('campsites')
+        .select('*')
+        .ilike('state', `%${searchParams.state.trim().toUpperCase()}%`)
+        .range(start, end);
+
+      if (searchError) throw searchError;
+      
+      if (searchData) {
+        setSearchResults(searchData);
+        setCurrentPage(page);
+      }
+    } catch (error) {
+      console.error('Error fetching page:', error);
+      toast.error('Failed to fetch results. Please try again.');
+    } finally {
+      setIsSearching(false);
+    }
+  };
+
   return {
     searchParams,
     setSearchParams,
     searchResults,
     isSearching,
     handleSearch,
+    currentPage,
+    totalPages: Math.ceil(totalResults / ITEMS_PER_PAGE),
+    handlePageChange,
   };
 };

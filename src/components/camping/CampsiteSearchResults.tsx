@@ -3,16 +3,32 @@ import React from "react";
 import { Card } from "@/components/ui/card";
 import { MapPin, Phone, Droplets, DollarSign } from "lucide-react";
 import { Database } from "@/integrations/supabase/types";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
 
 type Campsite = Database['public']['Tables']['campsites']['Row'];
 
 interface CampsiteSearchResultsProps {
   results: Campsite[];
+  currentPage: number;
+  totalPages: number;
+  onPageChange: (page: number) => void;
+  isLoading?: boolean;
 }
 
-const CampsiteSearchResults = ({ results }: CampsiteSearchResultsProps) => {
-  console.log('Rendering search results:', results);
-
+const CampsiteSearchResults = ({ 
+  results, 
+  currentPage, 
+  totalPages, 
+  onPageChange,
+  isLoading 
+}: CampsiteSearchResultsProps) => {
   return (
     <section className="w-full bg-white py-16">
       {(!results || results.length === 0) ? (
@@ -23,7 +39,7 @@ const CampsiteSearchResults = ({ results }: CampsiteSearchResultsProps) => {
         <>
           <div className="text-center mb-12">
             <h2 className="text-3xl font-bold mb-2">Search Results</h2>
-            <p className="text-gray-600">Found {results.length} campsites</p>
+            <p className="text-gray-600">Showing page {currentPage} of {totalPages}</p>
           </div>
           <div className="container mx-auto px-6">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -79,6 +95,53 @@ const CampsiteSearchResults = ({ results }: CampsiteSearchResultsProps) => {
                 </Card>
               ))}
             </div>
+
+            {totalPages > 1 && (
+              <div className="mt-8">
+                <Pagination>
+                  <PaginationContent>
+                    {currentPage > 1 && (
+                      <PaginationItem>
+                        <PaginationPrevious 
+                          href="#" 
+                          onClick={(e) => {
+                            e.preventDefault();
+                            onPageChange(currentPage - 1);
+                          }} 
+                        />
+                      </PaginationItem>
+                    )}
+                    
+                    {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                      <PaginationItem key={page}>
+                        <PaginationLink
+                          href="#"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            onPageChange(page);
+                          }}
+                          isActive={page === currentPage}
+                        >
+                          {page}
+                        </PaginationLink>
+                      </PaginationItem>
+                    ))}
+                    
+                    {currentPage < totalPages && (
+                      <PaginationItem>
+                        <PaginationNext 
+                          href="#" 
+                          onClick={(e) => {
+                            e.preventDefault();
+                            onPageChange(currentPage + 1);
+                          }} 
+                        />
+                      </PaginationItem>
+                    )}
+                  </PaginationContent>
+                </Pagination>
+              </div>
+            )}
           </div>
         </>
       )}
