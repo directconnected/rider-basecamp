@@ -21,13 +21,13 @@ const features = [
   {
     icon: Map,
     title: "Trail Maps",
-    description: "Access detailed trail maps and camping locations.",
+    description: "(Coming Soon)",
     link: "/trail-maps"
   },
   {
     icon: ShieldCheck,
     title: "Safety Tips",
-    description: "Essential safety tips for motorcycle camping.",
+    description: "(Coming Soon)",
     link: "/camping-safety"
   }
 ];
