@@ -3,10 +3,13 @@ import { useState } from 'react';
 import { supabase } from "@/integrations/supabase/client";
 import { useCampsiteSearchStore } from "@/stores/campsiteSearchStore";
 import { toast } from "sonner";
+import { Database } from "@/integrations/supabase/types";
+
+type Campsite = Database['public']['Tables']['campsites']['Row'];
 
 export const useCampsiteSearch = () => {
   const { searchParams, setSearchParams } = useCampsiteSearchStore();
-  const [searchResults, setSearchResults] = useState([]);
+  const [searchResults, setSearchResults] = useState<Campsite[]>([]);
   const [isSearching, setIsSearching] = useState(false);
 
   const handleSearch = async () => {
@@ -22,11 +25,11 @@ export const useCampsiteSearch = () => {
 
       const stateSearch = searchParams.state.trim().toUpperCase();
       
-      // Execute the query
+      // Execute the query with proper type casting
       const { data, error } = await supabase
         .from('campsites')
-        .select('*')
-        .eq('state', stateSearch);
+        .select()
+        .eq('state', stateSearch as string);
 
       if (error) {
         console.error('Search error:', error);

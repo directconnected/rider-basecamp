@@ -28,7 +28,9 @@ const ProtectedAdminRoute = ({ children }: ProtectedAdminRouteProps) => {
         });
 
         if (error) throw error;
-        setIsAdmin(isAdminData);
+        
+        // Explicitly cast the response to boolean
+        setIsAdmin(Boolean(isAdminData));
       } catch (error) {
         console.error('Error checking admin status:', error);
         toast.error("Failed to verify admin status");
