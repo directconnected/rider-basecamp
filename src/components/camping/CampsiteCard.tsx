@@ -79,6 +79,7 @@ const CampsiteCard = ({ campsite }: CampsiteCardProps) => {
               <div className="text-gray-600">
                 <span className="font-medium">Legend:</span>
                 <ul className="mt-1 space-y-1">
+                  <li><span className="font-medium">RS</span> - Reservations Required</li>
                   <li><span className="font-medium">PA</span> - Pets Allowed</li>
                   <li><span className="font-medium">DW</span> - Drinking Water</li>
                   <li><span className="font-medium">SH</span> - Shower House</li>
