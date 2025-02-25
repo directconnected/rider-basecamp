@@ -26,10 +26,10 @@ const StopSection = ({ title, icon: Icon, color, stops, getStopName }: StopSecti
           <div key={`${title}-${index}`} className="flex items-center gap-4">
             <div className={`w-3 h-3 rounded-full ${color}`} />
             <div className="flex items-center gap-2 flex-1">
-              <p className="text-base">
+              <p className="text-base flex-grow">
                 {getStopName(stop)} in {stop.name} - {Math.round(stop.distance)} miles from start
               </p>
-              <RatingDisplay rating={stop.rating} />
+              {stop.rating !== undefined && <RatingDisplay rating={stop.rating} />}
             </div>
           </div>
         ))}
