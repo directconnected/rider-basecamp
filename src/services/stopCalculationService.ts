@@ -1,4 +1,3 @@
-
 import { getLocationName } from './mapService';
 import { findNearbyGasStation, findNearbyLodging, findNearbyRestaurant, findNearbyCampground, findNearbyAttraction } from './placesService';
 import { FuelStop, HotelStop } from "@/hooks/useRoutePlanning";
@@ -8,6 +7,8 @@ export interface RestaurantStop {
   name: string;
   restaurantName: string;
   rating?: number;
+  website?: string;
+  phone?: string;
   distance: number;
 }
 
@@ -16,6 +17,8 @@ export interface CampingStop {
   name: string;
   campgroundName: string;
   rating?: number;
+  website?: string;
+  phone?: string;
   distance: number;
 }
 
@@ -24,6 +27,8 @@ export interface AttractionStop {
   name: string;
   attractionName: string;
   rating?: number;
+  website?: string;
+  phone?: string;
   distance: number;
 }
 
@@ -162,13 +167,17 @@ export const calculateRestaurantStops = async (route: any, milesPerMeal: number 
       const locationName = await getLocationName(coordinates);
       const restaurant = await findNearbyRestaurant(coordinates);
       
-      restaurantStops.push({
-        location: coordinates,
-        name: locationName,
-        restaurantName: restaurant ? restaurant.name : "No restaurant found",
-        rating: restaurant?.rating,
-        distance: Math.round(progress * totalDistance)
-      });
+      if (restaurant) {
+        restaurantStops.push({
+          location: coordinates,
+          name: locationName,
+          restaurantName: restaurant.name,
+          rating: restaurant.rating,
+          website: restaurant.website,
+          phone: restaurant.phone,
+          distance: Math.round(progress * totalDistance)
+        });
+      }
     } catch (error) {
       console.error('Error finding restaurant:', error);
     }
@@ -200,13 +209,17 @@ export const calculateCampingStops = async (route: any, milesPerDay: number): Pr
       const locationName = await getLocationName(coordinates);
       const campground = await findNearbyCampground(coordinates);
       
-      campingStops.push({
-        location: coordinates,
-        name: locationName,
-        campgroundName: campground ? campground.name : "No campground found",
-        rating: campground?.rating,
-        distance: Math.round(progress * totalDistance)
-      });
+      if (campground) {
+        campingStops.push({
+          location: coordinates,
+          name: locationName,
+          campgroundName: campground.name,
+          rating: campground.rating,
+          website: campground.website,
+          phone: campground.phone,
+          distance: Math.round(progress * totalDistance)
+        });
+      }
     } catch (error) {
       console.error('Error finding campground:', error);
     }
