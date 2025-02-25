@@ -23,18 +23,21 @@ export const useCampsiteSearch = () => {
         return;
       }
 
-      const stateSearch = searchParams.state.trim();
-      
-      let query = supabase
+      // First, let's check what data exists in the database
+      const { data: allData } = await supabase
         .from('campsites')
-        .select();
+        .select('state')
+        .limit(100);
+      
+      console.log('Available states in database:', allData?.map(d => d.state));
 
-      // Add filter conditions based on search parameters
-      if (stateSearch) {
-        query = query.eq('state', stateSearch);
-      }
-
-      const { data, error } = await query;
+      const stateSearch = searchParams.state.trim().toUpperCase();
+      console.log('Searching for state:', stateSearch);
+      
+      const { data, error } = await supabase
+        .from('campsites')
+        .select()
+        .eq('state', stateSearch);
 
       if (error) {
         console.error('Search error:', error);
