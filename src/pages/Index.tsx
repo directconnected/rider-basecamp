@@ -25,8 +25,8 @@ const features = [
   {
     icon: Shield,
     title: "Gear Hub",
-    description: "Top riding & camping gear.",
-    link: "/riding-gear",
+    description: "(Coming Soon)",
+    link: "#",
     id: "riding-gear-feature"
   },
   {
@@ -46,22 +46,22 @@ const features = [
   {
     icon: Store,
     title: "Dealers Hub",
-    description: "Find local motorcycle dealers & repair shops near you.",
+    description: "(Coming Soon)",
     link: "/dealers",
-    id: "dealers-feature"
+    id: "#"
   },
   {
     icon: Settings,
     title: "Parts Hub",
-    description: "Find motorcycle parts & accessories.",
+    description: "(Coming Soon)",
     link: "/parts",
-    id: "parts-feature"
+    id: "#"
   },
   {
     icon: Group,
     title: "Group Rides Hub",
-    description: "Join and organize group rides in your area.",
-    link: "/group-rides",
+    description: "(Coming Soon)",
+    link: "#",
     id: "group-rides-feature"
   },
   {
