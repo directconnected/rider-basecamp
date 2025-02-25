@@ -13,6 +13,7 @@ const Campgrounds = () => {
     searchResults,
     isSearching,
     handleSearch,
+    handleLocationSearch,
     currentPage,
     totalPages,
     handlePageChange,
@@ -40,6 +41,7 @@ const Campgrounds = () => {
                 setSearchParams={setSearchParams}
                 isSearching={isSearching}
                 onSearch={handleSearch}
+                onLocationSearch={handleLocationSearch}
               />
             </div>
           </div>
