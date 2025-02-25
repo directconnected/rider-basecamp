@@ -36,7 +36,9 @@ export const calculateHotelStops = async (route: any, milesPerDay: number): Prom
           name: hotel.address,
           hotelName: hotel.name,
           distance: Math.round(progress * totalDistance),
-          rating: hotel.rating
+          rating: hotel.rating,
+          website: hotel.website,
+          phone_number: hotel.phone_number
         });
         console.log(`Added hotel stop ${i}: ${hotel.name}`);
       }

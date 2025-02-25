@@ -1,8 +1,9 @@
 
 import React from "react";
 import { LucideIcon } from "lucide-react";
-import RatingDisplay from "./RatingDisplay";
 import { RatedStop } from "./types";
+import RatingDisplay from "./RatingDisplay";
+import { Phone, Globe } from "lucide-react";
 
 interface StopSectionProps {
   title: string;
@@ -13,26 +14,59 @@ interface StopSectionProps {
 }
 
 const StopSection = ({ title, icon: Icon, color, stops, getStopName }: StopSectionProps) => {
-  if (!Array.isArray(stops)) return null;
+  if (!stops || stops.length === 0) return null;
 
   return (
     <div className="space-y-4">
-      <h3 className="text-lg font-semibold flex items-center gap-2">
-        <Icon className="h-5 w-5" />
-        {title}
-      </h3>
+      <h3 className="text-lg font-semibold">{title}:</h3>
       <div className="space-y-3">
-        {stops.map((stop, index) => (
-          <div key={`${title}-${index}`} className="flex items-center gap-4">
-            <div className={`w-3 h-3 rounded-full ${color}`} />
-            <div className="flex items-center gap-2 flex-1">
-              <p className="text-base flex-grow">
-                {getStopName(stop)} in {stop.name} - {Math.round(stop.distance)} miles from start
-              </p>
-              {stop.rating !== undefined && <RatingDisplay rating={stop.rating} />}
+        {stops.map((stop, index) => {
+          const StopName = getStopName(stop);
+          return (
+            <div key={`${title}-${index}`} className="flex flex-col gap-2 p-4 rounded-lg bg-gray-50">
+              <div className="flex items-start gap-4">
+                <div className={`w-3 h-3 rounded-full mt-2 ${color}`} />
+                <div className="flex-1">
+                  <p className="text-base font-medium">{StopName}</p>
+                  <p className="text-sm text-gray-600">{stop.name}</p>
+                  <p className="text-sm text-gray-500">{Math.round(stop.distance)} miles from start</p>
+                  
+                  {/* Rating display */}
+                  {stop.rating && (
+                    <div className="mt-1">
+                      <RatingDisplay rating={stop.rating} />
+                    </div>
+                  )}
+                  
+                  {/* Contact Information */}
+                  <div className="mt-2 space-y-1">
+                    {'phone_number' in stop && stop.phone_number && (
+                      <div className="flex items-center gap-2 text-sm text-gray-600">
+                        <Phone className="w-4 h-4" />
+                        <a href={`tel:${stop.phone_number}`} className="hover:text-theme-600">
+                          {stop.phone_number}
+                        </a>
+                      </div>
+                    )}
+                    {'website' in stop && stop.website && (
+                      <div className="flex items-center gap-2 text-sm text-gray-600">
+                        <Globe className="w-4 h-4" />
+                        <a 
+                          href={stop.website}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="hover:text-theme-600 truncate"
+                        >
+                          Visit Website
+                        </a>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
     </div>
   );
