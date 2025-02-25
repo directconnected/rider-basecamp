@@ -30,6 +30,8 @@ interface HotelStop {
   hotelName: string;
   distance: number;
   rating?: number;
+  website?: string;
+  phone_number?: string;
 }
 
 interface RestaurantStop {
@@ -38,6 +40,8 @@ interface RestaurantStop {
   restaurantName: string;
   distance: number;
   rating?: number;
+  website?: string;
+  phone_number?: string;
 }
 
 interface CampingStop {
@@ -46,6 +50,8 @@ interface CampingStop {
   campgroundName: string;
   distance: number;
   rating?: number;
+  website?: string;
+  phone_number?: string;
 }
 
 export const useRoutePlanning = () => {
