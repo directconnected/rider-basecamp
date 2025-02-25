@@ -5,6 +5,7 @@ interface CampsiteSearchParams {
   state: string;
   city: string;
   zipCode: string;
+  radius?: number;
 }
 
 interface CampsiteSearchStore {
@@ -17,6 +18,7 @@ export const useCampsiteSearchStore = create<CampsiteSearchStore>((set) => ({
     state: "",
     city: "",
     zipCode: "",
+    radius: 25,
   },
   setSearchParams: (params) =>
     set((state) => ({
