@@ -11,7 +11,9 @@ interface CampsiteSearchResultsProps {
 }
 
 const CampsiteSearchResults = ({ results }: CampsiteSearchResultsProps) => {
-  if (results.length === 0) return null;
+  if (!results || results.length === 0) {
+    return null;
+  }
 
   return (
     <section className="w-full bg-white py-16">
@@ -26,10 +28,17 @@ const CampsiteSearchResults = ({ results }: CampsiteSearchResultsProps) => {
               <h3 className="text-xl font-bold mb-2">{campsite.name || 'Unnamed Campsite'}</h3>
               
               <div className="space-y-2 text-gray-600">
-                <div className="flex items-center gap-2">
-                  <MapPin className="w-4 h-4" />
-                  <span>{campsite.town}, {campsite.state}</span>
-                </div>
+                {(campsite.town || campsite.state) && (
+                  <div className="flex items-center gap-2">
+                    <MapPin className="w-4 h-4" />
+                    <span>
+                      {[
+                        campsite.town,
+                        campsite.state
+                      ].filter(Boolean).join(', ')}
+                    </span>
+                  </div>
+                )}
                 
                 {campsite.phone && (
                   <div className="flex items-center gap-2">
@@ -54,9 +63,9 @@ const CampsiteSearchResults = ({ results }: CampsiteSearchResultsProps) => {
               </div>
               
               <div className="mt-4 pt-4 border-t border-gray-200">
-                <div className="flex justify-between text-sm">
+                <div className="flex flex-wrap gap-4 text-sm text-gray-600">
                   {campsite.sites && (
-                    <span>Sites available: {campsite.sites}</span>
+                    <span>Sites: {campsite.sites}</span>
                   )}
                   {campsite.season && (
                     <span>Season: {campsite.season}</span>
