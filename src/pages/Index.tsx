@@ -9,18 +9,25 @@ import Breadcrumbs from "@/components/Breadcrumbs";
 
 const features = [
   {
+    icon: Search,
+    title: "Data Hub",
+    description: "Owner's manuals, service manuals, VIN lookups & motorcycle data.",
+    link: "/data",
+    id: "data-feature"
+  },
+    {
+    icon: Wrench,
+    title: "Service Hub",
+    description: "Track maintenance records & service intervals.",
+    link: "/service",
+    id: "service-feature"
+  },
+    {
     icon: Route,
     title: "Destination Hub",
     description: "Top motorcycle roads, route planning & GPX files.",
     link: "/destinations",
     id: "destinations-feature"
-  },
-  {
-    icon: Tent,
-    title: "Camping Hub",
-    description: "Find motorcycle friendly accomodations.",
-    link: "/camping-hub",
-    id: "camping-hub-feature"
   },
   {
     icon: Shield,
@@ -30,18 +37,11 @@ const features = [
     id: "riding-gear-feature"
   },
   {
-    icon: Wrench,
-    title: "Service Hub",
-    description: "Track maintenance records & service intervals.",
-    link: "/service",
-    id: "service-feature"
-  },
-  {
-    icon: Search,
-    title: "Data Hub",
-    description: "Owner's manuals, service manuals, VIN lookups & motorcycle data.",
-    link: "/data",
-    id: "data-feature"
+    icon: Tent,
+    title: "Camping Hub",
+    description: "Find motorcycle friendly accomodations.",
+    link: "/camping-hub",
+    id: "camping-hub-feature"
   },
   {
     icon: Store,
