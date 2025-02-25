@@ -25,11 +25,16 @@ export const useCampsiteSearch = () => {
 
       const stateSearch = searchParams.state.trim();
       
-      // Execute the query with case-insensitive search
-      const { data, error } = await supabase
+      let query = supabase
         .from('campsites')
-        .select()
-        .ilike('state', `%${stateSearch}%`);
+        .select();
+
+      // Add filter conditions based on search parameters
+      if (stateSearch) {
+        query = query.eq('state', stateSearch);
+      }
+
+      const { data, error } = await query;
 
       if (error) {
         console.error('Search error:', error);
