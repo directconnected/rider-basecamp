@@ -22,6 +22,9 @@ interface FuelStop {
   location: [number, number];
   name: string;
   distance: number;
+  rating?: number;
+  website?: string;
+  phone_number?: string;
 }
 
 interface HotelStop {
