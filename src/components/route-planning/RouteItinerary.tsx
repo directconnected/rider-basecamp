@@ -20,18 +20,21 @@ interface RouteItineraryProps {
     location: [number, number];
     distance: number;
     hotelName: string;
+    rating?: number;
   }>;
   restaurantStops?: Array<{
     name: string;
     location: [number, number];
     distance: number;
     restaurantName: string;
+    rating?: number;
   }>;
   campingStops?: Array<{
     name: string;
     location: [number, number];
     distance: number;
     campgroundName: string;
+    rating?: number;
   }>;
   attractionStops?: Array<{
     name: string;
@@ -42,6 +45,17 @@ interface RouteItineraryProps {
   }>;
   currentRoute?: any;
 }
+
+const RatingDisplay = ({ rating }: { rating?: number }) => {
+  if (!rating) return null;
+  
+  return (
+    <div className="flex items-center gap-1 text-yellow-500">
+      <Star className="h-4 w-4 fill-current" />
+      <span className="text-sm font-medium">{rating}</span>
+    </div>
+  );
+};
 
 const RouteItinerary = ({ 
   startPoint, 
@@ -125,9 +139,12 @@ const RouteItinerary = ({
             {Array.isArray(hotelStops) && hotelStops.map((stop, index) => (
               <div key={`hotel-${index}`} className="flex items-center gap-4">
                 <div className="w-3 h-3 rounded-full bg-purple-500" />
-                <p className="text-base">
-                  {stop.hotelName} in {stop.name} - {Math.round(stop.distance)} miles from start
-                </p>
+                <div className="flex items-center gap-2 flex-1">
+                  <p className="text-base">
+                    {stop.hotelName} in {stop.name} - {Math.round(stop.distance)} miles from start
+                  </p>
+                  <RatingDisplay rating={stop.rating} />
+                </div>
               </div>
             ))}
           </div>
@@ -142,9 +159,12 @@ const RouteItinerary = ({
             {Array.isArray(restaurantStops) && restaurantStops.map((stop, index) => (
               <div key={`restaurant-${index}`} className="flex items-center gap-4">
                 <div className="w-3 h-3 rounded-full bg-orange-500" />
-                <p className="text-base">
-                  {stop.restaurantName} in {stop.name} - {Math.round(stop.distance)} miles from start
-                </p>
+                <div className="flex items-center gap-2 flex-1">
+                  <p className="text-base">
+                    {stop.restaurantName} in {stop.name} - {Math.round(stop.distance)} miles from start
+                  </p>
+                  <RatingDisplay rating={stop.rating} />
+                </div>
               </div>
             ))}
           </div>
@@ -159,9 +179,12 @@ const RouteItinerary = ({
             {Array.isArray(campingStops) && campingStops.map((stop, index) => (
               <div key={`camping-${index}`} className="flex items-center gap-4">
                 <div className="w-3 h-3 rounded-full bg-green-600" />
-                <p className="text-base">
-                  {stop.campgroundName} in {stop.name} - {Math.round(stop.distance)} miles from start
-                </p>
+                <div className="flex items-center gap-2 flex-1">
+                  <p className="text-base">
+                    {stop.campgroundName} in {stop.name} - {Math.round(stop.distance)} miles from start
+                  </p>
+                  <RatingDisplay rating={stop.rating} />
+                </div>
               </div>
             ))}
           </div>
@@ -176,16 +199,11 @@ const RouteItinerary = ({
             {Array.isArray(attractionStops) && attractionStops.map((stop, index) => (
               <div key={`attraction-${index}`} className="flex items-center gap-4">
                 <div className="w-3 h-3 rounded-full bg-blue-500" />
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 flex-1">
                   <p className="text-base">
                     {stop.attractionName} in {stop.name} - {Math.round(stop.distance)} miles from start
                   </p>
-                  {stop.rating && (
-                    <div className="flex items-center gap-1 text-yellow-500">
-                      <Star className="h-4 w-4 fill-current" />
-                      <span className="text-sm font-medium">{stop.rating}</span>
-                    </div>
-                  )}
+                  <RatingDisplay rating={stop.rating} />
                 </div>
               </div>
             ))}

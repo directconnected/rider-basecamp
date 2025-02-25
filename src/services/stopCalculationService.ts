@@ -1,3 +1,4 @@
+
 import { getLocationName } from './mapService';
 import { findNearbyGasStation, findNearbyLodging, findNearbyRestaurant, findNearbyCampground, findNearbyAttraction } from './placesService';
 import { FuelStop, HotelStop } from "@/hooks/useRoutePlanning";
@@ -6,6 +7,7 @@ export interface RestaurantStop {
   location: [number, number];
   name: string;
   restaurantName: string;
+  rating?: number;
   distance: number;
 }
 
@@ -13,6 +15,7 @@ export interface CampingStop {
   location: [number, number];
   name: string;
   campgroundName: string;
+  rating?: number;
   distance: number;
 }
 
@@ -163,6 +166,7 @@ export const calculateRestaurantStops = async (route: any, milesPerMeal: number 
         location: coordinates,
         name: locationName,
         restaurantName: restaurant ? restaurant.name : "No restaurant found",
+        rating: restaurant?.rating,
         distance: Math.round(progress * totalDistance)
       });
     } catch (error) {
@@ -200,6 +204,7 @@ export const calculateCampingStops = async (route: any, milesPerDay: number): Pr
         location: coordinates,
         name: locationName,
         campgroundName: campground ? campground.name : "No campground found",
+        rating: campground?.rating,
         distance: Math.round(progress * totalDistance)
       });
     } catch (error) {
