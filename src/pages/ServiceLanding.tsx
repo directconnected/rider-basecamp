@@ -22,14 +22,14 @@ const ServiceLanding = () => {
     {
       icon: Clock,
       title: "Maintenance Reminders",
-      description: "Set up reminders for upcoming maintenance tasks (Coming Soon).",
+      description: "(Coming Soon)",
       link: "#",
       id: "maintenance-reminders"
     },
     {
       icon: Settings,
       title: "DIY Guides",
-      description: "Access maintenance guides and tutorials (Coming Soon).",
+      description: "(Coming Soon)",
       link: "#",
       id: "diy-guides"
     }
