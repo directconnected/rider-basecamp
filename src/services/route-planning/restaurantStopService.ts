@@ -24,12 +24,15 @@ export const calculateRestaurantStops = async (route: any, milesPerMeal: number 
       const restaurant = await findNearbyRestaurant(coordinates);
       
       if (restaurant) {
+        console.log(`Restaurant data for stop ${i}:`, restaurant);
         restaurantStops.push({
           location: coordinates,
           name: restaurant.address,
           restaurantName: restaurant.name,
           distance: Math.round(progress * totalDistance),
-          rating: restaurant.rating
+          rating: restaurant.rating,
+          website: restaurant.website,
+          phone_number: restaurant.phone_number
         });
       }
     } catch (error) {

@@ -31,6 +31,7 @@ export const calculateHotelStops = async (route: any, milesPerDay: number): Prom
       const hotel = await findNearbyLodging(coordinates);
       
       if (hotel) {
+        console.log(`Hotel data for stop ${i}:`, hotel);
         hotelStops.push({
           location: coordinates,
           name: hotel.address,
@@ -40,7 +41,7 @@ export const calculateHotelStops = async (route: any, milesPerDay: number): Prom
           website: hotel.website,
           phone_number: hotel.phone_number
         });
-        console.log(`Added hotel stop ${i}: ${hotel.name}`);
+        console.log(`Added hotel stop ${i}: ${hotel.name} with website: ${hotel.website} and phone: ${hotel.phone_number}`);
       }
     } catch (error) {
       console.error(`Error processing hotel stop ${i}:`, error);
