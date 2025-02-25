@@ -17,33 +17,53 @@ export const useCampsiteSearch = () => {
     setSearchResults([]); // Clear previous results
     
     try {
-      console.log('Starting search with params:', searchParams);
-      
       if (!searchParams.state.trim()) {
         toast.error('Please enter a state');
         return;
       }
 
-      const stateSearch = searchParams.state.trim();
-      console.log('Searching for state:', stateSearch);
+      // First, let's get a sample of the data to see what we're working with
+      const { data: sampleData } = await supabase
+        .from('campsites')
+        .select('state')
+        .limit(5);
       
-      const { data, error } = await supabase
+      console.log('Sample data states:', sampleData?.map(d => d.state));
+
+      // Try search with the state code as is
+      let { data, error } = await supabase
         .from('campsites')
         .select()
-        .eq('state', stateSearch);
+        .ilike('state', searchParams.state.trim());
 
       if (error) {
         console.error('Search error:', error);
         throw error;
       }
 
-      console.log('Search results:', data);
+      // If no results, try with uppercase
+      if (!data?.length) {
+        const upperState = searchParams.state.trim().toUpperCase();
+        console.log('Trying uppercase state:', upperState);
+        
+        ({ data, error } = await supabase
+          .from('campsites')
+          .select()
+          .ilike('state', upperState));
+
+        if (error) {
+          console.error('Uppercase search error:', error);
+          throw error;
+        }
+      }
+
+      console.log('Final search results:', data);
       
       if (data && data.length > 0) {
         setSearchResults(data);
         toast.success(`Found ${data.length} campsites`);
       } else {
-        toast.info(`No campsites found in ${stateSearch}`);
+        toast.info(`No campsites found in ${searchParams.state.trim()}`);
       }
 
     } catch (error) {
