@@ -26,14 +26,14 @@ const CampsiteSearchForm = ({
   onSearch
 }: CampsiteSearchFormProps) => {
   return (
-    <div className="flex flex-col gap-4 animate-fade-in">
-      <div className="flex flex-col md:flex-row gap-4 justify-center">
+    <div className="flex flex-col gap-6 animate-fade-in max-w-md mx-auto w-full">
+      <div className="space-y-4">
         <Input
           type="text"
           placeholder="State (e.g., CA)"
           value={searchParams.state}
           onChange={(e) => setSearchParams({ state: e.target.value.toUpperCase() })}
-          className="w-full md:w-32 bg-white text-center"
+          className="w-full bg-white text-center"
           maxLength={2}
         />
         <Input
@@ -41,18 +41,20 @@ const CampsiteSearchForm = ({
           placeholder="City"
           value={searchParams.city}
           onChange={(e) => setSearchParams({ city: e.target.value })}
-          className="w-full md:w-48 bg-white"
+          className="w-full bg-white"
         />
         <Input
           type="text"
           placeholder="Zip Code"
           value={searchParams.zipCode}
           onChange={(e) => setSearchParams({ zipCode: e.target.value })}
-          className="w-full md:w-32 bg-white text-center"
+          className="w-full bg-white text-center"
           maxLength={5}
         />
+      </div>
+      <div className="flex justify-center">
         <Button 
-          className="button-gradient text-white px-8 py-6"
+          className="button-gradient text-white px-8 py-6 w-full sm:w-auto"
           onClick={onSearch}
           disabled={isSearching}
         >
