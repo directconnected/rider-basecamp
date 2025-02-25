@@ -1,61 +1,12 @@
 
 import React from "react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { List, FileDown, Hotel, UtensilsCrossed, Tent, Landmark, Star } from "lucide-react";
+import { List, FileDown, Hotel, UtensilsCrossed, Tent, Landmark } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { downloadGPX } from "@/utils/gpxGenerator";
-
-interface RouteItineraryProps {
-  startPoint: string;
-  destination: string;
-  distance: number;
-  duration: number;
-  fuelStops: Array<{
-    name: string;
-    location: [number, number];
-    distance: number;
-  }>;
-  hotelStops: Array<{
-    name: string;
-    location: [number, number];
-    distance: number;
-    hotelName: string;
-    rating?: number;
-  }>;
-  restaurantStops?: Array<{
-    name: string;
-    location: [number, number];
-    distance: number;
-    restaurantName: string;
-    rating?: number;
-  }>;
-  campingStops?: Array<{
-    name: string;
-    location: [number, number];
-    distance: number;
-    campgroundName: string;
-    rating?: number;
-  }>;
-  attractionStops?: Array<{
-    name: string;
-    location: [number, number];
-    distance: number;
-    attractionName: string;
-    rating?: number;
-  }>;
-  currentRoute?: any;
-}
-
-const RatingDisplay = ({ rating }: { rating?: number }) => {
-  if (!rating) return null;
-  
-  return (
-    <div className="flex items-center gap-1 text-yellow-500">
-      <Star className="h-4 w-4 fill-current" />
-      <span className="text-sm font-medium">{rating}</span>
-    </div>
-  );
-};
+import StopSection from "./StopSection";
+import TravelTips from "./TravelTips";
+import { RouteItineraryProps, HotelStop, RestaurantStop, CampingStop, AttractionStop } from "./types";
 
 const RouteItinerary = ({ 
   startPoint, 
@@ -130,85 +81,37 @@ const RouteItinerary = ({
           </div>
         </div>
 
-        <div className="space-y-4">
-          <h3 className="text-lg font-semibold flex items-center gap-2">
-            <Hotel className="h-5 w-5" />
-            Suggested Stays:
-          </h3>
-          <div className="space-y-3">
-            {Array.isArray(hotelStops) && hotelStops.map((stop, index) => (
-              <div key={`hotel-${index}`} className="flex items-center gap-4">
-                <div className="w-3 h-3 rounded-full bg-purple-500" />
-                <div className="flex items-center gap-2 flex-1">
-                  <p className="text-base">
-                    {stop.hotelName} in {stop.name} - {Math.round(stop.distance)} miles from start
-                  </p>
-                  <RatingDisplay rating={stop.rating} />
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
+        <StopSection
+          title="Suggested Stays"
+          icon={Hotel}
+          color="bg-purple-500"
+          stops={hotelStops}
+          getStopName={(stop) => (stop as HotelStop).hotelName}
+        />
 
-        <div className="space-y-4">
-          <h3 className="text-lg font-semibold flex items-center gap-2">
-            <UtensilsCrossed className="h-5 w-5" />
-            Suggested Restaurants:
-          </h3>
-          <div className="space-y-3">
-            {Array.isArray(restaurantStops) && restaurantStops.map((stop, index) => (
-              <div key={`restaurant-${index}`} className="flex items-center gap-4">
-                <div className="w-3 h-3 rounded-full bg-orange-500" />
-                <div className="flex items-center gap-2 flex-1">
-                  <p className="text-base">
-                    {stop.restaurantName} in {stop.name} - {Math.round(stop.distance)} miles from start
-                  </p>
-                  <RatingDisplay rating={stop.rating} />
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
+        <StopSection
+          title="Suggested Restaurants"
+          icon={UtensilsCrossed}
+          color="bg-orange-500"
+          stops={restaurantStops}
+          getStopName={(stop) => (stop as RestaurantStop).restaurantName}
+        />
 
-        <div className="space-y-4">
-          <h3 className="text-lg font-semibold flex items-center gap-2">
-            <Tent className="h-5 w-5" />
-            Suggested Camping:
-          </h3>
-          <div className="space-y-3">
-            {Array.isArray(campingStops) && campingStops.map((stop, index) => (
-              <div key={`camping-${index}`} className="flex items-center gap-4">
-                <div className="w-3 h-3 rounded-full bg-green-600" />
-                <div className="flex items-center gap-2 flex-1">
-                  <p className="text-base">
-                    {stop.campgroundName} in {stop.name} - {Math.round(stop.distance)} miles from start
-                  </p>
-                  <RatingDisplay rating={stop.rating} />
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
+        <StopSection
+          title="Suggested Camping"
+          icon={Tent}
+          color="bg-green-600"
+          stops={campingStops}
+          getStopName={(stop) => (stop as CampingStop).campgroundName}
+        />
 
-        <div className="space-y-4">
-          <h3 className="text-lg font-semibold flex items-center gap-2">
-            <Landmark className="h-5 w-5" />
-            Suggested Things to Do:
-          </h3>
-          <div className="space-y-3">
-            {Array.isArray(attractionStops) && attractionStops.map((stop, index) => (
-              <div key={`attraction-${index}`} className="flex items-center gap-4">
-                <div className="w-3 h-3 rounded-full bg-blue-500" />
-                <div className="flex items-center gap-2 flex-1">
-                  <p className="text-base">
-                    {stop.attractionName} in {stop.name} - {Math.round(stop.distance)} miles from start
-                  </p>
-                  <RatingDisplay rating={stop.rating} />
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
+        <StopSection
+          title="Suggested Things to Do"
+          icon={Landmark}
+          color="bg-blue-500"
+          stops={attractionStops}
+          getStopName={(stop) => (stop as AttractionStop).attractionName}
+        />
 
         <div className="flex items-center gap-4">
           <div className="w-3 h-3 rounded-full bg-red-500" />
@@ -217,16 +120,7 @@ const RouteItinerary = ({
           </p>
         </div>
 
-        <div className="bg-gray-50 p-4 rounded-lg">
-          <h3 className="text-lg font-semibold mb-2">Travel Tips:</h3>
-          <ul className="list-disc list-inside space-y-2 text-gray-700">
-            <li>Plan to refuel at each suggested fuel stop to ensure you don't run low on gas</li>
-            <li>Book accommodations in advance at the suggested overnight stops</li>
-            <li>Take regular breaks every 2-3 hours to stay alert</li>
-            <li>Check weather conditions before departing</li>
-            <li>Keep emergency contacts and roadside assistance numbers handy</li>
-          </ul>
-        </div>
+        <TravelTips />
       </CardContent>
     </Card>
   );
