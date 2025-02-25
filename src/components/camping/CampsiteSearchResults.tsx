@@ -1,7 +1,7 @@
 
 import React from "react";
 import { Card } from "@/components/ui/card";
-import { MapPin, Phone, Droplets, DollarSign } from "lucide-react";
+import { MapPin, Phone, Droplets, DollarSign, Globe, PawPrint } from "lucide-react";
 import { Database } from "@/integrations/supabase/types";
 import {
   Pagination,
@@ -45,51 +45,96 @@ const CampsiteSearchResults = ({
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {results.map((campsite) => (
                 <Card key={campsite.id} className="p-6 hover:shadow-lg transition-shadow">
-                  <h3 className="text-xl font-bold mb-2">{campsite.camp || 'Unnamed Campsite'}</h3>
-                  
-                  <div className="space-y-2 text-gray-600">
-                    {(campsite.town || campsite.state) && (
-                      <div className="flex items-center gap-2">
-                        <MapPin className="w-4 h-4" />
-                        <span>
-                          {[
-                            campsite.town,
-                            campsite.state
-                          ].filter(Boolean).join(', ')}
-                        </span>
-                      </div>
-                    )}
+                  <div className="space-y-4">
+                    <h3 className="text-xl font-bold">Camp Name: {campsite.camp || 'Unnamed Campsite'}</h3>
                     
-                    {campsite.phone && (
-                      <div className="flex items-center gap-2">
-                        <Phone className="w-4 h-4" />
-                        <span>{campsite.phone}</span>
+                    <div className="grid grid-cols-2 gap-4 text-sm">
+                      <div>
+                        <p className="font-semibold">City:</p>
+                        <p>{campsite.town || 'N/A'}</p>
                       </div>
-                    )}
-                    
-                    {campsite.fee && (
-                      <div className="flex items-center gap-2">
-                        <DollarSign className="w-4 h-4" />
-                        <span>Fee: {campsite.fee}</span>
+                      <div>
+                        <p className="font-semibold">State:</p>
+                        <p>{campsite.state || 'N/A'}</p>
                       </div>
-                    )}
-                    
-                    {campsite.showers && (
-                      <div className="flex items-center gap-2">
-                        <Droplets className="w-4 h-4" />
-                        <span>Showers: {campsite.showers}</span>
+                      <div>
+                        <p className="font-semibold">Zip Code:</p>
+                        <p>{campsite.nforg || 'N/A'}</p>
                       </div>
-                    )}
-                  </div>
-                  
-                  <div className="mt-4 pt-4 border-t border-gray-200">
-                    <div className="flex flex-wrap gap-4 text-sm text-gray-600">
-                      {campsite.sites && (
-                        <span>Sites: {campsite.sites}</span>
+                      <div>
+                        <p className="font-semibold">Phone:</p>
+                        <p>{campsite.phone || 'N/A'}</p>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4 text-sm">
+                      <div>
+                        <p className="font-semibold">Latitude:</p>
+                        <p>{campsite.lat || 'N/A'}</p>
+                      </div>
+                      <div>
+                        <p className="font-semibold">Longitude:</p>
+                        <p>{campsite.lon || 'N/A'}</p>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4 text-sm">
+                      <div>
+                        <p className="font-semibold">Showers:</p>
+                        <p>{campsite.showers || 'N/A'}</p>
+                      </div>
+                      <div>
+                        <p className="font-semibold">Pets:</p>
+                        <p>{campsite.pets || 'N/A'}</p>
+                      </div>
+                      <div>
+                        <p className="font-semibold">Season:</p>
+                        <p>{campsite.season || 'N/A'}</p>
+                      </div>
+                      <div>
+                        <p className="font-semibold">Fee:</p>
+                        <p>{campsite.fee || 'N/A'}</p>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4 text-sm">
+                      <div>
+                        <p className="font-semibold">Elevation:</p>
+                        <p>{campsite.elev ? `${campsite.elev} ft` : 'N/A'}</p>
+                      </div>
+                      <div>
+                        <p className="font-semibold">Hookups:</p>
+                        <p>{campsite.hookups || 'N/A'}</p>
+                      </div>
+                      <div>
+                        <p className="font-semibold">Toilets:</p>
+                        <p>{campsite.toilets || 'N/A'}</p>
+                      </div>
+                      <div>
+                        <p className="font-semibold">Water:</p>
+                        <p>{campsite.water || 'N/A'}</p>
+                      </div>
+                    </div>
+
+                    <div className="space-y-2">
+                      {campsite.url && (
+                        <div>
+                          <p className="font-semibold">URL:</p>
+                          <a 
+                            href={campsite.url} 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            className="text-blue-600 hover:underline"
+                          >
+                            Visit Website
+                          </a>
+                        </div>
                       )}
-                      {campsite.season && (
-                        <span>Season: {campsite.season}</span>
-                      )}
+                      
+                      <div>
+                        <p className="font-semibold">Reservations:</p>
+                        <p>{campsite.reservations || 'N/A'}</p>
+                      </div>
                     </div>
                   </div>
                 </Card>
