@@ -13,10 +13,10 @@ export const useCampsiteSearch = () => {
   const [isSearching, setIsSearching] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalResults, setTotalResults] = useState(0);
-  const ITEMS_PER_PAGE = 15;
+  const ITEMS_PER_PAGE = 12;
 
   const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number) => {
-    const R = 3959; // Earth's radius in miles
+    const R = 3959;
     const dLat = (lat2 - lat1) * Math.PI / 180;
     const dLon = (lon2 - lon1) * Math.PI / 180;
     const a = 
@@ -42,19 +42,14 @@ export const useCampsiteSearch = () => {
 
       const { latitude, longitude } = position.coords;
       
-      // Get location name from coordinates
       const locationName = await getLocationName([longitude, latitude]);
       
-      // Query campsites within radius
       let query = supabase
         .from('campsites')
         .select('*', { count: 'exact' });
 
-      // Filter by radius if specified
       if (searchParams.radius) {
-        // Note: This is a simplified approach. For more accurate results,
-        // you might want to use PostGIS or a more sophisticated geospatial query
-        const latRange = searchParams.radius / 69; // Rough miles to degrees conversion
+        const latRange = searchParams.radius / 69;
         const lonRange = searchParams.radius / (69 * Math.cos(latitude * Math.PI / 180));
         
         query = query
@@ -70,7 +65,6 @@ export const useCampsiteSearch = () => {
       if (searchError) throw searchError;
       
       if (searchData && searchData.length > 0) {
-        // Filter results by actual distance (more accurate than the box filter)
         const filteredResults = searchParams.radius 
           ? searchData.filter(campsite => 
               calculateDistance(latitude, longitude, campsite.lat || 0, campsite.lon || 0) <= searchParams.radius!
@@ -110,8 +104,8 @@ export const useCampsiteSearch = () => {
 
   const handleSearch = async () => {
     setIsSearching(true);
-    setSearchResults([]); // Clear previous results
-    setCurrentPage(1); // Reset to first page on new search
+    setSearchResults([]);
+    setCurrentPage(1);
     
     try {
       if (!searchParams.state.trim() && !searchParams.city.trim() && !searchParams.zipCode.trim()) {
@@ -123,7 +117,6 @@ export const useCampsiteSearch = () => {
         .from('campsites')
         .select('*', { count: 'exact' });
 
-      // Add filters based on provided search params
       if (searchParams.state.trim()) {
         query = query.ilike('state', `%${searchParams.state.trim().toUpperCase()}%`);
       }
@@ -168,7 +161,6 @@ export const useCampsiteSearch = () => {
         .from('campsites')
         .select('*');
 
-      // Add filters based on provided search params
       if (searchParams.state.trim()) {
         query = query.ilike('state', `%${searchParams.state.trim().toUpperCase()}%`);
       }
