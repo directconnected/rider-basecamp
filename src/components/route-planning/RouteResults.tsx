@@ -1,10 +1,14 @@
-
 import React, { useEffect } from 'react';
 import RouteDetails from './RouteDetails';
 import RouteMap from './RouteMap';
 import RouteItinerary from './RouteItinerary';
 import { RouteDetails as RouteDetailsType, FuelStop, HotelStop } from '@/hooks/useRoutePlanning';
-import { RestaurantStop, CampingStop, AttractionStop, calculateRestaurantStops, calculateCampingStops, calculateAttractionStops } from '@/services/stopCalculationService';
+import { 
+  calculateRestaurantStops, 
+  calculateCampingStops, 
+  calculateAttractionStops 
+} from '@/services/route-planning';
+import { RestaurantStop, CampingStop, AttractionStop } from './types';
 
 interface RouteResultsProps {
   routeDetails: RouteDetailsType;
