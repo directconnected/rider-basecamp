@@ -46,7 +46,7 @@ const CampsiteSearchResults = ({
               {results.map((campsite) => (
                 <Card key={campsite.id} className="p-6 hover:shadow-lg transition-shadow">
                   <div className="space-y-4">
-                    <h3 className="text-xl font-bold">Camp Name: {campsite.camp || 'Unnamed Campsite'}</h3>
+                    <h3 className="text-xl font-bold">{campsite.camp || 'Unnamed Campsite'}</h3>
                     
                     <div className="grid grid-cols-2 gap-4 text-sm">
                       <div>
@@ -170,7 +170,7 @@ const CampsiteSearchResults = ({
                           {page}
                         </PaginationLink>
                       </PaginationItem>
-                    ))}
+                    )}
                     
                     {currentPage < totalPages && (
                       <PaginationItem>
