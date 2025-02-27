@@ -1,3 +1,4 @@
+
 import React from "react";
 import { Link } from "react-router-dom";
 import { Card } from "@/components/ui/card";
@@ -11,7 +12,7 @@ const features = [
     icon: Map,
     title: "Popular Roads",
     description: "Discover the most popular motorcycle roads across the country.",
-    link: "/top-roads"
+    link: "/destinations/top-roads"
   },
   {
     icon: Route,

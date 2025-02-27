@@ -8,6 +8,7 @@ import Auth from "@/pages/Auth";
 import Service from "@/pages/Service";
 import Destinations from "@/pages/Destinations";
 import PrintableService from "@/pages/PrintableService";
+import TopRoads from "@/pages/TopRoads";
 
 export const routeConfig = [
   {
@@ -45,6 +46,10 @@ export const routeConfig = [
   {
     path: "/destinations",
     element: Destinations,
+  },
+  {
+    path: "/destinations/top-roads",
+    element: TopRoads,
   },
   {
     path: "/printable-service",
