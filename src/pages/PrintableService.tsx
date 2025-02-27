@@ -112,8 +112,7 @@ const PrintableService = () => {
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-5xl">
-      <div className="no-print flex justify-between items-center mb-8">
-        <Button onClick={() => navigate(-1)} variant="outline">Back to Service History</Button>
+      <div className="no-print flex justify-end mb-8">
         <Button onClick={handlePrint} className="flex items-center gap-2">
           <Printer className="h-4 w-4" />
           <span>Print Report</span>
