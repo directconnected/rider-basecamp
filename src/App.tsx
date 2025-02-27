@@ -1,6 +1,6 @@
 
 import React from "react";
-import { BrowserRouter as Router, Routes as RouterRoutes, Route } from "react-router-dom";
+import { BrowserRouter as Router, Routes as RouterRoutes, Route, Navigate } from "react-router-dom";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -54,6 +54,9 @@ function App() {
                 element={<route.element />}
               />
             ))}
+            
+            {/* Redirect from /service to /service-records */}
+            <Route path="/service" element={<Navigate to="/service-records" replace />} />
             
             {/* Routes not included in routeConfig */}
             <Route path="/about" element={<About />} />
