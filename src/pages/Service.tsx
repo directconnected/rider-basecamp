@@ -9,7 +9,7 @@ import ServiceRecordDialog from "@/components/service/ServiceRecordDialog";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate, Link } from "react-router-dom";
 import { toast } from "sonner";
-import { format, addDays, compareAsc, isWithinInterval } from "date-fns";
+import { format, addDays, isWithinInterval } from "date-fns";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -33,7 +33,7 @@ const Service = () => {
   const [filteredRecords, setFilteredRecords] = useState<ServiceRecord[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchDate, setSearchDate] = useState("");
-  const [searchType, setSearchType] = useState("");
+  const [searchType, setSearchType] = useState<string>("");
   const [upcomingServices, setUpcomingServices] = useState<ServiceRecord[]>([]);
 
   useEffect(() => {
@@ -130,7 +130,7 @@ const Service = () => {
   };
 
   const handleAddServiceRecord = async (data: {
-    service_type: string;
+    service_type: ServiceType;
     service_date: string;
     mileage?: number;
     cost?: number;
@@ -204,21 +204,22 @@ const Service = () => {
                   className="w-44"
                 />
                 
-                <Select value={searchType} onValueChange={setSearchType}>
-                  <SelectTrigger className="w-44">
-                    <SelectValue placeholder="Service type" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="">All types</SelectItem>
-                    <SelectItem value="oil_change">Oil Change</SelectItem>
-                    <SelectItem value="tire_replacement">Tire Replacement</SelectItem>
-                    <SelectItem value="brake_service">Brake Service</SelectItem>
-                    <SelectItem value="chain_maintenance">Chain Maintenance</SelectItem>
-                    <SelectItem value="general_maintenance">General Maintenance</SelectItem>
-                    <SelectItem value="repair">Repair</SelectItem>
-                    <SelectItem value="inspection">Inspection</SelectItem>
-                  </SelectContent>
-                </Select>
+                <div className="w-44">
+                  <select 
+                    className="w-full h-10 px-3 py-2 rounded-md border text-sm"
+                    value={searchType} 
+                    onChange={(e) => setSearchType(e.target.value)}
+                  >
+                    <option value="">All types</option>
+                    <option value="oil_change">Oil Change</option>
+                    <option value="tire_replacement">Tire Replacement</option>
+                    <option value="brake_service">Brake Service</option>
+                    <option value="chain_maintenance">Chain Maintenance</option>
+                    <option value="general_maintenance">General Maintenance</option>
+                    <option value="repair">Repair</option>
+                    <option value="inspection">Inspection</option>
+                  </select>
+                </div>
                 
                 <Button variant="outline" onClick={resetFilters}>
                   Reset Filters

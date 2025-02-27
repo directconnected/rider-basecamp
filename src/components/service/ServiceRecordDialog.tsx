@@ -4,7 +4,6 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Plus } from "lucide-react";
 
 type ServiceType = 'oil_change' | 'tire_replacement' | 'brake_service' | 
@@ -23,7 +22,7 @@ interface ServiceRecordDialogProps {
 
 const ServiceRecordDialog = ({ onSubmit }: ServiceRecordDialogProps) => {
   const [open, setOpen] = React.useState(false);
-  const [serviceType, setServiceType] = React.useState<ServiceType>();
+  const [serviceType, setServiceType] = React.useState<ServiceType>("oil_change");
   const [mileage, setMileage] = React.useState("");
   const [cost, setCost] = React.useState("");
   const [notes, setNotes] = React.useState("");
@@ -45,7 +44,7 @@ const ServiceRecordDialog = ({ onSubmit }: ServiceRecordDialogProps) => {
 
     setOpen(false);
     // Reset form
-    setServiceType(undefined);
+    setServiceType("oil_change");
     setServiceDate("");
     setNextServiceDate("");
     setMileage("");
@@ -68,24 +67,20 @@ const ServiceRecordDialog = ({ onSubmit }: ServiceRecordDialogProps) => {
         <form onSubmit={handleSubmit} className="space-y-4 mt-4">
           <div className="space-y-2">
             <label className="text-sm font-medium">Service Type</label>
-            <Select 
-              value={serviceType} 
-              onValueChange={(value: ServiceType) => setServiceType(value)}
+            <select
+              className="w-full h-10 px-3 py-2 rounded-md border text-sm"
+              value={serviceType}
+              onChange={(e) => setServiceType(e.target.value as ServiceType)}
               required
             >
-              <SelectTrigger>
-                <SelectValue placeholder="Select service type" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="oil_change">Oil Change</SelectItem>
-                <SelectItem value="tire_replacement">Tire Replacement</SelectItem>
-                <SelectItem value="brake_service">Brake Service</SelectItem>
-                <SelectItem value="chain_maintenance">Chain Maintenance</SelectItem>
-                <SelectItem value="general_maintenance">General Maintenance</SelectItem>
-                <SelectItem value="repair">Repair</SelectItem>
-                <SelectItem value="inspection">Inspection</SelectItem>
-              </SelectContent>
-            </Select>
+              <option value="oil_change">Oil Change</option>
+              <option value="tire_replacement">Tire Replacement</option>
+              <option value="brake_service">Brake Service</option>
+              <option value="chain_maintenance">Chain Maintenance</option>
+              <option value="general_maintenance">General Maintenance</option>
+              <option value="repair">Repair</option>
+              <option value="inspection">Inspection</option>
+            </select>
           </div>
 
           <div className="space-y-2">

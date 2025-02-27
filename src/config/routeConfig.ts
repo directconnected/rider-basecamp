@@ -1,30 +1,38 @@
 
 import Index from "@/pages/Index";
-import Auth from "@/pages/Auth";
+import MotorcycleDetails from "@/pages/MotorcycleDetails";
+import CampingHub from "@/pages/CampingHub";
+import CampingGear from "@/pages/CampingGear";
 import Data from "@/pages/Data";
+import Auth from "@/pages/Auth";
 import Service from "@/pages/Service";
 import Destinations from "@/pages/Destinations";
-import CampingHub from "@/pages/CampingHub";
-import MotorcycleDetails from "@/pages/MotorcycleDetails";
 import PrintableService from "@/pages/PrintableService";
 
-interface RouteConfig {
-  path: string;
-  element: React.ComponentType<any>;
-}
-
-export const routeConfig: RouteConfig[] = [
+export const routeConfig = [
   {
     path: "/",
     element: Index,
   },
   {
-    path: "/auth",
-    element: Auth,
+    path: "/motorcycle/:id",
+    element: MotorcycleDetails,
+  },
+  {
+    path: "/camping",
+    element: CampingHub,
+  },
+  {
+    path: "/camping-gear",
+    element: CampingGear,
   },
   {
     path: "/data",
     element: Data,
+  },
+  {
+    path: "/auth",
+    element: Auth,
   },
   {
     path: "/service-records",
@@ -35,15 +43,7 @@ export const routeConfig: RouteConfig[] = [
     element: Destinations,
   },
   {
-    path: "/camping-hub",
-    element: CampingHub,
-  },
-  {
-    path: "/motorcycle/:id",
-    element: MotorcycleDetails,
-  },
-  {
     path: "/printable-service",
     element: PrintableService,
-  },
+  }
 ];
