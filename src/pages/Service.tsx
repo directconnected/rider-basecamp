@@ -49,12 +49,18 @@ const Service = () => {
   }, [records]);
 
   const checkAuthAndFetchRecords = async () => {
-    const { data: { session } } = await supabase.auth.getSession();
-    if (!session) {
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        navigate("/auth");
+        return;
+      }
+      fetchServiceRecords();
+    } catch (error) {
+      console.error("Error checking auth:", error);
+      toast.error("Authentication error occurred");
       navigate("/auth");
-      return;
     }
-    fetchServiceRecords();
   };
 
   const fetchServiceRecords = async () => {
@@ -164,6 +170,8 @@ const Service = () => {
     setSearchDate("");
     setSearchType("");
   };
+
+  console.log("Service component rendering", { records, filteredRecords, loading });
 
   return (
     <div className="min-h-screen flex flex-col">

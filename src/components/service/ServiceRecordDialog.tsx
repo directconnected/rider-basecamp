@@ -5,9 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { format } from "date-fns";
-import { CalendarIcon, Plus } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { Plus } from "lucide-react";
 
 type ServiceType = 'oil_change' | 'tire_replacement' | 'brake_service' | 
                   'chain_maintenance' | 'general_maintenance' | 'repair' | 'inspection';
@@ -70,7 +68,11 @@ const ServiceRecordDialog = ({ onSubmit }: ServiceRecordDialogProps) => {
         <form onSubmit={handleSubmit} className="space-y-4 mt-4">
           <div className="space-y-2">
             <label className="text-sm font-medium">Service Type</label>
-            <Select value={serviceType} onValueChange={(value: ServiceType) => setServiceType(value)} required>
+            <Select 
+              value={serviceType} 
+              onValueChange={(value: ServiceType) => setServiceType(value)}
+              required
+            >
               <SelectTrigger>
                 <SelectValue placeholder="Select service type" />
               </SelectTrigger>
