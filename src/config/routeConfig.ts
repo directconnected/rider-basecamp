@@ -15,6 +15,7 @@ import Tents from "@/pages/Tents";
 import RoutePlanning from "@/pages/RoutePlanning";
 import GroupRides from "@/pages/GroupRides";
 import GpxDownloads from "@/pages/GpxDownloads";
+import Campgrounds from "@/pages/Campgrounds";
 
 export const routeConfig = [
   {
@@ -80,6 +81,14 @@ export const routeConfig = [
   {
     path: "/route-planning",
     element: RoutePlanning,
+  },
+  {
+    path: "/campgrounds",
+    element: Campgrounds,
+  },
+  {
+    path: "/camping-hub/campgrounds",
+    element: Campgrounds,
   },
   {
     path: "/group-rides",

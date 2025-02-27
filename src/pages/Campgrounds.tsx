@@ -5,6 +5,7 @@ import Footer from "@/components/layout/Footer";
 import CampsiteSearchForm from "@/components/camping/CampsiteSearchForm";
 import CampsiteSearchResults from "@/components/camping/CampsiteSearchResults";
 import { useCampsiteSearch } from "@/hooks/useCampsiteSearch";
+import Breadcrumbs from "@/components/Breadcrumbs";
 
 const Campgrounds = () => {
   const {
@@ -22,6 +23,7 @@ const Campgrounds = () => {
   return (
     <div className="min-h-screen flex flex-col">
       <Navigation />
+      <Breadcrumbs />
       
       <main className="flex-1">
         <section className="py-24 bg-gradient-to-b from-gray-900 to-gray-800">
