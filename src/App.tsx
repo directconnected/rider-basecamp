@@ -5,24 +5,20 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import Index from "@/pages/Index";
+import { routeConfig } from "@/config/routeConfig";
+
+// Import standard pages not included in routeConfig
 import About from "@/pages/About";
 import Contact from "@/pages/Contact";
 import AdvertiseWithUs from "@/pages/AdvertiseWithUs";
 import Subscribe from "@/pages/Subscribe";
-import Auth from "@/pages/Auth";
 import Dashboard from "@/pages/Dashboard";
-import MotorcycleDetails from "@/pages/MotorcycleDetails";
 import NotFound from "@/pages/NotFound";
 import Admin from "@/pages/Admin";
 import AdminLogin from "@/pages/AdminLogin";
 import AdminSignup from "@/pages/AdminSignup";
 import ProtectedAdminRoute from "@/components/admin/ProtectedAdminRoute";
-import Destinations from "@/pages/Destinations";
-import CampingHub from "@/pages/CampingHub";
 import RidingGear from "@/pages/RidingGear";
-import Data from "@/pages/Data";
-import Service from "@/pages/Service";
 import Dealers from "@/pages/Dealers";
 import TopRoads from "@/pages/TopRoads";
 import ScenicByways from "@/pages/ScenicByways";
@@ -50,14 +46,21 @@ function App() {
       <TooltipProvider>
         <Router>
           <RouterRoutes>
-            <Route path="/" element={<Index />} />
+            {/* Routes from routeConfig */}
+            {routeConfig.map((route) => (
+              <Route
+                key={route.path}
+                path={route.path}
+                element={<route.element />}
+              />
+            ))}
+            
+            {/* Routes not included in routeConfig */}
             <Route path="/about" element={<About />} />
             <Route path="/contact" element={<Contact />} />
             <Route path="/advertise" element={<AdvertiseWithUs />} />
             <Route path="/subscribe" element={<Subscribe />} />
-            <Route path="/auth" element={<Auth />} />
             <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/motorcycle/:id" element={<MotorcycleDetails />} />
             <Route path="/admin/login" element={<AdminLogin />} />
             <Route 
               path="/admin/signup" 
@@ -75,12 +78,8 @@ function App() {
                 </ProtectedAdminRoute>
               } 
             />
-            <Route path="/service" element={<ServiceLanding />} />
-            <Route path="/service-records" element={<Service />} />
-            <Route path="/destinations" element={<Destinations />} />
-            <Route path="/camping-hub" element={<CampingHub />} />
+            <Route path="/service-landing" element={<ServiceLanding />} />
             <Route path="/riding-gear" element={<RidingGear />} />
-            <Route path="/data" element={<Data />} />
             <Route path="/dealers" element={<Dealers />} />
             <Route path="/top-roads" element={<TopRoads />} />
             <Route path="/scenic-byways" element={<ScenicByways />} />
