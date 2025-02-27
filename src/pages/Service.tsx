@@ -9,7 +9,7 @@ import ServiceRecordDialog from "@/components/service/ServiceRecordDialog";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate, Link } from "react-router-dom";
 import { toast } from "sonner";
-import { format, addDays, isWithinInterval } from "date-fns";
+import { format, addDays, isWithinInterval, parse } from "date-fns";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -98,9 +98,12 @@ const Service = () => {
     let filtered = [...records];
     
     if (searchDate) {
-      filtered = filtered.filter(record => 
-        record.service_date.includes(searchDate)
-      );
+      // Fix the date comparison logic here
+      filtered = filtered.filter(record => {
+        // Format the search date string to match the service_date format (yyyy-MM-dd)
+        const formattedSearchDate = formatSearchDateToISO(searchDate);
+        return record.service_date === formattedSearchDate;
+      });
     }
     
     if (searchType) {
@@ -110,6 +113,25 @@ const Service = () => {
     }
     
     setFilteredRecords(filtered);
+    console.log("Filtered records:", filtered);
+  };
+
+  // Helper function to format search date to ISO format
+  const formatSearchDateToISO = (dateString: string) => {
+    // If the date is already in yyyy-MM-dd format, return it as is
+    if (/^\d{4}-\d{2}-\d{2}$/.test(dateString)) {
+      return dateString;
+    }
+    
+    // Try to parse MM/dd/yyyy format
+    try {
+      const parsedDate = parse(dateString, 'MM/dd/yyyy', new Date());
+      return format(parsedDate, 'yyyy-MM-dd');
+    } catch (error) {
+      // If parsing fails, just return the original string
+      console.error("Date parsing error:", error);
+      return dateString;
+    }
   };
 
   const findUpcomingServices = () => {
