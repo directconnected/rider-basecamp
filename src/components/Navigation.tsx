@@ -37,7 +37,7 @@ const Navigation = () => {
       navigate('/auth', { 
         state: { 
           from: { 
-            pathname: location.pathname === '/auth' ? '/dashboard' : location.pathname 
+            pathname: location.pathname === '/auth' ? '/service-records' : location.pathname 
           } 
         } 
       });
