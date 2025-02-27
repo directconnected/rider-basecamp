@@ -11,6 +11,7 @@ import PrintableService from "@/pages/PrintableService";
 import TopRoads from "@/pages/TopRoads";
 import ScenicByways from "@/pages/ScenicByways";
 import FeaturedDestinations from "@/pages/FeaturedDestinations";
+import Tents from "@/pages/Tents";
 
 export const routeConfig = [
   {
@@ -60,6 +61,14 @@ export const routeConfig = [
   {
     path: "/destinations/featured-destinations",
     element: FeaturedDestinations,
+  },
+  {
+    path: "/camping-hub/tents",
+    element: Tents,
+  },
+  {
+    path: "/tents",
+    element: Tents,
   },
   {
     path: "/printable-service",

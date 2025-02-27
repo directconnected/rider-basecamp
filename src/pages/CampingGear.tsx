@@ -44,7 +44,7 @@ const CampingGear = () => {
                     icon: Tent,
                     title: "Tents & Shelters",
                     description: "Lightweight, compact options",
-                    link: "/tents"
+                    link: "/camping-hub/tents"
                   },
                   {
                     icon: Backpack,
