@@ -189,7 +189,7 @@ const PrintableService = () => {
         )}
       </div>
 
-      <style jsx global>{`
+      <style>{`
         @media print {
           .no-print {
             display: none;

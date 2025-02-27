@@ -1,11 +1,12 @@
-import { Index } from "@/pages";
-import { Auth } from "@/pages/Auth";
-import { Data } from "@/pages/Data";
-import { Service } from "@/pages/Service";
-import { Destinations } from "@/pages/Destinations";
-import { CampingHub } from "@/pages/CampingHub";
-import { MotorcycleDetails } from "@/pages/MotorcycleDetails";
-import { PrintableService } from "@/pages/PrintableService";
+
+import Index from "@/pages/Index";
+import Auth from "@/pages/Auth";
+import Data from "@/pages/Data";
+import Service from "@/pages/Service";
+import Destinations from "@/pages/Destinations";
+import CampingHub from "@/pages/CampingHub";
+import MotorcycleDetails from "@/pages/MotorcycleDetails";
+import PrintableService from "@/pages/PrintableService";
 
 interface RouteConfig {
   path: string;
