@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from "react";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/layout/Footer";
@@ -97,41 +96,44 @@ const Service = () => {
   const filterRecords = () => {
     let filtered = [...records];
     
+    console.log("Filtering records with searchDate:", searchDate);
+    
     if (searchDate) {
-      // Fix the date comparison logic here
+      // Improved date comparison logic
       filtered = filtered.filter(record => {
-        // Format the search date string to match the service_date format (yyyy-MM-dd)
-        const formattedSearchDate = formatSearchDateToISO(searchDate);
-        return record.service_date === formattedSearchDate;
+        try {
+          let formattedSearchDate;
+          let recordDate = record.service_date;
+          
+          // Format the input date consistently for comparison
+          if (searchDate.includes('/')) {
+            // Handle MM/DD/YYYY format
+            const parsedDate = parse(searchDate, 'MM/dd/yyyy', new Date());
+            formattedSearchDate = format(parsedDate, 'yyyy-MM-dd');
+          } else {
+            // Already in YYYY-MM-DD format from date picker
+            formattedSearchDate = searchDate;
+          }
+          
+          console.log(`Comparing record date: ${recordDate} with search date: ${formattedSearchDate}`);
+          return recordDate === formattedSearchDate;
+        } catch (error) {
+          console.error("Date comparison error:", error);
+          return false;
+        }
       });
+      
+      console.log("After date filtering:", filtered);
     }
     
     if (searchType) {
       filtered = filtered.filter(record => 
         record.service_type === searchType
       );
+      console.log("After type filtering:", filtered);
     }
     
     setFilteredRecords(filtered);
-    console.log("Filtered records:", filtered);
-  };
-
-  // Helper function to format search date to ISO format
-  const formatSearchDateToISO = (dateString: string) => {
-    // If the date is already in yyyy-MM-dd format, return it as is
-    if (/^\d{4}-\d{2}-\d{2}$/.test(dateString)) {
-      return dateString;
-    }
-    
-    // Try to parse MM/dd/yyyy format
-    try {
-      const parsedDate = parse(dateString, 'MM/dd/yyyy', new Date());
-      return format(parsedDate, 'yyyy-MM-dd');
-    } catch (error) {
-      // If parsing fails, just return the original string
-      console.error("Date parsing error:", error);
-      return dateString;
-    }
   };
 
   const findUpcomingServices = () => {
@@ -193,6 +195,33 @@ const Service = () => {
     setSearchType("");
   };
 
+  // Handle date input changes - normalize to ISO format for the state
+  const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const dateValue = e.target.value;
+    
+    // For clearing the input
+    if (!dateValue) {
+      setSearchDate("");
+      return;
+    }
+    
+    // Keep ISO format from date picker as is
+    if (/^\d{4}-\d{2}-\d{2}$/.test(dateValue)) {
+      setSearchDate(dateValue);
+      return;
+    }
+    
+    // Handle MM/DD/YYYY format entered manually
+    try {
+      const parsedDate = parse(dateValue, 'MM/dd/yyyy', new Date());
+      const formattedDate = format(parsedDate, 'yyyy-MM-dd');
+      setSearchDate(formattedDate);
+    } catch (error) {
+      console.warn("Could not parse date:", dateValue);
+      setSearchDate(dateValue); // Keep the unparsed value for now
+    }
+  };
+
   console.log("Service component rendering", { records, filteredRecords, loading });
 
   return (
@@ -221,7 +250,7 @@ const Service = () => {
                 <Input
                   type="date"
                   value={searchDate}
-                  onChange={(e) => setSearchDate(e.target.value)}
+                  onChange={handleDateChange}
                   placeholder="Filter by date"
                   className="w-44"
                 />
