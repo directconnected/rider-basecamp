@@ -12,6 +12,9 @@ import TopRoads from "@/pages/TopRoads";
 import ScenicByways from "@/pages/ScenicByways";
 import FeaturedDestinations from "@/pages/FeaturedDestinations";
 import Tents from "@/pages/Tents";
+import RoutePlanning from "@/pages/RoutePlanning";
+import GroupRides from "@/pages/GroupRides";
+import GpxDownloads from "@/pages/GpxDownloads";
 
 export const routeConfig = [
   {
@@ -69,6 +72,18 @@ export const routeConfig = [
   {
     path: "/tents",
     element: Tents,
+  },
+  {
+    path: "/route-planning",
+    element: RoutePlanning,
+  },
+  {
+    path: "/group-rides",
+    element: GroupRides,
+  },
+  {
+    path: "/gpx-downloads",
+    element: GpxDownloads,
   },
   {
     path: "/printable-service",
