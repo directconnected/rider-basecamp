@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from "react";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/layout/Footer";
@@ -93,6 +94,28 @@ const Service = () => {
     }
   };
 
+  // Function to normalize date strings for display and comparison
+  const normalizeDate = (dateString: string) => {
+    // Create a date object - ensures consistent handling
+    const date = new Date(dateString);
+    // Format to YYYY-MM-DD to avoid timezone issues
+    return format(date, 'yyyy-MM-dd');
+  };
+
+  // Format date for display with timezone handling
+  const formatDateForDisplay = (dateString: string) => {
+    if (!dateString) return '';
+    try {
+      // Create a date object that preserves the date regardless of timezone
+      // This ensures the displayed date matches what was stored
+      const date = new Date(dateString + 'T00:00:00'); 
+      return format(date, 'PP'); // Locale-specific date format
+    } catch (error) {
+      console.error("Error formatting date for display:", error);
+      return dateString;
+    }
+  };
+
   const filterRecords = () => {
     let filtered = [...records];
     
@@ -102,10 +125,8 @@ const Service = () => {
       // Improved date comparison logic
       filtered = filtered.filter(record => {
         try {
+          // Normalize the search date
           let formattedSearchDate;
-          let recordDate = record.service_date;
-          
-          // Format the input date consistently for comparison
           if (searchDate.includes('/')) {
             // Handle MM/DD/YYYY format
             const parsedDate = parse(searchDate, 'MM/dd/yyyy', new Date());
@@ -114,6 +135,9 @@ const Service = () => {
             // Already in YYYY-MM-DD format from date picker
             formattedSearchDate = searchDate;
           }
+          
+          // Normalize the record date
+          const recordDate = normalizeDate(record.service_date);
           
           console.log(`Comparing record date: ${recordDate} with search date: ${formattedSearchDate}`);
           return recordDate === formattedSearchDate;
@@ -298,7 +322,7 @@ const Service = () => {
                         <div key={`upcoming-${service.id}`} className="flex items-center gap-2">
                           <Calendar className="h-4 w-4 text-gray-500" />
                           <p>
-                            {formatServiceType(service.service_type)} due on {format(new Date(service.next_service_date!), 'PP')}
+                            {formatServiceType(service.service_type)} due on {formatDateForDisplay(service.next_service_date!)}
                           </p>
                         </div>
                       ))}
@@ -340,13 +364,13 @@ const Service = () => {
                     <div className="space-y-2 text-sm text-gray-600">
                       <div className="flex items-center">
                         <Calendar className="h-4 w-4 mr-2" />
-                        <span>Service Date: {format(new Date(record.service_date), 'PP')}</span>
+                        <span>Service Date: {formatDateForDisplay(record.service_date)}</span>
                       </div>
                       
                       {record.next_service_date && (
                         <div className="flex items-center">
                           <Clock className="h-4 w-4 mr-2" />
-                          <span>Next Service: {format(new Date(record.next_service_date), 'PP')}</span>
+                          <span>Next Service: {formatDateForDisplay(record.next_service_date)}</span>
                         </div>
                       )}
                       
