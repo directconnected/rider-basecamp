@@ -18,6 +18,12 @@ const features = [
     description: "Find motorcycle-friendly campgrounds and RV parks.",
     link: "/campgrounds"
   },
+  { 
+    icon: Tent,
+    title: "Tents & Shelters",
+    description: "Lightweight, compact options",
+    link: "/tents"
+  },
   {
     icon: Map,
     title: "Trail Maps",
