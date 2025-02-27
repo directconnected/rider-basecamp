@@ -27,7 +27,7 @@ export const routeConfig: RouteConfig[] = [
     element: Data,
   },
   {
-    path: "/service",
+    path: "/service-records",
     element: Service,
   },
   {
