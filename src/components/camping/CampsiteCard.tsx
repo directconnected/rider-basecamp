@@ -85,6 +85,7 @@ const CampsiteCard = ({ campsite }: CampsiteCardProps) => {
                   <li><span className="font-medium">SH</span> - Shower House</li>
                   <li><span className="font-medium">E</span> - Electric Available</li>
                   <li><span className="font-medium">NH</span> - No Hookups</li>
+                  <li><span className="font-medium">NS</span> - No Showers</li>
                   <li><span className="font-medium">N/A</span> - Data Not Available</li>
                 </ul>
               </div>
