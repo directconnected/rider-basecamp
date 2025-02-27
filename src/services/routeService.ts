@@ -1,3 +1,4 @@
+
 import mapboxgl from 'mapbox-gl';
 import { findNearbyGasStation, findNearbyLodging } from "./placesService";
 import { FuelStop, HotelStop } from "@/hooks/useRoutePlanning";
