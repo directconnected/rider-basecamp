@@ -15,8 +15,6 @@ export type Database = {
           camp: string | null
           camp_id: number | null
           comments: string | null
-          date: string | null
-          devel: number | null
           dir_from_town: string | null
           directions: string | null
           dump: string | null
@@ -26,11 +24,9 @@ export type Database = {
           id: number
           lat: number | null
           lon: number | null
-          name: string | null
           nforg: number | null
           pets: string | null
           phone: string | null
-          ra_number: number | null
           reservations: string | null
           rv_length: number | null
           season: string | null
@@ -40,9 +36,7 @@ export type Database = {
           toilets: string | null
           town: string | null
           type: string | null
-          upd: string | null
           url: string | null
-          url_confirmed: number | null
           water: string | null
         }
         Insert: {
@@ -50,8 +44,6 @@ export type Database = {
           camp?: string | null
           camp_id?: number | null
           comments?: string | null
-          date?: string | null
-          devel?: number | null
           dir_from_town?: string | null
           directions?: string | null
           dump?: string | null
@@ -61,11 +53,9 @@ export type Database = {
           id?: number
           lat?: number | null
           lon?: number | null
-          name?: string | null
           nforg?: number | null
           pets?: string | null
           phone?: string | null
-          ra_number?: number | null
           reservations?: string | null
           rv_length?: number | null
           season?: string | null
@@ -75,9 +65,7 @@ export type Database = {
           toilets?: string | null
           town?: string | null
           type?: string | null
-          upd?: string | null
           url?: string | null
-          url_confirmed?: number | null
           water?: string | null
         }
         Update: {
@@ -85,8 +73,6 @@ export type Database = {
           camp?: string | null
           camp_id?: number | null
           comments?: string | null
-          date?: string | null
-          devel?: number | null
           dir_from_town?: string | null
           directions?: string | null
           dump?: string | null
@@ -96,11 +82,9 @@ export type Database = {
           id?: number
           lat?: number | null
           lon?: number | null
-          name?: string | null
           nforg?: number | null
           pets?: string | null
           phone?: string | null
-          ra_number?: number | null
           reservations?: string | null
           rv_length?: number | null
           season?: string | null
@@ -110,9 +94,7 @@ export type Database = {
           toilets?: string | null
           town?: string | null
           type?: string | null
-          upd?: string | null
           url?: string | null
-          url_confirmed?: number | null
           water?: string | null
         }
         Relationships: []
