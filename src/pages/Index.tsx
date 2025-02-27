@@ -30,18 +30,18 @@ const features = [
     id: "destinations-feature"
   },
   {
-    icon: Shield,
-    title: "Gear Hub",
-    description: "(Coming Soon)",
-    link: "#",
-    id: "riding-gear-feature"
-  },
-  {
     icon: Tent,
     title: "Camping Hub",
     description: "Find motorcycle friendly accomodations.",
     link: "/camping-hub",
     id: "camping-hub-feature"
+  },
+  {
+    icon: Shield,
+    title: "Gear Hub",
+    description: "(Coming Soon)",
+    link: "#",
+    id: "riding-gear-feature"
   },
   {
     icon: Store,
