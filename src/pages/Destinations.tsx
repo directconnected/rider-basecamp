@@ -18,13 +18,13 @@ const features = [
     icon: Route,
     title: "Scenic Byways",
     description: "Explore America's most scenic motorcycle roads and byways.",
-    link: "/scenic-byways"
+    link: "/destinations/scenic-byways"
   },
   {
     icon: Star,
     title: "Destinations",
     description: "Must-visit destinations for motorcycle enthusiasts.",
-    link: "/featured-destinations"
+    link: "/destinations/featured-destinations"
   },
   {
     icon: Compass,

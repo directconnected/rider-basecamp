@@ -9,6 +9,8 @@ import Service from "@/pages/Service";
 import Destinations from "@/pages/Destinations";
 import PrintableService from "@/pages/PrintableService";
 import TopRoads from "@/pages/TopRoads";
+import ScenicByways from "@/pages/ScenicByways";
+import FeaturedDestinations from "@/pages/FeaturedDestinations";
 
 export const routeConfig = [
   {
@@ -50,6 +52,14 @@ export const routeConfig = [
   {
     path: "/destinations/top-roads",
     element: TopRoads,
+  },
+  {
+    path: "/destinations/scenic-byways",
+    element: ScenicByways,
+  },
+  {
+    path: "/destinations/featured-destinations",
+    element: FeaturedDestinations,
   },
   {
     path: "/printable-service",
