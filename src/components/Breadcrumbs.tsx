@@ -1,62 +1,47 @@
 
 import React from "react";
-import { useLocation } from "react-router-dom";
-import { Link } from "react-router-dom";
-import { ChevronRight, Home } from "lucide-react";
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb";
-import { getBreadcrumbs } from "@/utils/breadcrumbUtils";
+import { Link, useLocation } from "react-router-dom";
+import { ChevronRight } from "lucide-react";
 
 const Breadcrumbs = () => {
   const location = useLocation();
-  const breadcrumbs = getBreadcrumbs(location.pathname);
-
-  if (location.pathname === '/') return null;
+  const pathnames = location.pathname.split("/").filter((x) => x);
 
   return (
-    <div className="bg-white border-b">
+    <nav className="bg-gray-100 py-2" aria-label="Breadcrumb">
       <div className="container mx-auto px-4">
-        <Breadcrumb className="py-4">
-          <BreadcrumbList>
-            <BreadcrumbItem>
-              <BreadcrumbLink asChild>
-                <Link to="/" className="flex items-center">
-                  <Home className="h-4 w-4" />
-                </Link>
-              </BreadcrumbLink>
-            </BreadcrumbItem>
-            <BreadcrumbSeparator>
-              <ChevronRight className="h-4 w-4" />
-            </BreadcrumbSeparator>
+        <div className="flex items-center space-x-2 text-sm">
+          <Link to="/" className="text-gray-600 hover:text-gray-900">
+            Home
+          </Link>
+          {pathnames.map((name, index) => {
+            const routeTo = `/${pathnames.slice(0, index + 1).join("/")}`;
+            const isLast = index === pathnames.length - 1;
+            const formattedName = name.split("-")
+              .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+              .join(" ");
 
-            {breadcrumbs.map((crumb, index) => (
-              <React.Fragment key={crumb.url}>
-                <BreadcrumbItem>
-                  {index === breadcrumbs.length - 1 ? (
-                    <BreadcrumbPage>{crumb.label}</BreadcrumbPage>
-                  ) : (
-                    <BreadcrumbLink asChild>
-                      <Link to={crumb.url}>{crumb.label}</Link>
-                    </BreadcrumbLink>
-                  )}
-                </BreadcrumbItem>
-                {index < breadcrumbs.length - 1 && (
-                  <BreadcrumbSeparator>
-                    <ChevronRight className="h-4 w-4" />
-                  </BreadcrumbSeparator>
+            return (
+              <React.Fragment key={routeTo}>
+                <ChevronRight className="h-4 w-4 text-gray-400" />
+                {isLast ? (
+                  <span className="text-gray-900 font-medium">
+                    {formattedName}
+                  </span>
+                ) : (
+                  <Link
+                    to={routeTo}
+                    className="text-gray-600 hover:text-gray-900"
+                  >
+                    {formattedName}
+                  </Link>
                 )}
               </React.Fragment>
-            ))}
-          </BreadcrumbList>
-        </Breadcrumb>
+            );
+          })}
+        </div>
       </div>
-    </div>
+    </nav>
   );
 };
 
