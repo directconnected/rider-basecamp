@@ -66,6 +66,10 @@ export const routeConfig = [
     element: FeaturedDestinations,
   },
   {
+    path: "/destinations/route-planning",
+    element: RoutePlanning,
+  },
+  {
     path: "/camping-hub/tents",
     element: Tents,
   },

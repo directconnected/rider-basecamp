@@ -30,7 +30,7 @@ const features = [
     icon: Compass,
     title: "Route Planning",
     description: "Plan your next adventure with our route planning tools.",
-    link: "/route-planning"
+    link: "/destinations/route-planning"
   },
   {
     icon: FileDown,

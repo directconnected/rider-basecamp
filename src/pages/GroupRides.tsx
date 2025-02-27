@@ -30,7 +30,7 @@ const features = [
     icon: Map,
     title: "Route Planning",
     description: "Plan and share routes for group rides.",
-    link: "/route-planning"
+    link: "/destinations/route-planning"
   },
   {
     icon: MessageCircle,
