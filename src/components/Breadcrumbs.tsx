@@ -16,6 +16,7 @@ const Breadcrumbs = () => {
           <Link to="/" className="text-gray-600 hover:text-gray-900">
             Home
           </Link>
+
           {pathnames.map((name, index) => {
             const routeTo = `/${pathnames.slice(0, index + 1).join("/")}`;
             const isLast = index === pathnames.length - 1;
