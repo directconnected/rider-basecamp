@@ -19,6 +19,10 @@ export const routeConfig = [
     element: MotorcycleDetails,
   },
   {
+    path: "/camping-hub",
+    element: CampingHub,
+  },
+  {
     path: "/camping",
     element: CampingHub,
   },
