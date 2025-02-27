@@ -7,6 +7,8 @@ const Breadcrumbs = () => {
   const location = useLocation();
   const pathnames = location.pathname.split("/").filter((x) => x);
 
+  console.log("Breadcrumbs rendering with path:", location.pathname);
+
   return (
     <nav className="bg-gray-100 py-2" aria-label="Breadcrumb">
       <div className="container mx-auto px-4">

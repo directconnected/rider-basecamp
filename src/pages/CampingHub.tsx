@@ -33,9 +33,12 @@ const features = [
 ];
 
 const CampingHub = () => {
+  console.log("Rendering CampingHub component");
+  
   return (
     <div className="min-h-screen flex flex-col">
       <Navigation />
+      
       <Breadcrumbs />
       
       <main className="flex-1">
