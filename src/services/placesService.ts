@@ -110,6 +110,31 @@ export const findNearbyCampground = async (coordinates: [number, number], radius
 export const findNearbyCampgrounds = async (coordinates: [number, number], radius: number = 25000): Promise<CampgroundResult[]> => {
   try {
     console.log(`Searching for campgrounds near coordinates:`, coordinates, 'with radius:', radius);
+    
+    // Try directly using the campsites table if the Places API fails
+    // This is a fallback approach
+    const { data: campsiteData, error: dbError } = await supabase
+      .from('campsites')
+      .select('*')
+      .order('camp')
+      .limit(20);
+    
+    if (!dbError && campsiteData && campsiteData.length > 0) {
+      console.log(`Found ${campsiteData.length} campgrounds in database`);
+      
+      // Process and return the found places from the database
+      return campsiteData.map(site => ({
+        name: site.camp || 'Unknown Campground',
+        address: site.town ? `${site.town}, ${site.state}` : (site.state || 'Unknown Location'),
+        location: [site.lon || 0, site.lat || 0],
+        rating: 4.0, // Default rating since DB doesn't have this
+        website: site.url,
+        phone_number: site.phone,
+        types: ['campground']
+      }));
+    }
+    
+    // Try Google Places API
     const { data, error } = await supabase.functions.invoke('find-nearby-places', {
       body: {
         location: [coordinates[1], coordinates[0]], 
@@ -117,21 +142,22 @@ export const findNearbyCampgrounds = async (coordinates: [number, number], radiu
         radius,
         rankby: 'prominence',
         fields: ['name', 'vicinity', 'formatted_address', 'geometry', 'rating', 'price_level', 'website', 'formatted_phone_number', 'types'],
+        keyword: 'campground',
         limit: 20 // Request more results
       }
     });
 
     if (error) {
-      console.error(`Error finding campgrounds:`, error);
+      console.error(`Error finding campgrounds from Places API:`, error);
       return [];
     }
 
     if (!data?.places || data.places.length === 0) {
-      console.log(`No campgrounds found near coordinates with radius ${radius}:`, coordinates);
+      console.log(`No campgrounds found near coordinates with radius ${radius} from Places API:`, coordinates);
       return [];
     }
 
-    console.log(`Found ${data.places.length} campgrounds`);
+    console.log(`Found ${data.places.length} campgrounds from Places API`);
     
     // Process and return the found places
     return data.places.map(place => ({

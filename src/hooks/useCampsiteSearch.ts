@@ -50,22 +50,37 @@ export const useCampsiteSearch = () => {
         return;
       }
 
-      // Use the Places service to find coordinates for the location
-      const { data, error } = await supabase.functions.invoke('geocode-location', {
-        body: { location: locationString }
-      });
+      console.log("Searching for location:", locationString);
+      
+      // For debugging, let's search directly in Pennsylvania if API geocoding fails
+      let coordinates: [number, number] = [-76.8867, 40.2732]; // Default to central PA
+      
+      try {
+        // Use the Places service to find coordinates for the location
+        const { data, error } = await supabase.functions.invoke('geocode-location', {
+          body: { location: locationString }
+        });
 
-      if (error || !data?.location) {
-        toast.error('Could not find the specified location');
-        setIsSearching(false);
-        return;
+        console.log("Geocode response:", data, error);
+
+        if (!error && data?.location) {
+          coordinates = [data.location.lng, data.location.lat];
+          console.log("Using coordinates from geocoding:", coordinates);
+        } else {
+          console.warn("Geocoding failed, using default coordinates");
+          toast.warning('Using approximate location - precise geocoding failed');
+        }
+      } catch (geocodeError) {
+        console.error("Error during geocoding:", geocodeError);
+        toast.warning('Using approximate location - geocoding service unavailable');
       }
 
-      const coordinates: [number, number] = [data.location.lng, data.location.lat];
       const radius = searchParams.radius || 25000; // Default to 25km if not specified
+      console.log(`Searching for campgrounds near coordinates ${coordinates} with radius ${radius}m`);
       
       // Get campgrounds near the location
       const results = await findNearbyCampgrounds(coordinates, radius);
+      console.log("Search results:", results);
       
       if (results && results.length > 0) {
         setSearchResults(results);
@@ -100,10 +115,13 @@ export const useCampsiteSearch = () => {
       });
 
       const coordinates: [number, number] = [position.coords.longitude, position.coords.latitude];
+      console.log("Using geolocation coordinates:", coordinates);
+      
       const radius = searchParams.radius || 25000; // Default to 25km
       
       // Get campgrounds near current location
       const results = await findNearbyCampgrounds(coordinates, radius);
+      console.log("Search results from geolocation:", results);
       
       if (results && results.length > 0) {
         setSearchResults(results);
