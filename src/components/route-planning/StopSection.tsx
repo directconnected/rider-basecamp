@@ -31,14 +31,14 @@ const StopSection = ({
   // Generate a formatted display name for the stop type
   const formatType = (stop: RatedStop): string => {
     // Determine which type of stop it is
-    if ('restaurantType' in stop) {
-      return formatRestaurantType(stop.restaurantType);
-    } else if ('lodgingType' in stop) {
-      return formatLodgingType(stop.lodgingType);
+    if ('restaurantType' in stop && stop.restaurantType) {
+      return formatRestaurantType(stop.restaurantType as string);
+    } else if ('lodgingType' in stop && stop.lodgingType) {
+      return formatLodgingType(stop.lodgingType as string);
     } else if ('campingType' in stop) {
       return 'Campground';
-    } else if ('attractionType' in stop) {
-      return formatAttractionType(stop.attractionType);
+    } else if ('attractionType' in stop && stop.attractionType) {
+      return formatAttractionType(stop.attractionType as string);
     }
     return '';
   };

@@ -139,7 +139,7 @@ export const findNearbyRestaurant = async (
     let keyword = null;
     
     // Map specific restaurant types to the appropriate search parameters
-    if (requestedType !== 'any') {
+    if (requestedType !== 'any' as RestaurantType) {
       switch (requestedType) {
         case 'italian':
           keyword = 'italian restaurant';
@@ -248,8 +248,8 @@ export const findNearbyRestaurant = async (
     };
     
     // For specific requested types, look for a better match
-    if (requestedType !== 'any') {
-      const keywords = typeKeywords[requestedType] || [];
+    if (requestedType !== 'any' as RestaurantType) {
+      const keywords = typeKeywords[requestedType as string] || [];
       
       // Try to find a better match from results
       for (const result of data.results) {
@@ -282,7 +282,7 @@ export const findNearbyRestaurant = async (
       );
       
       // If we requested a specific type but found no matches, return null
-      if (!hasAnyMatch && requestedType !== 'any') {
+      if (!hasAnyMatch && requestedType !== 'any' as RestaurantType) {
         console.log(`No good matches found for ${requestedType} - would have returned ${bestMatch.name} which doesn't match`);
         return null;
       }
@@ -317,7 +317,7 @@ export const findNearbyAttraction = async (
     let placeType = 'tourist_attraction';
     let keyword = null;
     
-    if (attractionType !== 'any') {
+    if (attractionType !== 'any' as AttractionType) {
       switch (attractionType) {
         case 'museum':
           placeType = 'museum';
@@ -393,7 +393,7 @@ export const findNearbyAttraction = async (
     }
 
     // When we specifically requested a type, use that type for consistency  
-    let displayType: AttractionType = attractionType !== 'any' ? attractionType : 'tourist_attraction';
+    let displayType: AttractionType = attractionType !== 'any' as AttractionType ? attractionType : 'tourist_attraction';
     
     console.log(`Attraction "${validAttraction.name}" will be displayed with type: ${displayType}`);
 
