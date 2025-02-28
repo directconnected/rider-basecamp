@@ -1,4 +1,3 @@
-
 import { createClient } from '@supabase/supabase-js';
 import { supabase } from "@/integrations/supabase/client";
 
@@ -89,12 +88,42 @@ export const findNearbyRestaurant = async (
   try {
     console.log(`Finding restaurant near ${coordinates} with radius ${radius} and type ${restaurantType}`);
     
+    // Custom restaurant type mapping for accurate searches
+    let searchType = 'restaurant';
+    let specificType = null;
+    
+    // Map specific restaurant types to the right parameters
+    if (restaurantType !== 'any') {
+      switch (restaurantType) {
+        case 'italian':
+          specificType = 'italian_restaurant';
+          break;
+        case 'chinese':
+          specificType = 'chinese_restaurant';
+          break;
+        case 'fast_food':
+          searchType = 'fast_food';
+          specificType = null;
+          break;
+        case 'fine_dining':
+          specificType = 'fine_dining';
+          break;
+        case 'casual_dining':
+          specificType = 'casual_dining';
+          break;
+        default:
+          specificType = restaurantType;
+      }
+    }
+    
+    console.log(`Searching for ${searchType} with specific type: ${specificType}`);
+    
     const { data, error } = await supabase.functions.invoke('find-nearby-places', {
       body: {
         coordinates,
         radius,
-        type: 'restaurant',
-        specificType: restaurantType === 'any' ? null : restaurantType
+        type: searchType,
+        specificType: specificType
       }
     });
     
@@ -110,16 +139,109 @@ export const findNearbyRestaurant = async (
     
     const restaurant = data.results[0];
     
-    // Get and store the actual restaurant type from the API response
+    // Determine the actual restaurant type from the API response
     let actualType = 'restaurant';
-    if (restaurant.types && restaurant.types.length > 0) {
-      // Filter out generic types
-      const specificTypes = restaurant.types.filter((type: string) => 
-        !['food', 'point_of_interest', 'establishment', 'restaurant', 'place'].includes(type)
-      );
+    
+    // If we're specifically looking for a type, verify the result matches
+    if (restaurantType !== 'any') {
+      // Check if the returned restaurant has the requested cuisine type
+      const hasRequestedType = restaurant.types?.includes(specificType) || 
+                             restaurant.types?.includes(restaurantType) ||
+                             (restaurant.name?.toLowerCase().includes(restaurantType));
       
-      if (specificTypes.length > 0) {
-        actualType = specificTypes[0]; // Use the first specific type
+      // If it does match what we asked for, use that type
+      if (hasRequestedType) {
+        actualType = restaurantType;
+      } else {
+        // Otherwise, try to determine the actual type from its categories
+        if (restaurant.types && restaurant.types.length > 0) {
+          const cuisineTypes = ['italian', 'chinese', 'mexican', 'japanese', 'thai', 'indian', 'french'];
+          
+          // Look for cuisine types in the response
+          for (const cuisine of cuisineTypes) {
+            if (restaurant.types.includes(`${cuisine}_restaurant`) || 
+                restaurant.types.includes(cuisine)) {
+              actualType = cuisine;
+              break;
+            }
+          }
+          
+          // Look for restaurant categories
+          if (actualType === 'restaurant') {
+            if (restaurant.types.includes('fast_food')) {
+              actualType = 'fast_food';
+            } else if (restaurant.types.includes('cafe')) {
+              actualType = 'cafe';
+            } else if (restaurant.types.includes('bar')) {
+              actualType = 'bar';
+            }
+          }
+        }
+      }
+    } else {
+      // If we're not looking for a specific type, determine the best category
+      if (restaurant.types && restaurant.types.length > 0) {
+        // First check for specific cuisine types
+        const cuisineMapping = {
+          'italian_restaurant': 'italian',
+          'chinese_restaurant': 'chinese',
+          'mexican_restaurant': 'mexican',
+          'japanese_restaurant': 'japanese',
+          'thai_restaurant': 'thai',
+          'indian_restaurant': 'indian',
+          'french_restaurant': 'french',
+        };
+        
+        for (const [apiType, displayType] of Object.entries(cuisineMapping)) {
+          if (restaurant.types.includes(apiType)) {
+            actualType = displayType;
+            break;
+          }
+        }
+        
+        // Check for restaurant categories if no cuisine was found
+        if (actualType === 'restaurant') {
+          const categoryMapping = {
+            'fast_food': 'fast food',
+            'cafe': 'cafe',
+            'bar': 'bar',
+            'bakery': 'bakery',
+            'meal_takeaway': 'meal takeaway',
+            'meal_delivery': 'meal delivery',
+          };
+          
+          for (const [apiType, displayType] of Object.entries(categoryMapping)) {
+            if (restaurant.types.includes(apiType)) {
+              actualType = displayType;
+              break;
+            }
+          }
+        }
+      }
+    }
+    
+    // Manual overrides for known chains to ensure accuracy
+    if (restaurant.name) {
+      const name = restaurant.name.toLowerCase();
+      if (name.includes('mcdonald') || name.includes('burger king') || 
+          name.includes('wendy') || name.includes('taco bell')) {
+        actualType = 'fast food';
+      } else if (name.includes('cracker barrel')) {
+        actualType = 'american';
+      } else if (name.includes('subway')) {
+        actualType = 'sandwich';
+      } else if (name.includes('olive garden')) {
+        actualType = 'italian';
+      } else if (name.includes('panda express')) {
+        actualType = 'chinese';
+      } else if (name.includes('ruby tuesday')) {
+        actualType = 'american';
+      } else if (name.includes('lone star')) {
+        actualType = 'steakhouse';
+      } else if (name.includes('red lobster')) {
+        actualType = 'seafood';
+      } else if (name.includes('bbq') || name.includes('barbecue')) {
+        actualType = 'bbq';
       }
     }
     
@@ -132,7 +254,7 @@ export const findNearbyRestaurant = async (
       rating: restaurant.rating,
       website: restaurant.website,
       phone_number: restaurant.formatted_phone_number,
-      restaurantType: actualType // Store the actual restaurant type
+      restaurantType: actualType
     };
   } catch (error) {
     console.error('Error in findNearbyRestaurant:', error);
@@ -210,8 +332,6 @@ export const findNearbyAttraction = async (
     return null;
   }
 };
-
-// Add the missing exported functions:
 
 export const findNearbyCampground = async (
   coordinates: [number, number],

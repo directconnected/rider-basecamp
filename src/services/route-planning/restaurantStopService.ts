@@ -31,10 +31,14 @@ export const calculateRestaurantStops = async (
       if (restaurant) {
         console.log(`Found restaurant data for stop ${i}:`, restaurant);
         
-        // Use the provided restaurantType unless it's 'any', then use the type from the API
-        let displayType = restaurantType === 'any' ? 
-          (restaurant.restaurantType || 'restaurant') : 
-          restaurantType;
+        // Use the restaurant's actual type rather than the requested type
+        // Only use the requested type if it was specifically requested (not 'any')
+        let displayType = restaurant.restaurantType || 'restaurant';
+        
+        // If a specific type was requested and found, use that
+        if (restaurantType !== 'any') {
+          displayType = restaurantType;
+        }
         
         // Format the display type to be more human-readable
         displayType = displayType.replace(/_/g, ' ');
@@ -52,7 +56,7 @@ export const calculateRestaurantStops = async (
           restaurantType: displayType
         });
         
-        console.log(`Added restaurant stop ${i}: ${restaurant.name}`);
+        console.log(`Added restaurant stop ${i}: ${restaurant.name} with type ${displayType}`);
       }
     } catch (error) {
       console.error('Error finding restaurant:', error);

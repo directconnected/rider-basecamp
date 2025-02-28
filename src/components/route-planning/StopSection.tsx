@@ -39,6 +39,20 @@ const StopSection = ({ title, icon: Icon, color, stops, getStopName, getStopType
       return 'Fine Dining';
     }
     
+    // Handle special cuisines and restaurant types
+    if (type === 'american') return 'American';
+    if (type === 'italian') return 'Italian';
+    if (type === 'chinese') return 'Chinese';
+    if (type === 'mexican') return 'Mexican';
+    if (type === 'japanese') return 'Japanese';
+    if (type === 'thai') return 'Thai';
+    if (type === 'indian') return 'Indian';
+    if (type === 'steakhouse') return 'Steakhouse';
+    if (type === 'seafood') return 'Seafood';
+    if (type === 'bbq') return 'BBQ';
+    if (type === 'sandwich') return 'Sandwich';
+    if (type === 'meal takeaway') return 'Takeout';
+    
     // Replace underscores with spaces and capitalize each word
     return type
       .replace(/_/g, ' ')
