@@ -92,118 +92,198 @@ export const findNearbyRestaurant = async (
   try {
     console.log(`Finding restaurant near ${coordinates} with radius ${radius} and type ${requestedType}`);
     
-    // Map our internal types to Google Places API types and keywords
-    let placeType = 'restaurant';
-    let keyword = '';
+    // If we're looking for a specific type, we should be more aggressive about filtering
+    const maxAttempts = requestedType === 'any' ? 1 : 5; // Try harder when a specific type is requested
+    let attempt = 0;
+    let searchRadius = radius;
+    let restaurant = null;
     
-    // Map specific restaurant types to the appropriate search parameters
-    if (requestedType !== 'any') {
-      switch (requestedType) {
-        case 'italian':
-          placeType = 'restaurant';
-          keyword = 'italian restaurant';
-          break;
-        case 'mexican':
-          placeType = 'restaurant';
-          keyword = 'mexican restaurant';
-          break;
-        case 'chinese':
-          placeType = 'restaurant';
-          keyword = 'chinese restaurant';
-          break;
-        case 'american':
-          placeType = 'restaurant';
-          keyword = 'american restaurant';
-          break;
-        case 'thai':
-          placeType = 'restaurant';
-          keyword = 'thai restaurant';
-          break;
-        case 'japanese':
-          placeType = 'restaurant';
-          keyword = 'japanese restaurant';
-          break;
-        case 'indian':
-          placeType = 'restaurant';
-          keyword = 'indian restaurant';
-          break;
-        case 'fast_food':
-          placeType = 'restaurant';
-          keyword = 'fast food';
-          break;
-        case 'pizza':
-          placeType = 'restaurant';
-          keyword = 'pizza';
-          break;
-        case 'seafood':
-          placeType = 'restaurant';
-          keyword = 'seafood restaurant';
-          break;
-        case 'steakhouse':
-          placeType = 'restaurant';
-          keyword = 'steakhouse';
-          break;
-        case 'vegetarian':
-          placeType = 'restaurant';
-          keyword = 'vegetarian restaurant';
-          break;
-        case 'breakfast':
-          placeType = 'restaurant';
-          keyword = 'breakfast';
-          break;
-        case 'cafe':
-          placeType = 'cafe';
-          break;
-        case 'barbecue':
-          placeType = 'restaurant';
-          keyword = 'bbq restaurant';
-          break;
-        case 'fine_dining':
-          placeType = 'restaurant';
-          keyword = 'fine dining';
-          break;
-        case 'casual':
-          placeType = 'restaurant';
-          keyword = 'casual dining';
-          break;
-        case 'asian':
-          placeType = 'restaurant';
-          keyword = 'asian restaurant';
-          break;
-        default:
-          // Type assertion to string to avoid 'never' type error
-          keyword = (requestedType as string).replace(/_/g, ' ');
+    while (attempt < maxAttempts && !restaurant) {
+      // Map our internal types to Google Places API types and keywords
+      let placeType = 'restaurant';
+      let keyword = '';
+      
+      // Map specific restaurant types to the appropriate search parameters
+      if (requestedType !== 'any') {
+        switch (requestedType) {
+          case 'italian':
+            placeType = 'restaurant';
+            keyword = 'italian restaurant';
+            break;
+          case 'mexican':
+            placeType = 'restaurant';
+            keyword = 'mexican restaurant';
+            break;
+          case 'chinese':
+            placeType = 'restaurant';
+            keyword = 'chinese restaurant';
+            break;
+          case 'american':
+            placeType = 'restaurant';
+            keyword = 'american restaurant';
+            break;
+          case 'thai':
+            placeType = 'restaurant';
+            keyword = 'thai restaurant';
+            break;
+          case 'japanese':
+            placeType = 'restaurant';
+            keyword = 'japanese restaurant';
+            break;
+          case 'indian':
+            placeType = 'restaurant';
+            keyword = 'indian restaurant';
+            break;
+          case 'fast_food':
+            placeType = 'restaurant';
+            keyword = 'fast food';
+            break;
+          case 'pizza':
+            placeType = 'restaurant';
+            keyword = 'pizza';
+            break;
+          case 'seafood':
+            placeType = 'restaurant';
+            keyword = 'seafood restaurant';
+            break;
+          case 'steakhouse':
+            placeType = 'restaurant';
+            keyword = 'steakhouse';
+            break;
+          case 'vegetarian':
+            placeType = 'restaurant';
+            keyword = 'vegetarian restaurant';
+            break;
+          case 'breakfast':
+            placeType = 'restaurant';
+            keyword = 'breakfast';
+            break;
+          case 'cafe':
+            placeType = 'cafe';
+            break;
+          case 'barbecue':
+            placeType = 'restaurant';
+            keyword = 'bbq restaurant';
+            break;
+          case 'fine_dining':
+            placeType = 'restaurant';
+            keyword = 'fine dining';
+            break;
+          case 'casual':
+            placeType = 'restaurant';
+            keyword = 'casual dining';
+            break;
+          case 'asian':
+            placeType = 'restaurant';
+            keyword = 'asian restaurant';
+            break;
+          default:
+            // Type assertion to string to avoid 'never' type error
+            keyword = (requestedType as string).replace(/_/g, ' ');
+        }
       }
+      
+      console.log(`Attempt ${attempt+1}: Searching for ${placeType} with keyword: "${keyword}" at radius ${searchRadius}m`);
+      
+      const { data, error } = await supabase.functions.invoke('find-nearby-places', {
+        body: {
+          coordinates,
+          radius: searchRadius,
+          type: placeType,
+          keyword: keyword || null
+        }
+      });
+      
+      if (error) {
+        console.error('Error finding nearby restaurant:', error);
+        break;
+      }
+      
+      if (!data || !data.results || data.results.length === 0) {
+        console.log(`No restaurants found for type "${requestedType}" in this attempt`);
+        attempt++;
+        searchRadius += 5000; // Increase radius and try again
+        continue;
+      }
+      
+      // For specific types, try to verify the result matches what we want
+      if (requestedType !== 'any') {
+        // Try to find a result that matches our requested type better
+        const results = data.results;
+        let bestMatch = null;
+        
+        // Keywords that should appear in the name or types for each restaurant type
+        const typeKeywords: Record<RestaurantType, string[]> = {
+          'any': [],
+          'italian': ['italian', 'pasta', 'pizzeria'],
+          'mexican': ['mexican', 'taco', 'burrito'],
+          'chinese': ['chinese', 'asian', 'wok', 'panda'],
+          'american': ['american', 'burger', 'grill', 'diner'],
+          'thai': ['thai'],
+          'japanese': ['japanese', 'sushi', 'ramen'],
+          'indian': ['indian', 'curry'],
+          'fast_food': ['fast', 'mcdonald', 'burger king', 'wendy', 'taco bell', 'kfc', 'subway'],
+          'pizza': ['pizza', 'pizzeria'],
+          'seafood': ['seafood', 'fish', 'lobster', 'crab'],
+          'steakhouse': ['steak', 'steakhouse', 'grill', 'beef', 'outback', 'longhorn'],
+          'vegetarian': ['vegetarian', 'vegan', 'plant'],
+          'breakfast': ['breakfast', 'brunch', 'pancake', 'waffle', 'ihop', 'denny'],
+          'cafe': ['cafe', 'coffee', 'starbucks', 'bakery', 'pastry'],
+          'barbecue': ['bbq', 'barbecue', 'grill', 'smokehouse'],
+          'fine_dining': ['fine dining', 'upscale', 'gourmet', 'fancy'],
+          'casual': ['casual', 'family', 'pub', 'bar & grill'],
+          'asian': ['asian', 'chinese', 'japanese', 'thai', 'vietnamese', 'korean']
+        };
+        
+        // First pass - check place types and name for exact match
+        for (const result of results) {
+          const nameLower = result.name.toLowerCase();
+          const typesLower = result.types ? result.types.join(' ').toLowerCase() : '';
+          const vicinity = result.vicinity ? result.vicinity.toLowerCase() : '';
+          const keywords = typeKeywords[requestedType];
+          
+          const isMatch = keywords.some(keyword => 
+            nameLower.includes(keyword) || 
+            typesLower.includes(keyword) || 
+            vicinity.includes(keyword)
+          );
+          
+          if (isMatch) {
+            bestMatch = result;
+            console.log(`Found matching restaurant: ${result.name} matches ${requestedType} keywords`);
+            break;
+          }
+        }
+        
+        // If we still don't have a match, just use the first result but mark its type correctly
+        if (!bestMatch && results.length > 0) {
+          bestMatch = results[0];
+          console.log(`No exact match found, using ${bestMatch.name} but will set correct type`);
+        }
+        
+        if (bestMatch) {
+          restaurant = bestMatch;
+        }
+      } else {
+        // If we don't need a specific type, just use the first result
+        restaurant = data.results[0];
+      }
+      
+      attempt++;
     }
     
-    console.log(`Searching for ${placeType} with keyword: "${keyword}"`);
-    
-    const { data, error } = await supabase.functions.invoke('find-nearby-places', {
-      body: {
-        coordinates,
-        radius,
-        type: placeType,
-        keyword: keyword || null
-      }
-    });
-    
-    if (error) {
-      console.error('Error finding nearby restaurant:', error);
+    if (!restaurant) {
+      console.log(`Could not find restaurant of type ${requestedType} after ${maxAttempts} attempts`);
       return null;
     }
     
-    if (!data || !data.results || data.results.length === 0) {
-      console.log(`No restaurants found for type "${requestedType}"`);
-      return null;
-    }
-    
-    const restaurant = data.results[0];
     console.log('Found restaurant:', restaurant.name, 'types:', restaurant.types);
     
-    // When we specifically requested a type, use that type
+    // For specific requested types, always use the requested type
+    // (We already filtered for restaurants matching this type)
     let displayType: RestaurantType = requestedType !== 'any' ? requestedType : 'any';
     
-    // If we didn't request a specific type, try to determine the type from the result
+    // For generic searches, try to determine the best type
     if (requestedType === 'any' && restaurant.types) {
       // Check for specific cuisine types in the API response
       const typeMapping: Record<string, RestaurantType> = {

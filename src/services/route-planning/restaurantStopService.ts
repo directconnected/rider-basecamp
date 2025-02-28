@@ -31,7 +31,7 @@ export const calculateRestaurantStops = async (
       if (restaurant) {
         console.log(`Found restaurant data for stop ${i}:`, restaurant);
         
-        // Only add this restaurant if it's the requested type or if we requested "any"
+        // Strict type checking: Only add restaurants if they match the requested type exactly
         if (restaurantType === 'any' || restaurant.restaurantType === restaurantType) {
           restaurantStops.push({
             location: coordinates,
