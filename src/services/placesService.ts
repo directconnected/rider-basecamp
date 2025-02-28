@@ -1,5 +1,8 @@
+
 import { createClient } from '@supabase/supabase-js';
-import { Database } from '../../supabase/database.types';
+
+// Use a more generic typing approach since we don't have access to the database.types
+type Database = any;
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
 const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "";
@@ -167,7 +170,7 @@ export const findNearbyAttraction = async (
       return null;
     }
 
-	const attraction = data.results[0];
+    const attraction = data.results[0];
 	
     // Extract specific attraction types
     let actualType = 'tourist_attraction';
@@ -184,13 +187,101 @@ export const findNearbyAttraction = async (
       name: attraction.name,
       address: attraction.vicinity || attraction.formatted_address,
       location: [attraction.geometry.location.lng, attraction.geometry.location.lat],
-	  rating: attraction.rating,
-	  website: attraction.website,
-	  phone_number: attraction.formatted_phone_number,
-	  attractionType: actualType
+      rating: attraction.rating,
+      website: attraction.website,
+      phone_number: attraction.formatted_phone_number,
+      attractionType: actualType
     };
   } catch (error) {
     console.error('Error in findNearbyAttraction:', error);
     return null;
+  }
+};
+
+// Add the missing exported functions:
+
+export const findNearbyCampground = async (
+  coordinates: [number, number],
+  radius: number = 5000
+): Promise<any | null> => {
+  try {
+    console.log(`Finding campground near ${coordinates} with radius ${radius}`);
+
+    const { data, error } = await supabase.functions.invoke('find-nearby-places', {
+      body: {
+        coordinates,
+        radius,
+        type: 'campground'
+      }
+    });
+
+    if (error) {
+      console.error('Error finding nearby campground:', error);
+      return null;
+    }
+
+    if (!data || !data.results || data.results.length === 0) {
+      console.log('No campgrounds found');
+      return null;
+    }
+
+    const campground = data.results[0];
+
+    return {
+      name: campground.name,
+      address: campground.vicinity || campground.formatted_address,
+      location: [campground.geometry.location.lng, campground.geometry.location.lat],
+      rating: campground.rating,
+      website: campground.website,
+      phone_number: campground.formatted_phone_number
+    };
+  } catch (error) {
+    console.error('Error in findNearbyCampground:', error);
+    return null;
+  }
+};
+
+export const findNearbyCampgrounds = async (
+  coordinates: [number, number],
+  radius: number = 5000,
+  state?: string
+): Promise<any[]> => {
+  try {
+    console.log(`Finding campgrounds near ${coordinates} with radius ${radius}${state ? ` in ${state}` : ''}`);
+
+    const { data, error } = await supabase.functions.invoke('find-nearby-places', {
+      body: {
+        coordinates,
+        radius,
+        type: 'campground',
+        state: state
+      }
+    });
+
+    if (error) {
+      console.error('Error finding nearby campgrounds:', error);
+      return [];
+    }
+
+    if (!data || !data.results || data.results.length === 0) {
+      console.log('No campgrounds found');
+      return [];
+    }
+
+    // Process the results to standardize the format
+    return data.results.map((campground: any) => ({
+      name: campground.name,
+      address: campground.vicinity || campground.formatted_address,
+      location: [campground.geometry.location.lng, campground.geometry.location.lat],
+      rating: campground.rating,
+      website: campground.website,
+      phone_number: campground.formatted_phone_number,
+      state: state || (campground.address_components ? 
+        campground.address_components.find((comp: any) => comp.types.includes('administrative_area_level_1'))?.short_name : 
+        undefined)
+    }));
+  } catch (error) {
+    console.error('Error in findNearbyCampgrounds:', error);
+    return [];
   }
 };

@@ -1,5 +1,4 @@
 
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.7.1'
 import { corsHeaders } from '../_shared/cors.ts'
 
 interface PlacesRequest {
@@ -7,6 +6,7 @@ interface PlacesRequest {
   radius: number;
   type: string;
   specificType?: string | null;
+  state?: string;
 }
 
 Deno.serve(async (req) => {
@@ -24,7 +24,7 @@ Deno.serve(async (req) => {
       );
     }
 
-    const { coordinates, radius, type, specificType } = await req.json() as PlacesRequest;
+    const { coordinates, radius, type, specificType, state } = await req.json() as PlacesRequest;
     
     if (!coordinates || !Array.isArray(coordinates) || coordinates.length !== 2) {
       return new Response(
@@ -70,32 +70,87 @@ Deno.serve(async (req) => {
       );
     }
 
-    // Get more details for the first result if present
-    let detailedResults = data.results;
+    let results = data.results || [];
     
-    if (data.results && data.results.length > 0) {
+    // Filter by state if specified
+    if (state && results.length > 0) {
+      // For each result, we'll need to get more details to check the state
+      // We'll limit to checking the first 5 to avoid too many API calls
+      const resultsToCheck = results.slice(0, 5);
+      const filteredResults = [];
+      
+      for (const place of resultsToCheck) {
+        try {
+          const detailsUrl = `https://maps.googleapis.com/maps/api/place/details/json?place_id=${place.place_id}&fields=address_components&key=${apiKey}`;
+          const detailsResponse = await fetch(detailsUrl);
+          const detailsData = await detailsResponse.json();
+          
+          if (detailsData.status === 'OK' && detailsData.result && detailsData.result.address_components) {
+            const stateComponent = detailsData.result.address_components.find(
+              (comp: any) => comp.types.includes('administrative_area_level_1')
+            );
+            
+            if (stateComponent && 
+                (stateComponent.short_name === state || 
+                 stateComponent.long_name.toLowerCase() === state.toLowerCase())) {
+              filteredResults.push(place);
+            }
+          }
+        } catch (detailsError) {
+          console.error('Error fetching place details for state filtering:', detailsError);
+        }
+      }
+      
+      // Use filtered results if we found any in the specified state
+      if (filteredResults.length > 0) {
+        results = filteredResults;
+      }
+    }
+
+    // Get more details for all results
+    const detailedResults = [];
+    const fieldsToFetch = [
+      "name",
+      "vicinity",
+      "formatted_address",
+      "geometry",
+      "rating",
+      "price_level",
+      "website",
+      "formatted_phone_number",
+      "types"
+    ];
+    
+    console.log(`Fetching details for ${Math.min(results.length, 5)} places with fields: ${JSON.stringify(fieldsToFetch, null, 2)}`);
+    
+    // Only fetch details for the first 5 results to avoid making too many API calls
+    for (let i = 0; i < Math.min(results.length, 5); i++) {
       try {
-        const placeId = data.results[0].place_id;
-        const detailsUrl = `https://maps.googleapis.com/maps/api/place/details/json?place_id=${placeId}&fields=name,formatted_address,formatted_phone_number,website,types,vicinity,geometry,rating&key=${apiKey}`;
+        const placeId = results[i].place_id;
+        const detailsUrl = `https://maps.googleapis.com/maps/api/place/details/json?place_id=${placeId}&fields=${fieldsToFetch.join(',')}&key=${apiKey}`;
         
         const detailsResponse = await fetch(detailsUrl);
         const detailsData = await detailsResponse.json();
         
         if (detailsData.status === 'OK' && detailsData.result) {
-          // Replace the first result with more detailed information
-          detailedResults[0] = {
-            ...data.results[0],
+          // Merge the details with the original result
+          detailedResults.push({
+            ...results[i],
             ...detailsData.result
-          };
+          });
+        } else {
+          // If we can't get details, use the original result
+          detailedResults.push(results[i]);
         }
       } catch (detailsError) {
         console.error('Error fetching place details:', detailsError);
-        // Continue with the basic results if details fetch fails
+        // Continue with the basic result if details fetch fails
+        detailedResults.push(results[i]);
       }
     }
 
     return new Response(
-      JSON.stringify({ results: detailedResults }),
+      JSON.stringify({ results: detailedResults.length > 0 ? detailedResults : results }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   } catch (error) {
