@@ -97,6 +97,8 @@ export const calculateHotelStops = async (
   let currentMiles = 0;
   let lastStopIndex = 0;
 
+  console.log(`Calculate hotel stops with preferred lodging type: ${preferredLodgingType}`);
+
   while (currentMiles < totalDistanceInMiles) {
     currentMiles += milesPerDay;
     if (currentMiles >= totalDistanceInMiles) break;

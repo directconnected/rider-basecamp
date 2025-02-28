@@ -29,7 +29,7 @@ const RouteItinerary = ({
 
   const handleDownloadGPX = () => {
     if (!currentRoute?.geometry?.coordinates) {
-      console.error('Cannot generate GPPX: Missing route coordinates');
+      console.error('Cannot generate GPX: Missing route coordinates');
       return;
     }
     downloadGPX(startPoint, destination, currentRoute, fuelStops);
@@ -61,43 +61,43 @@ const RouteItinerary = ({
   // Sort by distance
   allStays.sort((a, b) => a.distance - b.distance);
 
-  // Filter attraction stops based on preferred attraction type from localStorage
+  // Get preferred attraction type from localStorage
   const preferredAttraction = localStorage.getItem('preferredAttraction') || 'any';
+  console.log('Using preferred attraction from localStorage:', preferredAttraction);
+  
+  // Log all attraction stops for debugging
+  console.log('All attraction stops before filtering:', 
+    attractionStops.map(a => ({name: a.attractionName, type: a.attractionType}))
+  );
   
   // If preferredAttraction is not 'any', filter the attractions to match only that type
-  const filteredAttractionStops = preferredAttraction === 'any' 
-    ? attractionStops 
-    : attractionStops.filter(stop => {
-        // Handle the special case for tourist attractions (singular vs plural)
-        if (preferredAttraction === 'tourist_attractions' && 
-            (stop.attractionType === 'tourist attraction' || 
-             stop.attractionType?.includes('tourist'))) {
-          return true;
-        }
-        
-        // Convert stored preference to display format for comparison
-        const preferredTypeFormatted = preferredAttraction.replace(/_/g, ' ');
-        
-        // Direct match or contains the preferred type
-        return stop.attractionType === preferredTypeFormatted || 
-               stop.attractionType?.includes(preferredTypeFormatted);
-      });
+  let filteredAttractionStops = attractionStops;
+  if (preferredAttraction !== 'any' && attractionStops.length > 0) {
+    // Handle the special case for tourist attractions (singular vs plural)
+    if (preferredAttraction === 'tourist_attractions') {
+      filteredAttractionStops = attractionStops.filter(stop => 
+        stop.attractionType === 'tourist_attraction' || 
+        stop.attractionType === 'tourist attraction' || 
+        (stop.attractionType && stop.attractionType.includes('tourist'))
+      );
+    } else {
+      // Convert stored preference to display format for comparison
+      const preferredTypeFormatted = preferredAttraction.replace(/_/g, ' ');
+      
+      filteredAttractionStops = attractionStops.filter(stop => 
+        stop.attractionType === preferredTypeFormatted || 
+        (stop.attractionType && stop.attractionType.includes(preferredTypeFormatted))
+      );
+    }
+  }
+  
+  console.log('Filtered attraction stops:', 
+    filteredAttractionStops.map(a => ({name: a.attractionName, type: a.attractionType}))
+  );
 
   // Get preferred restaurant type from localStorage
   const preferredRestaurant = localStorage.getItem('preferredRestaurant') || 'any';
   
-  // Log for debugging
-  console.log(`Displaying attraction stops: ${filteredAttractionStops.length} based on preference: ${preferredAttraction}`);
-  console.log(`Restaurant stops: ${restaurantStops.length} based on preference: ${preferredRestaurant}`);
-  
-  // Check restaurant types
-  console.log('Restaurant stop types:', restaurantStops.map(r => r.restaurantType));
-
-  // Debug specific properties for restaurant stops
-  restaurantStops.forEach((stop, index) => {
-    console.log(`Restaurant ${index}: ${stop.restaurantName}, type: ${stop.restaurantType}`);
-  });
-
   return (
     <Card className="mt-8">
       <CardHeader className="flex flex-row items-center justify-between">
@@ -168,31 +168,34 @@ const RouteItinerary = ({
           />
         )}
 
-        <StopSection
-          title="Suggested Restaurants"
-          icon={UtensilsCrossed}
-          color="bg-orange-500"
-          stops={restaurantStops}
-          getStopName={(stop) => (stop as RestaurantStop).restaurantName}
-          getStopType={(stop) => {
-            // Make sure we're returning the actual restaurant type rather than nothing
-            const restaurantStop = stop as RestaurantStop;
-            console.log(`Getting type for restaurant ${restaurantStop.restaurantName}: ${restaurantStop.restaurantType}`);
-            return restaurantStop.restaurantType || 'restaurant';
-          }}
-        />
+        {restaurantStops.length > 0 && (
+          <StopSection
+            title="Suggested Restaurants"
+            icon={UtensilsCrossed}
+            color="bg-orange-500"
+            stops={restaurantStops}
+            getStopName={(stop) => (stop as RestaurantStop).restaurantName}
+            getStopType={(stop) => {
+              // Make sure we're returning the actual restaurant type rather than nothing
+              const restaurantStop = stop as RestaurantStop;
+              return restaurantStop.restaurantType || 'restaurant';
+            }}
+          />
+        )}
 
-        <StopSection
-          title="Suggested Things to Do"
-          icon={Landmark}
-          color="bg-blue-500"
-          stops={filteredAttractionStops}
-          getStopName={(stop) => (stop as AttractionStop).attractionName}
-          getStopType={(stop) => {
-            const attractionStop = stop as AttractionStop;
-            return attractionStop.attractionType || 'attraction';
-          }}
-        />
+        {filteredAttractionStops.length > 0 && (
+          <StopSection
+            title="Suggested Things to Do"
+            icon={Landmark}
+            color="bg-blue-500"
+            stops={filteredAttractionStops}
+            getStopName={(stop) => (stop as AttractionStop).attractionName}
+            getStopType={(stop) => {
+              const attractionStop = stop as AttractionStop;
+              return attractionStop.attractionType || 'attraction';
+            }}
+          />
+        )}
 
         <div className="flex items-center gap-4">
           <div className="w-3 h-3 rounded-full bg-red-500" />

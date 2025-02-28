@@ -77,6 +77,21 @@ export const useRouteCalculation = () => {
       const milesPerDay = parseInt(formData.milesPerDay);
       
       const calculatedFuelStops = await calculateFuelStops(route, fuelMileage);
+      
+      // Save preferences to localStorage for reference by other components
+      if (formData.preferredLodging) {
+        localStorage.setItem('preferredLodging', formData.preferredLodging);
+        console.log('useRouteCalculation saved preferredLodging:', formData.preferredLodging);
+      }
+      if (formData.preferredRestaurant) {
+        localStorage.setItem('preferredRestaurant', formData.preferredRestaurant);
+        console.log('useRouteCalculation saved preferredRestaurant:', formData.preferredRestaurant);
+      }
+      if (formData.preferredAttraction) {
+        localStorage.setItem('preferredAttraction', formData.preferredAttraction);
+        console.log('useRouteCalculation saved preferredAttraction:', formData.preferredAttraction);
+      }
+
       const calculatedHotelStops = await calculateHotelStops(
         route, 
         milesPerDay, 

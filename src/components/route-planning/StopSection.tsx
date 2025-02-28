@@ -16,7 +16,9 @@ interface StopSectionProps {
 }
 
 const StopSection = ({ title, icon: Icon, color, stops, getStopName, getStopType }: StopSectionProps) => {
-  if (!stops || stops.length === 0) return null;
+  if (!stops || stops.length === 0) {
+    return null;
+  }
 
   // Function to format type labels for display
   const formatTypeLabel = (type: string | undefined): string => {
@@ -35,12 +37,12 @@ const StopSection = ({ title, icon: Icon, color, stops, getStopName, getStopType
       <h3 className="text-lg font-semibold">{title}:</h3>
       <div className="space-y-3">
         {stops.map((stop, index) => {
-          const StopName = getStopName(stop);
-          const StopType = getStopType ? getStopType(stop) : undefined;
-          const formattedType = formatTypeLabel(StopType);
+          const stopName = getStopName(stop);
+          const stopType = getStopType ? getStopType(stop) : undefined;
+          const formattedType = formatTypeLabel(stopType);
           
           // Debug logging for type labels
-          console.log(`Stop ${index} (${StopName}): Type=${StopType}, Formatted=${formattedType}`);
+          console.log(`${title} Stop ${index} (${stopName}): Type=${stopType}, Formatted=${formattedType}`);
           
           return (
             <div key={`${title}-${index}`} className="flex flex-col gap-2 p-4 rounded-lg bg-gray-50">
@@ -48,7 +50,7 @@ const StopSection = ({ title, icon: Icon, color, stops, getStopName, getStopType
                 <div className={`w-3 h-3 rounded-full mt-2 ${color}`} />
                 <div className="flex-1">
                   <div className="flex items-center justify-between">
-                    <p className="text-base font-medium">{StopName}</p>
+                    <p className="text-base font-medium">{stopName}</p>
                     {formattedType && (
                       <Badge variant="outline" className="ml-2">
                         {formattedType}

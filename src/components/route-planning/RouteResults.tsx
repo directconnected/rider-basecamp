@@ -40,6 +40,7 @@ const RouteResults: React.FC<RouteResultsProps> = ({
     const storedLodging = localStorage.getItem('preferredLodging');
     if (storedLodging) {
       setPreferredLodging(storedLodging);
+      console.log('Loaded stored lodging preference:', storedLodging);
     }
     
     const storedRestaurant = localStorage.getItem('preferredRestaurant');
@@ -69,6 +70,7 @@ const RouteResults: React.FC<RouteResultsProps> = ({
 
           // Camping stops (only if preferred lodging is campground)
           if (preferredLodging === 'campground') {
+            console.log('Calculating camping stops for campground preference');
             const camping = await calculateCampingStops(currentRoute, Math.floor(routeDetails.distance / hotelStops.length));
             setCampingStops(camping);
             console.log('Calculated camping stops:', camping);
@@ -80,7 +82,8 @@ const RouteResults: React.FC<RouteResultsProps> = ({
           console.log('Calculating attraction stops with type:', preferredAttraction);
           const attractions = await calculateAttractionStops(currentRoute, 100, preferredAttraction);
           setAttractionStops(attractions);
-          console.log('Calculated attraction stops:', attractions, 'with type:', preferredAttraction);
+          console.log('Calculated attraction stops:', attractions);
+          console.log('Attraction types:', attractions.map(a => a.attractionType));
         } catch (error) {
           console.error('Error calculating additional stops:', error);
         }
@@ -93,39 +96,16 @@ const RouteResults: React.FC<RouteResultsProps> = ({
   // Debug logging
   useEffect(() => {
     console.log('Route Details:', routeDetails);
-    console.log('Current Route:', currentRoute);
-    console.log('Fuel Stops:', fuelStops);
-    console.log('Hotel Stops:', hotelStops);
-    console.log('Restaurant Stops:', restaurantStops);
-    console.log('Camping Stops:', campingStops);
-    console.log('Attraction Stops:', attractionStops);
-    console.log('Start Coordinates:', startCoords);
-    console.log('End Coordinates:', endCoords);
+    console.log('Current Route:', currentRoute?.distance);
+    console.log('Fuel Stops:', fuelStops.length);
+    console.log('Hotel Stops:', hotelStops.length);
+    console.log('Restaurant Stops:', restaurantStops.length);
+    console.log('Camping Stops:', campingStops.length);
+    console.log('Attraction Stops:', attractionStops.length);
     console.log('Preferred Lodging Type:', preferredLodging);
     console.log('Preferred Restaurant Type:', preferredRestaurant);
     console.log('Preferred Attraction Type:', preferredAttraction);
-
-    // Validation checks
-    if (!routeDetails) {
-      console.error('Route details is missing');
-      return;
-    }
-
-    if (!currentRoute?.geometry?.coordinates) {
-      console.error('Current route is missing or has invalid structure');
-      return;
-    }
-
-    if (!Array.isArray(fuelStops)) {
-      console.error('Fuel stops is not an array');
-      return;
-    }
-
-    if (!Array.isArray(hotelStops)) {
-      console.error('Hotel stops is not an array');
-      return;
-    }
-  }, [routeDetails, currentRoute, fuelStops, hotelStops, restaurantStops, campingStops, attractionStops, startCoords, endCoords, preferredLodging, preferredRestaurant, preferredAttraction]);
+  }, [routeDetails, currentRoute, fuelStops, hotelStops, restaurantStops, campingStops, attractionStops, preferredLodging, preferredRestaurant, preferredAttraction]);
 
   if (!routeDetails || !currentRoute?.geometry?.coordinates || !Array.isArray(fuelStops)) {
     console.error('Missing required data for route rendering');
