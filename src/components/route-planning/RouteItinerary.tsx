@@ -36,7 +36,10 @@ const RouteItinerary = ({
 
   // Combine hotel stays and camping into a single array for display
   const allStays: RatedStop[] = [
-    ...hotelStops,
+    ...hotelStops.map(hotel => ({
+      ...hotel,
+      lodgingType: hotel.lodgingType || 'hotel'
+    })),
     ...campingStops.map(camp => ({
       ...camp,
       hotelName: camp.campgroundName,
@@ -107,7 +110,7 @@ const RouteItinerary = ({
             if ('campgroundName' in stop) {
               return 'campground';
             } else {
-              return (stop as HotelStop).lodgingType;
+              return (stop as HotelStop).lodgingType || 'hotel';
             }
           }}
         />
@@ -118,7 +121,7 @@ const RouteItinerary = ({
           color="bg-orange-500"
           stops={restaurantStops}
           getStopName={(stop) => (stop as RestaurantStop).restaurantName}
-          getStopType={(stop) => (stop as RestaurantStop).restaurantType}
+          getStopType={(stop) => (stop as RestaurantStop).restaurantType || 'restaurant'}
         />
 
         <StopSection
@@ -127,7 +130,7 @@ const RouteItinerary = ({
           color="bg-blue-500"
           stops={attractionStops}
           getStopName={(stop) => (stop as AttractionStop).attractionName}
-          getStopType={(stop) => (stop as AttractionStop).attractionType}
+          getStopType={(stop) => (stop as AttractionStop).attractionType || 'attraction'}
         />
 
         <div className="flex items-center gap-4">
