@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import RouteDetails from './RouteDetails';
 import RouteMap from './RouteMap';
@@ -8,7 +9,7 @@ import {
   calculateCampingStops, 
   calculateAttractionStops 
 } from '@/services/route-planning';
-import { RestaurantStop, CampingStop, AttractionStop } from './types';
+import { RestaurantStop, CampingStop, AttractionStop, AttractionType } from './types';
 
 interface RouteResultsProps {
   routeDetails: RouteDetailsType;
@@ -31,11 +32,17 @@ const RouteResults: React.FC<RouteResultsProps> = ({
   const [campingStops, setCampingStops] = useState<CampingStop[]>([]);
   const [attractionStops, setAttractionStops] = useState<AttractionStop[]>([]);
   const [preferredLodging, setPreferredLodging] = useState<string>('any');
+  const [preferredAttraction, setPreferredAttraction] = useState<AttractionType>('any');
 
   useEffect(() => {
     const storedPreferredLodging = localStorage.getItem('preferredLodging');
     if (storedPreferredLodging) {
       setPreferredLodging(storedPreferredLodging);
+    }
+    
+    const storedPreferredAttraction = localStorage.getItem('preferredAttraction');
+    if (storedPreferredAttraction) {
+      setPreferredAttraction(storedPreferredAttraction as AttractionType);
     }
   }, []);
 
@@ -44,7 +51,6 @@ const RouteResults: React.FC<RouteResultsProps> = ({
       if (currentRoute?.geometry?.coordinates) {
         try {
           const preferredRestaurant = localStorage.getItem('preferredRestaurant') || 'any';
-          const preferredAttraction = localStorage.getItem('preferredAttraction') || 'any';
           
           const restaurants = await calculateRestaurantStops(currentRoute, 150, preferredRestaurant);
           setRestaurantStops(restaurants);
@@ -58,6 +64,7 @@ const RouteResults: React.FC<RouteResultsProps> = ({
             setCampingStops([]);
           }
 
+          console.log('Calculating attractions with type:', preferredAttraction);
           const attractions = await calculateAttractionStops(currentRoute, 100, preferredAttraction);
           setAttractionStops(attractions);
           console.log('Calculated attraction stops:', attractions);
@@ -68,7 +75,7 @@ const RouteResults: React.FC<RouteResultsProps> = ({
     };
 
     calculateAdditionalStops();
-  }, [currentRoute, routeDetails, hotelStops, preferredLodging]);
+  }, [currentRoute, routeDetails, hotelStops, preferredLodging, preferredAttraction]);
 
   useEffect(() => {
     console.log('Route Details:', routeDetails);
@@ -81,6 +88,7 @@ const RouteResults: React.FC<RouteResultsProps> = ({
     console.log('Start Coordinates:', startCoords);
     console.log('End Coordinates:', endCoords);
     console.log('Preferred Lodging Type:', preferredLodging);
+    console.log('Preferred Attraction Type:', preferredAttraction);
 
     if (!routeDetails) {
       console.error('Route details is missing');
@@ -101,7 +109,7 @@ const RouteResults: React.FC<RouteResultsProps> = ({
       console.error('Hotel stops is not an array');
       return;
     }
-  }, [routeDetails, currentRoute, fuelStops, hotelStops, restaurantStops, campingStops, attractionStops, startCoords, endCoords, preferredLodging]);
+  }, [routeDetails, currentRoute, fuelStops, hotelStops, restaurantStops, campingStops, attractionStops, startCoords, endCoords, preferredLodging, preferredAttraction]);
 
   if (!routeDetails || !currentRoute?.geometry?.coordinates || !Array.isArray(fuelStops)) {
     console.error('Missing required data for route rendering');
