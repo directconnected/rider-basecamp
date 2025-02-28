@@ -1,4 +1,3 @@
-
 import { findNearestPointIndex } from './routeUtils';
 import { findNearbyAttraction } from '../placesService';
 import { AttractionStop } from '@/components/route-planning/types';
@@ -25,6 +24,7 @@ export const calculateAttractionStops = async (
     const coordinates = route.geometry.coordinates[pointIndex] as [number, number];
     
     try {
+      // Use the specific attraction type when searching for nearby attractions
       const attraction = await findNearbyAttraction(coordinates, 5000, attractionType);
       
       if (attraction) {
@@ -61,17 +61,27 @@ export const calculateAttractionStops = async (
           }
         }
         
-        attractionStops.push({
-          location: coordinates,
-          name: attraction.address,
-          attractionName: attraction.name,
-          distance: Math.round(progress * totalDistance),
-          rating: attraction.rating,
-          website: attraction.website,
-          phone_number: attraction.phone_number,
-          attractionType: specificType
-        });
-        console.log(`Added attraction stop ${i}: ${attraction.name} with website: ${attraction.website} and phone: ${attraction.phone_number}`);
+        // Check if the attraction matches the requested type
+        // If attractionType is 'any', include all attractions
+        // Otherwise, only include if the specific type matches or contains the requested type
+        if (attractionType === 'any' || 
+            specificType.includes(attractionType.replace('_', ' ')) || 
+            attraction.types?.includes(attractionType)) {
+          
+          attractionStops.push({
+            location: coordinates,
+            name: attraction.address,
+            attractionName: attraction.name,
+            distance: Math.round(progress * totalDistance),
+            rating: attraction.rating,
+            website: attraction.website,
+            phone_number: attraction.phone_number,
+            attractionType: specificType
+          });
+          console.log(`Added attraction stop ${i}: ${attraction.name} with website: ${attraction.website} and phone: ${attraction.phone_number}`);
+        } else {
+          console.log(`Skipping attraction ${attraction.name} because it doesn't match the requested type: ${attractionType}`);
+        }
       }
     } catch (error) {
       console.error('Error finding attraction:', error);

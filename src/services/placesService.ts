@@ -180,11 +180,36 @@ export const findNearbyAttraction = async (
   radius: number = 5000,
   attractionType: string = 'any'
 ): Promise<PlaceResult | null> => {
+  console.log(`Finding nearby attraction of type: ${attractionType}`);
+  
   if (attractionType === 'any') {
     return findPlace(coordinates, 'tourist_attraction', radius);
-  } else {
-    // Use specific attraction type
-    const placeType = attractionType as 'museum' | 'park' | 'tourist_attraction' | 'amusement_park' | 'art_gallery' | 'historic_site' | 'natural_feature' | 'point_of_interest';
-    return findPlace(coordinates, placeType, radius);
   }
+  
+  // Map our UI attraction types to Google Places API types
+  const typeMap: Record<string, 'museum' | 'park' | 'tourist_attraction' | 'amusement_park' | 'art_gallery' | 'historic_site' | 'natural_feature' | 'point_of_interest'> = {
+    'museum': 'museum',
+    'park': 'park',
+    'tourist_attraction': 'tourist_attraction',
+    'amusement_park': 'amusement_park',
+    'art_gallery': 'art_gallery',
+    'historic_site': 'point_of_interest',  // Google doesn't have historic_site type, use point_of_interest with keyword
+    'natural_feature': 'natural_feature',
+    'point_of_interest': 'point_of_interest'
+  };
+  
+  // Get the appropriate Google Places type
+  const placeType = typeMap[attractionType] || 'tourist_attraction';
+  
+  // For some types, we need to use keywords to further refine the search
+  let keyword: string | undefined;
+  if (attractionType === 'historic_site') {
+    keyword = 'historic';
+  } else if (attractionType !== 'any' && attractionType !== placeType) {
+    // If our UI type doesn't match Google's type exactly, use it as a keyword
+    keyword = attractionType.replace('_', ' ');
+  }
+  
+  console.log(`Searching for attraction of type ${placeType}${keyword ? ` with keyword ${keyword}` : ''}`);
+  return findPlace(coordinates, placeType, radius, keyword);
 };
