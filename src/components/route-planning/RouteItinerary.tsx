@@ -89,6 +89,8 @@ const RouteItinerary = ({
   // Log for debugging
   console.log(`Displaying attraction stops: ${filteredAttractionStops.length} based on preference: ${preferredAttraction}`);
   console.log(`Restaurant stops: ${restaurantStops.length} based on preference: ${preferredRestaurant}`);
+  
+  // Check restaurant types
   console.log('Restaurant stop types:', restaurantStops.map(r => r.restaurantType));
 
   // Debug specific properties for restaurant stops
@@ -173,7 +175,7 @@ const RouteItinerary = ({
           stops={restaurantStops}
           getStopName={(stop) => (stop as RestaurantStop).restaurantName}
           getStopType={(stop) => {
-            // Make sure we're returning the actual restaurant type
+            // Make sure we're returning the actual restaurant type rather than nothing
             const restaurantStop = stop as RestaurantStop;
             console.log(`Getting type for restaurant ${restaurantStop.restaurantName}: ${restaurantStop.restaurantType}`);
             return restaurantStop.restaurantType || 'restaurant';

@@ -29,6 +29,11 @@ export const calculateRestaurantStops = async (
       
       if (restaurant) {
         console.log(`Restaurant data for stop ${i}:`, restaurant);
+        
+        // Ensure we're getting the actual restaurant type from the API
+        const actualRestaurantType = restaurant.restaurantType || 'restaurant';
+        console.log(`Restaurant type for ${restaurant.name}: ${actualRestaurantType}`);
+        
         restaurantStops.push({
           location: coordinates,
           name: restaurant.address,
@@ -37,10 +42,10 @@ export const calculateRestaurantStops = async (
           rating: restaurant.rating,
           website: restaurant.website,
           phone_number: restaurant.phone_number,
-          restaurantType: restaurantType // Ensure this is correctly passed through
+          restaurantType: actualRestaurantType // Use the actual type returned from the API
         });
         
-        console.log(`Added restaurant stop ${i} with type: ${restaurantType}`);
+        console.log(`Added restaurant stop ${i} with type: ${actualRestaurantType}`);
       }
     } catch (error) {
       console.error('Error finding restaurant:', error);

@@ -1,278 +1,196 @@
-import { supabase } from "@/integrations/supabase/client";
-import { CampgroundResult } from '@/hooks/useCampsiteSearch';
+import { createClient } from '@supabase/supabase-js';
+import { Database } from '../../supabase/database.types';
 
-export interface PlaceResult {
-  name: string;
-  address: string;
-  location: [number, number];
-  rating?: number;
-  price_level?: number;
-  website?: string;
-  phone_number?: string;
-  types?: string[];
-  state?: string;
-}
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
+const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "";
+const supabase = createClient<Database>(supabaseUrl, supabaseKey);
 
-export const findPlace = async (
-  coordinates: [number, number], 
-  type: 'lodging' | 'gas_station' | 'restaurant' | 'campground' | 'tourist_attraction' | 'museum' | 'park' | 'amusement_park' | 'art_gallery' | 'historic_site' | 'natural_feature' | 'point_of_interest', 
-  initialRadius: number = 5000,
-  keyword?: string
-): Promise<PlaceResult | null> => {
+export const findNearbyGasStation = async (coordinates: [number, number], radius: number = 5000): Promise<any | null> => {
   try {
-    console.log(`Finding ${type} near coordinates:`, coordinates, 'with radius:', initialRadius, keyword ? `and keyword: ${keyword}` : '');
-    
     const { data, error } = await supabase.functions.invoke('find-nearby-places', {
       body: {
-        location: [coordinates[1], coordinates[0]], 
-        type,
-        radius: initialRadius,
-        rankby: 'prominence',
-        fields: ['name', 'vicinity', 'formatted_address', 'geometry', 'rating', 'price_level', 'website', 'formatted_phone_number', 'types'],
-        keyword,
-        limit: 1
+        coordinates,
+        radius,
+        type: 'gas_station'
       }
     });
 
     if (error) {
-      console.error(`Error finding ${type}:`, error);
+      console.error('Error finding nearby gas station:', error);
       return null;
     }
 
-    if (!data?.places || data.places.length === 0) {
-      console.log(`No ${type} found near coordinates with radius ${initialRadius}:`, coordinates);
+    if (!data || !data.results || data.results.length === 0) {
+      console.log('No gas stations found');
       return null;
     }
 
-    console.log(`Found ${type}:`, data.places[0]);
-    
-    const place = data.places[0];
+    const gasStation = data.results[0];
+
     return {
-      name: place.name,
-      address: place.vicinity || place.formatted_address,
-      location: [place.geometry.location.lng, place.geometry.location.lat],
-      rating: place.rating,
-      price_level: place.price_level,
-      website: place.website,
-      phone_number: place.formatted_phone_number,
-      types: place.types
+      name: gasStation.name,
+      address: gasStation.vicinity || gasStation.formatted_address,
+      location: [gasStation.geometry.location.lng, gasStation.geometry.location.lat]
     };
   } catch (error) {
-    console.error(`Error in findPlace:`, error);
+    console.error('Error in findNearbyGasStation:', error);
     return null;
   }
 };
 
 export const findNearbyLodging = async (
-  coordinates: [number, number], 
+  coordinates: [number, number],
   radius: number = 5000,
   lodgingType: string = 'any'
-): Promise<PlaceResult | null> => {
-  console.log(`Finding lodging of type ${lodgingType} near:`, coordinates);
-  
-  // Map UI lodging types to Google Places API types/keywords
-  const typeMapping: Record<string, { type: string; keyword?: string }> = {
-    'hotel': { type: 'lodging', keyword: 'hotel' },
-    'motel': { type: 'lodging', keyword: 'motel' },
-    'resort': { type: 'lodging', keyword: 'resort' },
-    'inn': { type: 'lodging', keyword: 'inn' },
-    'bed_and_breakfast': { type: 'lodging', keyword: 'bed and breakfast' },
-    'campground': { type: 'campground' }
-  };
-  
-  // For 'any' lodging type, just search for lodging
-  if (lodgingType === 'any') {
-    return findPlace(coordinates, 'lodging', radius);
-  }
-  
-  // Get type configuration
-  const typeConfig = typeMapping[lodgingType] || { type: 'lodging' };
-  
-  // Use the mapped type and keyword
-  return findPlace(coordinates, typeConfig.type as any, radius, typeConfig.keyword);
-};
-
-export const findNearbyGasStation = async (coordinates: [number, number], radius: number = 5000): Promise<PlaceResult | null> => {
-  return findPlace(coordinates, 'gas_station', radius);
-};
-
-export const findNearbyRestaurant = async (
-  coordinates: [number, number], 
-  radius: number = 5000,
-  restaurantType: string = 'any'
-): Promise<PlaceResult | null> => {
-  console.log(`Finding restaurant of type ${restaurantType} near:`, coordinates);
-  
-  // If no specific type is requested, just search for any restaurant
-  if (restaurantType === 'any') {
-    return findPlace(coordinates, 'restaurant', radius);
-  }
-  
-  // Otherwise, search for restaurants with the specific cuisine as a keyword
-  const keyword = restaurantType.replace(/_/g, ' ');
-  return findPlace(coordinates, 'restaurant', radius, keyword);
-};
-
-export const findNearbyCampground = async (coordinates: [number, number], radius: number = 5000): Promise<PlaceResult | null> => {
-  return findPlace(coordinates, 'campground', radius);
-};
-
-export const findNearbyCampgrounds = async (
-  coordinates: [number, number], 
-  radius: number = 25000,
-  state?: string
-): Promise<CampgroundResult[]> => {
+): Promise<any | null> => {
   try {
-    console.log(`Searching for campgrounds near coordinates:`, coordinates, 'with radius:', radius, state ? `in state: ${state}` : '');
-    
-    // We'll use Google Places API directly since we don't have a campsites table
+    console.log(`Finding lodging near ${coordinates} with radius ${radius} and type ${lodgingType}`);
+
     const { data, error } = await supabase.functions.invoke('find-nearby-places', {
       body: {
-        location: [coordinates[1], coordinates[0]], 
-        type: 'campground',
+        coordinates,
         radius,
-        rankby: 'prominence',
-        fields: ['name', 'vicinity', 'formatted_address', 'geometry', 'rating', 'price_level', 'website', 'formatted_phone_number', 'types'],
-        keyword: state ? `campground ${state}` : 'campground',
-        limit: 60
+        type: 'lodging',
+        specificType: lodgingType === 'any' ? null : lodgingType
       }
     });
 
     if (error) {
-      console.error(`Error finding campgrounds from Places API:`, error);
-      return [];
+      console.error('Error finding nearby lodging:', error);
+      return null;
     }
 
-    if (!data?.places || data.places.length === 0) {
-      console.log(`No campgrounds found near coordinates with radius ${radius} from Places API:`, coordinates);
-      return [];
+    if (!data || !data.results || data.results.length === 0) {
+      console.log('No lodging found');
+      return null;
     }
 
-    console.log(`Found ${data.places.length} campgrounds from Places API`);
+    const lodging = data.results[0];
+
+    return {
+      name: lodging.name,
+      address: lodging.vicinity || lodging.formatted_address,
+      location: [lodging.geometry.location.lng, lodging.geometry.location.lat],
+	  rating: lodging.rating,
+	  website: lodging.website,
+	  phone_number: lodging.formatted_phone_number
+    };
+  } catch (error) {
+    console.error('Error in findNearbyLodging:', error);
+    return null;
+  }
+};
+
+export const findNearbyRestaurant = async (
+  coordinates: [number, number],
+  radius: number = 5000,
+  restaurantType: string = 'any'
+): Promise<any | null> => {
+  try {
+    console.log(`Finding restaurant near ${coordinates} with radius ${radius} and type ${restaurantType}`);
     
-    // Process the places and filter by state if needed
-    let places = data.places.map(place => {
-      // Extract state from address
-      let placeState = null;
-      if (place.vicinity) {
-        const addressParts = place.vicinity.split(',');
-        if (addressParts.length > 1) {
-          const lastPart = addressParts[addressParts.length - 1].trim();
-          const stateParts = lastPart.split(' ');
-          if (stateParts.length > 0) {
-            placeState = stateParts[0].trim();
-          }
-        }
+    const { data, error } = await supabase.functions.invoke('find-nearby-places', {
+      body: {
+        coordinates,
+        radius,
+        type: 'restaurant',
+        specificType: restaurantType === 'any' ? null : restaurantType
       }
-      
-      // Generate sample pricing based on rating
-      const basePricePerNight = place.rating ? `$${(20 + place.rating * 5).toFixed(2)}` : '$25.00'; 
-      const monthlyRate = place.rating ? `$${(600 + place.rating * 150).toFixed(2)}` : '$750.00';
-      
-      return {
-        name: place.name,
-        address: place.vicinity || place.formatted_address,
-        location: [place.geometry.location.lng, place.geometry.location.lat],
-        rating: place.rating,
-        website: place.website,
-        phone_number: place.formatted_phone_number,
-        types: place.types,
-        state: placeState,
-        // Default camping info fields (since we don't have real data)
-        type: 'Campground',
-        water: place.types?.includes('rv_park') ? 'Yes' : 'N/A',
-        showers: place.types?.includes('rv_park') ? 'Yes' : 'N/A',
-        season: 'N/A',
-        sites: 'N/A',
-        rv_length: place.types?.includes('rv_park') ? 40 : undefined,
-        pets: 'N/A',
-        fee: 'N/A',
-        // Additional campground fields
-        price_per_night: basePricePerNight,
-        monthly_rate: monthlyRate,
-        elev: undefined,
-        cell_service: 'Unknown',
-        reviews: place.rating ? `${Math.floor(place.rating * 10)} reviews` : 'No reviews',
-        amenities: place.types?.includes('rv_park') ? 'Water, Electric, Sewer' : 'Basic',
-        photos: []
-      };
     });
     
-    // Filter by state if one was provided
-    if (state) {
-      places = places.filter(place => {
-        // If we have an extracted state, check if it matches
-        if (place.state) {
-          return place.state.toUpperCase() === state.toUpperCase() || 
-                 place.address.includes(state) ||
-                 (place.address.includes(', ' + state + ' '));
-        }
-        // Otherwise check if the address contains the state
-        return place.address.includes(state) || 
-               (place.address.includes(', ' + state + ' '));
-      });
-      
-      console.log(`Filtered to ${places.length} campgrounds in ${state}`);
+    if (error) {
+      console.error('Error finding nearby restaurant:', error);
+      return null;
     }
     
-    return places;
+    if (!data || !data.results || data.results.length === 0) {
+      console.log('No restaurant found');
+      return null;
+    }
+    
+    const restaurant = data.results[0];
+    
+    // Get and store the actual restaurant type from the API response
+    let actualType = 'restaurant';
+    if (restaurant.types && restaurant.types.length > 0) {
+      // Filter out generic types
+      const specificTypes = restaurant.types.filter((type: string) => 
+        !['food', 'point_of_interest', 'establishment', 'restaurant', 'place'].includes(type)
+      );
+      
+      if (specificTypes.length > 0) {
+        actualType = specificTypes[0]; // Use the first specific type
+      }
+    }
+    
+    console.log('Found restaurant:', restaurant.name, 'with type:', actualType);
+    
+    return {
+      name: restaurant.name,
+      address: restaurant.vicinity || restaurant.formatted_address,
+      location: [restaurant.geometry.location.lng, restaurant.geometry.location.lat],
+      rating: restaurant.rating,
+      website: restaurant.website,
+      phone_number: restaurant.formatted_phone_number,
+      restaurantType: actualType // Store the actual restaurant type
+    };
   } catch (error) {
-    console.error(`Error in findNearbyCampgrounds:`, error);
-    return [];
+    console.error('Error in findNearbyRestaurant:', error);
+    return null;
   }
 };
 
 export const findNearbyAttraction = async (
-  coordinates: [number, number], 
+  coordinates: [number, number],
   radius: number = 5000,
   attractionType: string = 'any'
-): Promise<PlaceResult | null> => {
-  console.log(`Finding nearby attraction of type: ${attractionType}`);
-  
-  // Map our UI attraction types to Google Places API types and keywords
-  const typeMapping: Record<string, { type: string, keyword?: string }> = {
-    'museum': { type: 'museum' },
-    'park': { type: 'park' },
-    'tourist_attraction': { type: 'tourist_attraction' },
-    'tourist_attractions': { type: 'tourist_attraction' }, // Handle plural form
-    'amusement_park': { type: 'amusement_park' },
-    'art_gallery': { type: 'art_gallery' },
-    'historic_site': { type: 'point_of_interest', keyword: 'historic' },
-    'natural_feature': { type: 'natural_feature' },
-    'point_of_interest': { type: 'point_of_interest' }
-  };
-  
-  if (attractionType === 'any') {
-    return findPlace(coordinates, 'tourist_attraction', radius);
-  }
-  
-  // Get the mapped type configuration
-  const typeConfig = typeMapping[attractionType] || { type: 'tourist_attraction' };
-  
-  // Use the mapped type and keyword
-  console.log(`Searching for attraction with type: ${typeConfig.type} and keyword: ${typeConfig.keyword || 'none'}`);
-  
+): Promise<any | null> => {
   try {
-    // Attempt to find exactly the type requested
-    const result = await findPlace(coordinates, typeConfig.type as any, radius, typeConfig.keyword);
-    if (result) {
-      console.log(`Found ${attractionType} attraction:`, result.name);
-      return result;
-    }
-    
-    // If the exact type wasn't found, and it's not 'any', try as a point_of_interest with the type as keyword
-    if (attractionType !== 'any' && !result) {
-      console.log(`No ${attractionType} found, trying as point_of_interest with keyword`);
-      const fallbackResult = await findPlace(coordinates, 'point_of_interest', radius, attractionType.replace(/_/g, ' '));
-      if (fallbackResult) {
-        console.log(`Found fallback ${attractionType} attraction:`, fallbackResult.name);
+    console.log(`Finding attraction near ${coordinates} with radius ${radius} and type ${attractionType}`);
+
+    const { data, error } = await supabase.functions.invoke('find-nearby-places', {
+      body: {
+        coordinates,
+        radius,
+        type: 'tourist_attraction',
+        specificType: attractionType === 'any' ? null : attractionType
       }
-      return fallbackResult;
+    });
+
+    if (error) {
+      console.error('Error finding nearby attraction:', error);
+      return null;
     }
-    
-    return null;
+
+    if (!data || !data.results || data.results.length === 0) {
+      console.log('No attractions found');
+      return null;
+    }
+
+	const attraction = data.results[0];
+	
+    // Extract specific attraction types
+    let actualType = 'tourist_attraction';
+    if (attraction.types && attraction.types.length > 0) {
+      const specificTypes = attraction.types.filter((type: string) =>
+        !['point_of_interest', 'establishment', 'place'].includes(type)
+      );
+      if (specificTypes.length > 0) {
+        actualType = specificTypes[0];
+      }
+    }
+
+    return {
+      name: attraction.name,
+      address: attraction.vicinity || attraction.formatted_address,
+      location: [attraction.geometry.location.lng, attraction.geometry.location.lat],
+	  rating: attraction.rating,
+	  website: attraction.website,
+	  phone_number: attraction.formatted_phone_number,
+	  attractionType: actualType
+    };
   } catch (error) {
-    console.error(`Error finding ${attractionType} attraction:`, error);
+    console.error('Error in findNearbyAttraction:', error);
     return null;
   }
 };
