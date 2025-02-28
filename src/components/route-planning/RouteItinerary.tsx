@@ -65,13 +65,22 @@ const RouteItinerary = ({
   const preferredAttraction = localStorage.getItem('preferredAttraction') || 'any';
   console.log('Preferred attraction type from localStorage:', preferredAttraction);
   
-  // Log all attraction stops for debugging
-  console.log('All attraction stops before filtering:', attractionStops.length, 
-    attractionStops.map(a => ({name: a.attractionName, type: a.attractionType}))
-  );
-  
   // Get preferred restaurant type from localStorage
   const preferredRestaurant = localStorage.getItem('preferredRestaurant') || 'any';
+  
+  // Filter restaurant stops to only include the preferred type
+  const filteredRestaurantStops = preferredRestaurant === 'any' 
+    ? restaurantStops 
+    : restaurantStops.filter(stop => stop.restaurantType === preferredRestaurant);
+  
+  console.log(`Filtered restaurant stops from ${restaurantStops.length} to ${filteredRestaurantStops.length} for type ${preferredRestaurant}`);
+  
+  // Filter attraction stops to only include the preferred type
+  const filteredAttractionStops = preferredAttraction === 'any' 
+    ? attractionStops 
+    : attractionStops.filter(stop => stop.attractionType === preferredAttraction);
+  
+  console.log(`Filtered attraction stops from ${attractionStops.length} to ${filteredAttractionStops.length} for type ${preferredAttraction}`);
   
   return (
     <Card className="mt-8">
@@ -137,35 +146,25 @@ const RouteItinerary = ({
           />
         )}
 
-        {restaurantStops.length > 0 && (
+        {filteredRestaurantStops.length > 0 && (
           <StopSection
             title="Suggested Restaurants"
             icon={UtensilsCrossed}
             color="bg-orange-500"
-            stops={restaurantStops}
+            stops={filteredRestaurantStops}
             getStopName={(stop) => (stop as RestaurantStop).restaurantName}
-            getStopType={(stop) => {
-              const restaurantStop = stop as RestaurantStop;
-              return preferredRestaurant === 'any' ? 
-                'any' : 
-                (restaurantStop.restaurantType || preferredRestaurant);
-            }}
+            getStopType={(stop) => (stop as RestaurantStop).restaurantType}
           />
         )}
 
-        {attractionStops.length > 0 && (
+        {filteredAttractionStops.length > 0 && (
           <StopSection
             title="Suggested Things to Do"
             icon={Landmark}
             color="bg-blue-500"
-            stops={attractionStops}
+            stops={filteredAttractionStops}
             getStopName={(stop) => (stop as AttractionStop).attractionName}
-            getStopType={(stop) => {
-              const attractionStop = stop as AttractionStop;
-              return preferredAttraction === 'any' ? 
-                'any' : 
-                (attractionStop.attractionType || preferredAttraction.replace('_', ' '));
-            }}
+            getStopType={(stop) => (stop as AttractionStop).attractionType}
           />
         )}
 

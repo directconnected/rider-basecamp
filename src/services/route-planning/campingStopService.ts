@@ -8,7 +8,7 @@ export const calculateCampingStops = async (
   milesPerDay: number, 
   campingType: string = 'any'
 ): Promise<CampingStop[]> => {
-  console.log('Calculating camping stops with miles per day:', milesPerDay);
+  console.log('Calculating camping stops with miles per day:', milesPerDay, 'camping type:', campingType);
   
   const campingStops: CampingStop[] = [];
   const totalDistance = route.distance / 1609.34;
@@ -24,27 +24,47 @@ export const calculateCampingStops = async (
     const pointIndex = Math.floor(progress * route.geometry.coordinates.length);
     const coordinates = route.geometry.coordinates[pointIndex] as [number, number];
     
-    try {
-      const campground = await findNearbyCampground(coordinates);
-      
-      if (campground) {
-        console.log(`Campground data for stop ${i}:`, campground);
-        campingStops.push({
-          location: coordinates,
-          name: campground.address,
-          campgroundName: campground.name,
-          distance: Math.round(progress * totalDistance),
-          rating: campground.rating,
-          website: campground.website,
-          phone_number: campground.phone_number,
-          campingType: campingType
-        });
-        console.log(`Added campground stop ${i}: ${campground.name} with website: ${campground.website} and phone: ${campground.phone_number}`);
+    // Try multiple times with increasing radius
+    let campground = null;
+    let attempts = 0;
+    let searchRadius = 10000; // Start with 10km for campgrounds (they're more spread out)
+    const maxAttempts = 3;
+    
+    while (!campground && attempts < maxAttempts) {
+      try {
+        console.log(`Attempt ${attempts + 1}: Finding campground near ${coordinates} with radius ${searchRadius}m`);
+        campground = await findNearbyCampground(coordinates, searchRadius);
+        
+        if (campground) {
+          console.log(`Found campground data for stop ${i}:`, campground);
+          break;
+        }
+      } catch (error) {
+        console.error(`Error in attempt ${attempts + 1}:`, error);
       }
-    } catch (error) {
-      console.error('Error finding campground:', error);
+      
+      attempts++;
+      searchRadius += 10000; // Increase radius by 10km each attempt for campgrounds
+    }
+    
+    if (campground) {
+      campingStops.push({
+        location: coordinates,
+        name: campground.address,
+        campgroundName: campground.name,
+        distance: Math.round(progress * totalDistance),
+        rating: campground.rating,
+        website: campground.website,
+        phone_number: campground.phone_number,
+        campingType: campingType
+      });
+      console.log(`Added campground stop ${i}: ${campground.name}`);
+    } else {
+      console.log(`Could not find campground for stop ${i} after ${maxAttempts} attempts`);
     }
   }
 
+  console.log(`Final camping stops count: ${campingStops.length}`);
+  
   return campingStops;
 };

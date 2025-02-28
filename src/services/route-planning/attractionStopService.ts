@@ -24,43 +24,61 @@ export const calculateAttractionStops = async (
     const pointIndex = Math.floor(progress * route.geometry.coordinates.length);
     const coordinates = route.geometry.coordinates[pointIndex] as [number, number];
     
-    try {
-      console.log(`Finding attraction near ${coordinates} with type ${attractionType}`);
-      const attraction = await findNearbyAttraction(coordinates, 5000, attractionType);
-      
-      if (attraction) {
-        console.log(`Found attraction data for stop ${i}:`, attraction);
+    // Try multiple times with increasing radius if we don't find the preferred type
+    let attraction = null;
+    let attempts = 0;
+    let searchRadius = 5000; // Start with 5km
+    const maxAttempts = attractionType === 'any' ? 2 : 4; // Try harder for specific types
+    
+    while (!attraction && attempts < maxAttempts) {
+      try {
+        console.log(`Attempt ${attempts + 1}: Finding attraction near ${coordinates} with type ${attractionType} and radius ${searchRadius}m`);
+        attraction = await findNearbyAttraction(coordinates, searchRadius, attractionType);
         
-        // Only add this attraction if it's the requested type or if we requested "any"
-        if (attractionType === 'any' || attraction.attractionType === attractionType) {
-          attractionStops.push({
-            location: coordinates,
-            name: attraction.address,
-            attractionName: attraction.name,
-            distance: Math.round(progress * totalDistance),
-            rating: attraction.rating,
-            website: attraction.website,
-            phone_number: attraction.phone_number,
-            attractionType: attraction.attractionType
-          });
+        if (attraction) {
+          console.log(`Found attraction data for stop ${i}:`, attraction);
           
-          console.log(`Added attraction stop ${i}: ${attraction.name} with type ${attraction.attractionType}`);
-        } else {
-          console.log(`Skipped attraction ${attraction.name} because type ${attraction.attractionType} doesn't match requested type ${attractionType}`);
+          // Only add this attraction if it's the requested type or if we requested "any"
+          if (attractionType === 'any' || attraction.attractionType === attractionType) {
+            console.log(`Found matching attraction: ${attraction.name} with type: ${attraction.attractionType}`);
+            break;
+          } else {
+            console.log(`Attraction ${attraction.name} has type ${attraction.attractionType} which doesn't match requested ${attractionType}, trying again`);
+            attraction = null; // Reset and try again
+          }
         }
+      } catch (error) {
+        console.error(`Error in attempt ${attempts + 1}:`, error);
       }
-    } catch (error) {
-      console.error('Error finding attraction:', error);
+      
+      attempts++;
+      searchRadius += 5000; // Increase radius by 5km each attempt
+    }
+    
+    if (attraction) {
+      attractionStops.push({
+        location: coordinates,
+        name: attraction.address,
+        attractionName: attraction.name,
+        distance: Math.round(progress * totalDistance),
+        rating: attraction.rating,
+        website: attraction.website,
+        phone_number: attraction.phone_number,
+        attractionType: attraction.attractionType
+      });
+      
+      console.log(`Added attraction stop ${i}: ${attraction.name} with type ${attraction.attractionType}`);
+    } else {
+      console.log(`Could not find attraction of type ${attractionType} for stop ${i} after ${maxAttempts} attempts`);
     }
   }
 
   console.log(`Final attraction stops count: ${attractionStops.length}`);
   
-  // Log all attraction stops for debugging
-  console.log('All attraction stops before filtering:', attractionStops.length, attractionStops.map(a => ({
-    name: a.attractionName,
-    type: a.attractionType
-  })));
+  // Log the attraction types found for debugging
+  if (attractionStops.length > 0) {
+    console.log('Attraction types found:', attractionStops.map(a => a.attractionType));
+  }
   
   return attractionStops;
 };
