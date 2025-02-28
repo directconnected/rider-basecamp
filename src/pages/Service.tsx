@@ -9,7 +9,7 @@ import ServiceRecordDialog from "@/components/service/ServiceRecordDialog";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate, Link } from "react-router-dom";
 import { toast } from "sonner";
-import { format, addDays, isWithinInterval, parse } from "date-fns";
+import { format, addDays, isWithinInterval, parse, parseISO } from "date-fns";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -94,22 +94,18 @@ const Service = () => {
     }
   };
 
-  // Function to normalize date strings for display and comparison
-  const normalizeDate = (dateString: string) => {
-    // Create a date object - ensures consistent handling
-    const date = new Date(dateString);
-    // Format to YYYY-MM-DD to avoid timezone issues
-    return format(date, 'yyyy-MM-dd');
-  };
-
-  // Format date for display with timezone handling
+  // Format date for display
   const formatDateForDisplay = (dateString: string) => {
     if (!dateString) return '';
+    
+    // Extract just the YYYY-MM-DD portion if it's in ISO format
+    const dateOnlyPart = dateString.split('T')[0];
+    
     try {
-      // Create a date object that preserves the date regardless of timezone
-      // This ensures the displayed date matches what was stored
-      const date = new Date(dateString + 'T00:00:00'); 
-      return format(date, 'PP'); // Locale-specific date format
+      // Parse the date string safely without timezone adjustments
+      // Using parseISO for ISO format strings
+      const parsedDate = parseISO(dateOnlyPart);
+      return format(parsedDate, 'PP'); // Locale-specific date format
     } catch (error) {
       console.error("Error formatting date for display:", error);
       return dateString;
@@ -125,22 +121,12 @@ const Service = () => {
       // Improved date comparison logic
       filtered = filtered.filter(record => {
         try {
-          // Normalize the search date
-          let formattedSearchDate;
-          if (searchDate.includes('/')) {
-            // Handle MM/DD/YYYY format
-            const parsedDate = parse(searchDate, 'MM/dd/yyyy', new Date());
-            formattedSearchDate = format(parsedDate, 'yyyy-MM-dd');
-          } else {
-            // Already in YYYY-MM-DD format from date picker
-            formattedSearchDate = searchDate;
-          }
+          // Extract just the date part from both
+          const recordDateParts = record.service_date.split('T')[0];
+          const searchDateParts = searchDate.split('T')[0];
           
-          // Normalize the record date
-          const recordDate = normalizeDate(record.service_date);
-          
-          console.log(`Comparing record date: ${recordDate} with search date: ${formattedSearchDate}`);
-          return recordDate === formattedSearchDate;
+          console.log(`Comparing record date: ${recordDateParts} with search date: ${searchDateParts}`);
+          return recordDateParts === searchDateParts;
         } catch (error) {
           console.error("Date comparison error:", error);
           return false;
@@ -167,7 +153,10 @@ const Service = () => {
     const upcoming = records.filter(record => {
       if (!record.next_service_date) return false;
       
-      const nextDate = new Date(record.next_service_date);
+      // Parse the date in a timezone-neutral way
+      const dateOnlyPart = record.next_service_date.split('T')[0];
+      const nextDate = parseISO(dateOnlyPart);
+      
       return isWithinInterval(nextDate, {
         start: today,
         end: thirtyDaysFromNow
@@ -229,21 +218,7 @@ const Service = () => {
       return;
     }
     
-    // Keep ISO format from date picker as is
-    if (/^\d{4}-\d{2}-\d{2}$/.test(dateValue)) {
-      setSearchDate(dateValue);
-      return;
-    }
-    
-    // Handle MM/DD/YYYY format entered manually
-    try {
-      const parsedDate = parse(dateValue, 'MM/dd/yyyy', new Date());
-      const formattedDate = format(parsedDate, 'yyyy-MM-dd');
-      setSearchDate(formattedDate);
-    } catch (error) {
-      console.warn("Could not parse date:", dateValue);
-      setSearchDate(dateValue); // Keep the unparsed value for now
-    }
+    setSearchDate(dateValue);
   };
 
   console.log("Service component rendering", { records, filteredRecords, loading });
