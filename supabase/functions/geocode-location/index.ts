@@ -3,16 +3,14 @@ import { serve } from "https://deno.land/std@0.177.0/http/server.ts";
 import { corsHeaders } from "../_shared/cors.ts";
 
 interface GeocodeRequest {
-  location: string;
+  address: string;
   state?: string;
 }
 
 interface GeocodeResponse {
-  location?: {
-    lat: number;
-    lng: number;
-  };
-  address?: string;
+  lat?: string;
+  lon?: string;
+  display_name?: string;
   error?: string;
 }
 
@@ -24,25 +22,18 @@ serve(async (req) => {
   
   try {
     // Get the request body
-    const { location, state } = await req.json() as GeocodeRequest;
+    const requestData = await req.json();
+    const { address } = requestData as GeocodeRequest;
     
-    if (!location) {
+    if (!address) {
+      console.error("Missing address parameter");
       return new Response(
-        JSON.stringify({ error: "Location required" }),
+        JSON.stringify({ error: "Address parameter is required" }),
         { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 400 }
       );
     }
 
-    console.log(`Using search query: "${location}"`);
-    
-    // Build the search query
-    let searchQuery = location;
-    
-    // If there's a state and it's not already in the location string,
-    // append it to improve geocoding accuracy
-    if (state && !location.toLowerCase().includes(state.toLowerCase())) {
-      searchQuery = `${location}, ${state}`;
-    }
+    console.log(`Using search query: "${address}"`);
     
     // Get the MapBox token from environment variables
     const MAPBOX_TOKEN = Deno.env.get("MAPBOX_PUBLIC_TOKEN");
@@ -56,7 +47,7 @@ serve(async (req) => {
     }
     
     // Encode the query for URL
-    const encodedQuery = encodeURIComponent(searchQuery);
+    const encodedQuery = encodeURIComponent(address);
     
     // Build the MapBox Geocoding API URL
     const geocodeUrl = `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodedQuery}.json?access_token=${MAPBOX_TOKEN}&limit=1`;
@@ -97,14 +88,12 @@ serve(async (req) => {
     // Extract the coordinates (longitude, latitude)
     const coordinates = bestMatch.center;
     
-    // Create the response object
-    const geocodeResponse: GeocodeResponse = {
-      location: {
-        lng: coordinates[0],
-        lat: coordinates[1]
-      },
-      address: bestMatch.place_name
-    };
+    // Create the response in the format expected by useAddressSearch.ts
+    const geocodeResponse: GeocodeResponse[] = [{
+      lon: coordinates[0].toString(),
+      lat: coordinates[1].toString(),
+      display_name: bestMatch.place_name
+    }];
     
     // Return the results
     return new Response(

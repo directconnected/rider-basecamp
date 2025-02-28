@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
@@ -36,13 +37,28 @@ export const useAddressSearch = ({
       if (searchParams.zipCode) addressParts.push(searchParams.zipCode);
       const addressString = addressParts.join(', ');
 
+      if (!addressString) {
+        toast.error('Please enter a city, state, or zip code to search');
+        setIsSearching(false);
+        return;
+      }
+
+      console.log(`Geocoding address: ${addressString}`);
+
       // Use Supabase edge function to geocode the address
       const { data: geocodeData, error: geocodeError } = await supabase.functions.invoke('geocode-location', {
         body: { address: addressString },
       });
 
-      if (geocodeError || !geocodeData || !geocodeData.length) {
-        console.error('Geocoding error:', geocodeError || 'No results found');
+      if (geocodeError) {
+        console.error('Geocoding error:', geocodeError);
+        toast.error('Could not find that location. Please try another search.');
+        setIsSearching(false);
+        return;
+      }
+
+      if (!geocodeData || !Array.isArray(geocodeData) || !geocodeData.length) {
+        console.error('No geocoding results found');
         toast.error('Could not find that location. Please try another search.');
         setIsSearching(false);
         return;
