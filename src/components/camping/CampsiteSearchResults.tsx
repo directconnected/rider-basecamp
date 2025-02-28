@@ -1,6 +1,6 @@
 
 import React from "react";
-import { CampgroundResult } from "@/hooks/useCampsiteSearch";
+import { CampgroundResult } from "@/hooks/camping/types";
 import { Badge } from "@/components/ui/badge";
 import { MapPin, Phone, Globe, Star, Droplet, ShowerHead, Calendar, Tent, Truck, Dog, Info, Trees, DollarSign, Wifi, Mountain, Map, MessageSquare, Sparkles, Image } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";

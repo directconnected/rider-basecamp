@@ -3,9 +3,9 @@ import { useState } from 'react';
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { getLocationName } from "@/services/mapService";
-import { calculateDistance } from "@/utils/distanceCalculations";
+import { calculateDistance } from "@/hooks/camping/campsiteUtils";
 import { findNearbyCampgrounds } from "@/services/placesService";
-import { CampgroundResult } from './useCampsiteSearch';
+import { CampgroundResult } from '@/hooks/camping/types';
 
 type SearchParams = {
   state: string;
