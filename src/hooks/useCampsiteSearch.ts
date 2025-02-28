@@ -22,21 +22,20 @@ export const useCampsiteSearch = () => {
   const [searchResults, setSearchResults] = useState<CampgroundResult[]>([]);
   const [isSearching, setIsSearching] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
-  const [totalResults, setTotalResults] = useState(0);
   const ITEMS_PER_PAGE = 12;
 
-  const totalPages = Math.ceil(totalResults / ITEMS_PER_PAGE);
+  const totalPages = Math.ceil(searchResults.length / ITEMS_PER_PAGE);
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
-    // If we had pagination from the API, we would fetch new results here
-    // For now, we'll just update the page display
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   // Regular search by state/city
   const handleSearch = async () => {
     setIsSearching(true);
     setSearchResults([]);
+    setCurrentPage(1); // Reset to first page on new search
     
     try {
       // Format the search location
@@ -122,7 +121,6 @@ export const useCampsiteSearch = () => {
       
       if (processedResults.length > 0) {
         setSearchResults(processedResults);
-        setTotalResults(processedResults.length);
         
         if (isAnyDistance) {
           toast.success(`Found ${processedResults.length} campgrounds near ${searchParams.city || locationString}`);
@@ -148,6 +146,7 @@ export const useCampsiteSearch = () => {
   const handleLocationSearch = async () => {
     setIsSearching(true);
     setSearchResults([]);
+    setCurrentPage(1); // Reset to first page on new search
     
     try {
       if (!navigator.geolocation) {
@@ -204,7 +203,6 @@ export const useCampsiteSearch = () => {
       
       if (processedResults.length > 0) {
         setSearchResults(processedResults);
-        setTotalResults(processedResults.length);
         
         if (isAnyDistance) {
           toast.success(`Found ${processedResults.length} campgrounds near your location`);

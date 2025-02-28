@@ -47,6 +47,12 @@ const CampsiteSearchResults = ({
     );
   }
 
+  // Calculate the results for the current page
+  const ITEMS_PER_PAGE = 12;
+  const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+  const endIndex = startIndex + ITEMS_PER_PAGE;
+  const paginatedResults = results.slice(startIndex, endIndex);
+
   return (
     <section className="py-12 bg-gray-50">
       <div className="container mx-auto px-4">
@@ -55,7 +61,7 @@ const CampsiteSearchResults = ({
         </h2>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {results.map((campsite, index) => (
+          {paginatedResults.map((campsite, index) => (
             <div key={index} className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow">
               <div className="p-6 space-y-4">
                 <div className="flex justify-between items-start">
