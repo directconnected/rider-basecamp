@@ -1,6 +1,6 @@
 
 import { toast } from 'sonner';
-import { findNearbyCampgrounds } from '@/services/placesService';
+import { supabase } from '@/integrations/supabase/client';
 import { processSearchResults } from './campsiteUtils';
 import { CampgroundResult } from './types';
 
@@ -42,7 +42,7 @@ export const useLocationBasedSearch = ({
       console.log("Using geolocation coordinates:", coordinates);
       
       // Set search radius based on user selection
-      const radiusMiles = searchParams.radius === 0 ? 500 : searchParams.radius; // Use large radius for "Any Distance"
+      const radiusMiles = searchParams.radius === 0 ? 100 : searchParams.radius; // Default to 100 miles for "Any Distance"
       const radiusMeters = radiusMiles * 1609.34; // Convert miles to meters
       const isAnyDistance = searchParams.radius === 0;
       
@@ -50,12 +50,58 @@ export const useLocationBasedSearch = ({
       
       console.log(`Searching for campgrounds near your location with radius ${isAnyDistance ? "Any Distance" : radiusMiles + " miles"} (${radiusMeters}m)`);
       
-      // Get campgrounds near current location
-      const results = await findNearbyCampgrounds(coordinates, radiusMeters, state);
-      console.log("Search results from geolocation:", results);
+      // Get campgrounds near current location using Google Places API
+      const { data, error } = await supabase.functions.invoke('find-nearby-places', {
+        body: {
+          coordinates,
+          radius: radiusMeters,
+          type: 'campground',
+          state: state || null
+        }
+      });
+      
+      if (error) {
+        console.error('Error searching for campgrounds by location:', error);
+        toast.error('Failed to search for campgrounds');
+        setIsSearching(false);
+        return;
+      }
+      
+      if (!data || !data.results || data.results.length === 0) {
+        console.log("No campgrounds found in the area");
+        toast.info(isAnyDistance ? 
+          'No campgrounds found near your location' : 
+          `No campgrounds found within ${radiusMiles} miles of your location`
+        );
+        setIsSearching(false);
+        return;
+      }
+      
+      console.log("Search results from geolocation:", data.results);
+      
+      // Convert Google Places API results to our format
+      const campgrounds = data.results.map((place: any) => ({
+        name: place.name,
+        address: place.vicinity || place.formatted_address,
+        location: [place.geometry.location.lng, place.geometry.location.lat],
+        rating: place.rating,
+        phone_number: place.formatted_phone_number,
+        website: place.website,
+        types: place.types,
+        state: state || null,
+        // Set remaining fields to null or default values
+        water: null,
+        showers: null,
+        season: null,
+        sites: null,
+        rv_length: null,
+        pets: null,
+        fee: null,
+        type: 'campground',
+      }));
       
       // Process results
-      const processedResults = processSearchResults(results, coordinates, radiusMiles, isAnyDistance);
+      const processedResults = processSearchResults(campgrounds, coordinates, radiusMiles, isAnyDistance);
       
       if (processedResults.length > 0) {
         setSearchResults(processedResults);

@@ -1,4 +1,3 @@
-
 import { createClient } from '@supabase/supabase-js';
 import { supabase } from "@/integrations/supabase/client";
 import { RestaurantType, AttractionType } from '@/components/route-planning/types';
@@ -485,6 +484,7 @@ export const findNearbyCampgrounds = async (
       website: campground.website,
       phone_number: campground.formatted_phone_number,
       campingType: 'campground',
+      types: campground.types,
       state: state || (campground.address_components ? 
         campground.address_components.find((comp: any) => comp.types.includes('administrative_area_level_1'))?.short_name : 
         undefined)

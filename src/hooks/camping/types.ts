@@ -8,24 +8,24 @@ export interface CampgroundResult {
   phone_number?: string;
   website?: string;
   types?: string[];
-  state?: string;
-  // Additional campground information
-  water?: string;
-  showers?: string;
-  season?: string;
-  sites?: string;
-  rv_length?: number;
-  pets?: string;
-  fee?: string;
+  state?: string | null;
+  // Additional campground information (might be null for Google Places results)
+  water?: string | null;
+  showers?: string | null;
+  season?: string | null;
+  sites?: string | null;
+  rv_length?: number | null;
+  pets?: string | null;
+  fee?: string | null;
   type?: string;
   // New campground information
-  price_per_night?: string;
-  monthly_rate?: string;
-  elev?: number;
-  cell_service?: string;
-  reviews?: string;
-  amenities?: string;
-  photos?: string[];
+  price_per_night?: string | null;
+  monthly_rate?: string | null;
+  elev?: number | null;
+  cell_service?: string | null;
+  reviews?: string | null;
+  amenities?: string | null;
+  photos?: string[] | null;
 }
 
 export interface CampsiteSearchState {
