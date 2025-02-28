@@ -32,7 +32,7 @@ const RoutePlanning = () => {
 
   const { calculateRoute } = useRouteCalculation();
 
-  // Store preferences in localStorage and trigger recalculation when they change
+  // Store preferences in localStorage when they change
   useEffect(() => {
     if (formData.preferredLodging) {
       localStorage.setItem('preferredLodging', formData.preferredLodging);
@@ -46,23 +46,27 @@ const RoutePlanning = () => {
       localStorage.setItem('preferredAttraction', formData.preferredAttraction);
       console.log('Saved preferredAttraction to localStorage:', formData.preferredAttraction);
     }
+  }, [formData.preferredLodging, formData.preferredRestaurant, formData.preferredAttraction]);
+
+  // Handle recalculating route when preferences change and a route is displayed
+  useEffect(() => {
+    const shouldRefreshRoute = 
+      currentRoute && 
+      (localStorage.getItem('forceRefresh') === 'true' || 
+       localStorage.getItem('preferencesChanged') === 'true');
     
-    // If a route is already displayed and preferences change, force a re-render of results
-    if (currentRoute && (
-      localStorage.getItem('forceRefresh') === 'true' || 
-      localStorage.getItem('preferencesChanged') === 'true'
-    )) {
+    if (shouldRefreshRoute) {
       console.log('Preferences changed, refreshing results');
       localStorage.setItem('forceRefresh', 'false');
       localStorage.setItem('preferencesChanged', 'false');
       
-      // This will cause the RouteResults component to re-run its effects
-      resetResults();
-      
-      // Recalculate the route with the new preferences
-      handlePlanRoute();
+      // Only trigger recalculation if we're not already loading
+      if (!isLoading) {
+        resetResults();
+        handlePlanRoute();
+      }
     }
-  }, [formData.preferredLodging, formData.preferredRestaurant, formData.preferredAttraction, currentRoute]);
+  }, [currentRoute, isLoading]);
 
   const handlePlanRoute = async () => {
     // Set flag for preference changes
@@ -111,7 +115,7 @@ const RoutePlanning = () => {
                   currentRoute={currentRoute}
                   fuelStops={fuelStops}
                   hotelStops={hotelStops}
-                  key={Date.now()} // Force re-render when preferences change
+                  key={`route-results-${formData.preferredLodging}-${formData.preferredRestaurant}-${formData.preferredAttraction}`} 
                 />
               )}
             </div>

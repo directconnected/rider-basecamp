@@ -42,6 +42,7 @@ const RouteResults: React.FC<RouteResultsProps> = ({
   const prevLodgingRef = useRef<string>('any');
   const prevRestaurantRef = useRef<RestaurantType>('any');
   const prevAttractionRef = useRef<AttractionType>('any');
+  const intervalIdRef = useRef<number | null>(null);
 
   // Load preferences from localStorage on initial render
   useEffect(() => {
@@ -70,11 +71,22 @@ const RouteResults: React.FC<RouteResultsProps> = ({
     // Clear any pending preference change flags
     localStorage.setItem('preferencesChanged', 'false');
     localStorage.setItem('forceRefresh', 'false');
+    
+    // One-time check for preference changes when component mounts
+    checkForPreferenceChanges();
+    
+    // Clean up interval on unmount
+    return () => {
+      if (intervalIdRef.current) {
+        clearInterval(intervalIdRef.current);
+        intervalIdRef.current = null;
+      }
+    };
   }, []);
 
-  // Setup a listener for localStorage changes
+  // Setup a one-time listener for localStorage changes, not an interval
   useEffect(() => {
-    const checkForPreferenceChanges = () => {
+    function checkForPreferenceChanges() {
       const storedLodging = localStorage.getItem('preferredLodging');
       const storedRestaurant = localStorage.getItem('preferredRestaurant');
       const storedAttraction = localStorage.getItem('preferredAttraction');
@@ -103,15 +115,25 @@ const RouteResults: React.FC<RouteResultsProps> = ({
         // Set a flag to force recalculation on the next effect run
         localStorage.setItem('forceRefresh', 'true');
       }
+    }
+    
+    // Listen for storage events instead of polling
+    const handleStorageChange = (event: StorageEvent) => {
+      if (event.key === 'preferredLodging' || 
+          event.key === 'preferredRestaurant' || 
+          event.key === 'preferredAttraction' ||
+          event.key === 'preferencesChanged' ||
+          event.key === 'forceRefresh') {
+        checkForPreferenceChanges();
+      }
     };
     
-    // Check initially
-    checkForPreferenceChanges();
+    window.addEventListener('storage', handleStorageChange);
     
-    // Set up an interval to check for changes
-    const intervalId = setInterval(checkForPreferenceChanges, 1000);
-    
-    return () => clearInterval(intervalId);
+    // Clean up the event listener
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+    };
   }, [preferredLodging, preferredRestaurant, preferredAttraction]);
 
   // Check if preferences have changed
