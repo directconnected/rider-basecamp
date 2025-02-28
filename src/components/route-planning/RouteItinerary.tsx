@@ -134,8 +134,9 @@ const RouteItinerary = ({
           stops={attractionStops}
           getStopName={(stop) => (stop as AttractionStop).attractionName}
           getStopType={(stop) => {
-            const type = (stop as AttractionStop).attractionType;
-            return type === 'any' ? 'attraction' : (type || 'attraction');
+            // Use the specific attraction type from the AttractionStop
+            const attractionStop = stop as AttractionStop;
+            return attractionStop.attractionType || 'attraction';
           }}
         />
 

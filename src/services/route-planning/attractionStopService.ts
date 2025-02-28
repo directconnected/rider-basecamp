@@ -29,6 +29,38 @@ export const calculateAttractionStops = async (
       
       if (attraction) {
         console.log(`Attraction data for stop ${i}:`, attraction);
+        
+        // Determine more specific attraction type from the place types
+        let specificType = attractionType;
+        if (attraction.types && attraction.types.length > 0) {
+          // Map Google Places types to more user-friendly labels
+          const typeMapping: Record<string, string> = {
+            'museum': 'museum',
+            'art_gallery': 'art gallery',
+            'park': 'park',
+            'amusement_park': 'amusement park',
+            'tourist_attraction': 'tourist attraction',
+            'church': 'church',
+            'place_of_worship': 'place of worship',
+            'historic_site': 'historic site',
+            'natural_feature': 'natural attraction',
+            'zoo': 'zoo',
+            'aquarium': 'aquarium',
+            'stadium': 'stadium',
+            'library': 'library',
+            'campground': 'campground',
+            'point_of_interest': 'point of interest'
+          };
+          
+          // Try to find a more specific type
+          for (const type of attraction.types) {
+            if (typeMapping[type]) {
+              specificType = typeMapping[type];
+              break;
+            }
+          }
+        }
+        
         attractionStops.push({
           location: coordinates,
           name: attraction.address,
@@ -37,7 +69,7 @@ export const calculateAttractionStops = async (
           rating: attraction.rating,
           website: attraction.website,
           phone_number: attraction.phone_number,
-          attractionType: attractionType
+          attractionType: specificType
         });
         console.log(`Added attraction stop ${i}: ${attraction.name} with website: ${attraction.website} and phone: ${attraction.phone_number}`);
       }
