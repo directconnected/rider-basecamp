@@ -87,6 +87,7 @@ const RouteItinerary = ({
           color="bg-purple-500"
           stops={hotelStops}
           getStopName={(stop) => (stop as HotelStop).hotelName}
+          getStopType={(stop) => (stop as HotelStop).lodgingType}
         />
 
         <StopSection
@@ -95,6 +96,7 @@ const RouteItinerary = ({
           color="bg-orange-500"
           stops={restaurantStops}
           getStopName={(stop) => (stop as RestaurantStop).restaurantName}
+          getStopType={(stop) => (stop as RestaurantStop).restaurantType}
         />
 
         <StopSection
@@ -103,6 +105,7 @@ const RouteItinerary = ({
           color="bg-green-600"
           stops={campingStops}
           getStopName={(stop) => (stop as CampingStop).campgroundName}
+          getStopType={(stop) => (stop as CampingStop).campingType}
         />
 
         <StopSection

@@ -1,6 +1,7 @@
 
 import { useState } from "react";
 import { useToast } from "@/components/ui/use-toast";
+import { LodgingType, RestaurantType } from "@/components/route-planning/types";
 
 interface FormData {
   startPoint: string;
@@ -9,6 +10,8 @@ interface FormData {
   duration: string;
   fuelMileage: string;
   milesPerDay: string;
+  preferredLodging: LodgingType;
+  preferredRestaurant: RestaurantType;
 }
 
 interface RouteDetails {
@@ -35,6 +38,7 @@ interface HotelStop {
   rating?: number;
   website?: string;
   phone_number?: string;
+  lodgingType?: string;
 }
 
 interface RestaurantStop {
@@ -45,6 +49,7 @@ interface RestaurantStop {
   rating?: number;
   website?: string;
   phone_number?: string;
+  restaurantType?: string;
 }
 
 interface CampingStop {
@@ -55,6 +60,7 @@ interface CampingStop {
   rating?: number;
   website?: string;
   phone_number?: string;
+  campingType?: string;
 }
 
 export const useRoutePlanning = () => {
@@ -66,7 +72,9 @@ export const useRoutePlanning = () => {
     startDate: "",
     duration: "1",
     fuelMileage: "150",
-    milesPerDay: "300"
+    milesPerDay: "300",
+    preferredLodging: "any",
+    preferredRestaurant: "any"
   });
   const [routeDetails, setRouteDetails] = useState<RouteDetails | null>(null);
   const [currentRoute, setCurrentRoute] = useState<any>(null);

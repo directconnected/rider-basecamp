@@ -77,7 +77,11 @@ export const useRouteCalculation = () => {
       const milesPerDay = parseInt(formData.milesPerDay);
       
       const calculatedFuelStops = await calculateFuelStops(route, fuelMileage);
-      const calculatedHotelStops = await calculateHotelStops(route, milesPerDay);
+      const calculatedHotelStops = await calculateHotelStops(
+        route, 
+        milesPerDay, 
+        formData.preferredLodging
+      );
       
       setFuelStops(calculatedFuelStops);
       setHotelStops(calculatedHotelStops);

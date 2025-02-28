@@ -2,6 +2,7 @@
 import mapboxgl from 'mapbox-gl';
 import { findNearbyGasStation, findNearbyLodging } from "./placesService";
 import { FuelStop, HotelStop } from "@/hooks/useRoutePlanning";
+import { LodgingType } from '@/components/route-planning/types';
 
 const findNearestPointIndex = (coordinates: [number, number][], distance: number): number => {
   let accumulatedDistance = 0;
@@ -83,7 +84,11 @@ export const calculateFuelStops = async (route: any, fuelMileage: number): Promi
   return fuelStops;
 };
 
-export const calculateHotelStops = async (route: any, milesPerDay: number): Promise<HotelStop[]> => {
+export const calculateHotelStops = async (
+  route: any, 
+  milesPerDay: number,
+  preferredLodgingType: LodgingType = 'any'
+): Promise<HotelStop[]> => {
   const totalDistanceInMeters = route.distance;
   const totalDistanceInMiles = totalDistanceInMeters / 1609.34;
   const coordinates = route.geometry.coordinates;
@@ -102,17 +107,24 @@ export const calculateHotelStops = async (route: any, milesPerDay: number): Prom
     const stopCoordinates = coordinates[stopIndex];
     if (!stopCoordinates) continue;
 
-    console.log(`Looking for hotel near mile ${currentMiles}`);
-    const hotel = await findNearbyLodging([stopCoordinates[0], stopCoordinates[1]]);
+    console.log(`Looking for ${preferredLodgingType} near mile ${currentMiles}`);
+    const hotel = await findNearbyLodging(
+      [stopCoordinates[0], stopCoordinates[1]], 
+      5000, 
+      preferredLodgingType
+    );
     
     if (hotel) {
-      console.log(`Found hotel: ${hotel.name} with rating: ${hotel.rating}`);
+      console.log(`Found lodging: ${hotel.name} with rating: ${hotel.rating}, type: ${preferredLodgingType}`);
       hotelStops.push({
         location: hotel.location,
         name: hotel.address,
         hotelName: hotel.name,
         distance: currentMiles,
-        rating: hotel.rating
+        rating: hotel.rating,
+        website: hotel.website,
+        phone_number: hotel.phone_number,
+        lodgingType: preferredLodgingType
       });
     }
 

@@ -3,8 +3,12 @@ import { findNearestPointIndex } from './routeUtils';
 import { findNearbyRestaurant } from '../placesService';
 import { RestaurantStop } from '@/components/route-planning/types';
 
-export const calculateRestaurantStops = async (route: any, milesPerMeal: number = 150): Promise<RestaurantStop[]> => {
-  console.log('Calculating restaurant stops every:', milesPerMeal, 'miles');
+export const calculateRestaurantStops = async (
+  route: any, 
+  milesPerMeal: number = 150, 
+  restaurantType: string = 'any'
+): Promise<RestaurantStop[]> => {
+  console.log('Calculating restaurant stops every:', milesPerMeal, 'miles, type:', restaurantType);
   
   const restaurantStops: RestaurantStop[] = [];
   const totalDistance = route.distance / 1609.34;
@@ -21,7 +25,7 @@ export const calculateRestaurantStops = async (route: any, milesPerMeal: number 
     const coordinates = route.geometry.coordinates[pointIndex] as [number, number];
     
     try {
-      const restaurant = await findNearbyRestaurant(coordinates);
+      const restaurant = await findNearbyRestaurant(coordinates, 5000, restaurantType);
       
       if (restaurant) {
         console.log(`Restaurant data for stop ${i}:`, restaurant);
@@ -32,7 +36,8 @@ export const calculateRestaurantStops = async (route: any, milesPerMeal: number 
           distance: Math.round(progress * totalDistance),
           rating: restaurant.rating,
           website: restaurant.website,
-          phone_number: restaurant.phone_number
+          phone_number: restaurant.phone_number,
+          restaurantType: restaurantType
         });
       }
     } catch (error) {

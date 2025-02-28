@@ -3,7 +3,11 @@ import { findNearestPointIndex } from './routeUtils';
 import { findNearbyCampground } from '../placesService';
 import { CampingStop } from '@/components/route-planning/types';
 
-export const calculateCampingStops = async (route: any, milesPerDay: number): Promise<CampingStop[]> => {
+export const calculateCampingStops = async (
+  route: any, 
+  milesPerDay: number, 
+  campingType: string = 'any'
+): Promise<CampingStop[]> => {
   console.log('Calculating camping stops with miles per day:', milesPerDay);
   
   const campingStops: CampingStop[] = [];
@@ -32,7 +36,8 @@ export const calculateCampingStops = async (route: any, milesPerDay: number): Pr
           distance: Math.round(progress * totalDistance),
           rating: campground.rating,
           website: campground.website,
-          phone_number: campground.phone_number
+          phone_number: campground.phone_number,
+          campingType: campingType
         });
         console.log(`Added campground stop ${i}: ${campground.name} with website: ${campground.website} and phone: ${campground.phone_number}`);
       }

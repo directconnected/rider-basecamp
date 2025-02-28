@@ -1,9 +1,11 @@
 
 import React from "react";
-import { Compass, MapPin, Clock, Calendar, Fuel, LayoutGrid } from "lucide-react";
+import { Compass, MapPin, Clock, Calendar, Fuel, LayoutGrid, UtensilsCrossed, Hotel } from "lucide-react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { LodgingType, RestaurantType } from "./types";
 
 interface FormData {
   startPoint: string;
@@ -12,6 +14,8 @@ interface FormData {
   duration: string;
   fuelMileage: string;
   milesPerDay: string;
+  preferredLodging: LodgingType;
+  preferredRestaurant: RestaurantType;
 }
 
 interface RouteFormProps {
@@ -120,6 +124,63 @@ const RouteForm = ({ formData, isLoading, onFormDataChange, onPlanRoute }: Route
               />
               <Button variant="outline" size="icon">
                 <LayoutGrid className="h-4 w-4" />
+              </Button>
+            </div>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <label className="block text-sm font-medium mb-2">Preferred Lodging Type</label>
+            <div className="flex gap-2">
+              <Select 
+                value={formData.preferredLodging} 
+                onValueChange={(value: LodgingType) => onFormDataChange({ preferredLodging: value })}
+              >
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Select lodging type" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="any">Any Lodging</SelectItem>
+                  <SelectItem value="hotel">Hotel</SelectItem>
+                  <SelectItem value="motel">Motel</SelectItem>
+                  <SelectItem value="resort">Resort</SelectItem>
+                  <SelectItem value="inn">Inn</SelectItem>
+                  <SelectItem value="bed_and_breakfast">Bed & Breakfast</SelectItem>
+                  <SelectItem value="campground">Campground</SelectItem>
+                </SelectContent>
+              </Select>
+              <Button variant="outline" size="icon">
+                <Hotel className="h-4 w-4" />
+              </Button>
+            </div>
+          </div>
+          
+          <div>
+            <label className="block text-sm font-medium mb-2">Preferred Restaurant Type</label>
+            <div className="flex gap-2">
+              <Select 
+                value={formData.preferredRestaurant} 
+                onValueChange={(value: RestaurantType) => onFormDataChange({ preferredRestaurant: value })}
+              >
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Select restaurant type" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="any">Any Restaurant</SelectItem>
+                  <SelectItem value="fine_dining">Fine Dining</SelectItem>
+                  <SelectItem value="casual">Casual Dining</SelectItem>
+                  <SelectItem value="fast_food">Fast Food</SelectItem>
+                  <SelectItem value="cafe">Café</SelectItem>
+                  <SelectItem value="steakhouse">Steakhouse</SelectItem>
+                  <SelectItem value="seafood">Seafood</SelectItem>
+                  <SelectItem value="italian">Italian</SelectItem>
+                  <SelectItem value="mexican">Mexican</SelectItem>
+                  <SelectItem value="asian">Asian</SelectItem>
+                </SelectContent>
+              </Select>
+              <Button variant="outline" size="icon">
+                <UtensilsCrossed className="h-4 w-4" />
               </Button>
             </div>
           </div>
