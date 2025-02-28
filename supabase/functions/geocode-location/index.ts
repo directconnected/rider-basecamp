@@ -1,77 +1,123 @@
 
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.7.1'
-import { corsHeaders } from '../_shared/cors.ts'
+import { serve } from "https://deno.land/std@0.177.0/http/server.ts";
+import { corsHeaders } from "../_shared/cors.ts";
 
 interface GeocodeRequest {
   location: string;
   state?: string;
 }
 
-Deno.serve(async (req) => {
+interface GeocodeResponse {
+  location?: {
+    lat: number;
+    lng: number;
+  };
+  address?: string;
+  error?: string;
+}
+
+serve(async (req) => {
   // Handle CORS preflight requests
-  if (req.method === 'OPTIONS') {
-    return new Response(null, { headers: corsHeaders });
+  if (req.method === "OPTIONS") {
+    return new Response("ok", { headers: corsHeaders });
   }
-
+  
   try {
-    const apiKey = Deno.env.get('GOOGLE_PLACES_API_KEY');
-    if (!apiKey) {
-      return new Response(
-        JSON.stringify({ error: 'API key not configured' }),
-        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
-    }
-
+    // Get the request body
     const { location, state } = await req.json() as GeocodeRequest;
     
     if (!location) {
       return new Response(
-        JSON.stringify({ error: 'No location provided' }),
-        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        JSON.stringify({ error: "Location required" }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 400 }
       );
     }
 
-    // Format the query to include state if provided
-    let query = location;
-    if (state && !location.includes(state)) {
-      query = `${location}, ${state}`;
+    console.log(`Using search query: "${location}"`);
+    
+    // Build the search query
+    let searchQuery = location;
+    
+    // If there's a state and it's not already in the location string,
+    // append it to improve geocoding accuracy
+    if (state && !location.toLowerCase().includes(state.toLowerCase())) {
+      searchQuery = `${location}, ${state}`;
     }
-
-    console.log(`Geocoding location: "${query}"`);
-
-    // Call Google Geocoding API
-    const url = `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(query)}&key=${apiKey}`;
-    const response = await fetch(url);
-    const data = await response.json();
-
-    console.log('Geocoding API response status:', data.status);
-
-    if (data.status !== 'OK' || !data.results || data.results.length === 0) {
-      console.error('Geocoding error or no results:', data.status);
+    
+    // Get the MapBox token from environment variables
+    const MAPBOX_TOKEN = Deno.env.get("MAPBOX_PUBLIC_TOKEN");
+    
+    if (!MAPBOX_TOKEN) {
+      console.error("MAPBOX_PUBLIC_TOKEN environment variable not set");
       return new Response(
-        JSON.stringify({ error: 'Location not found', details: data.status }),
-        { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        JSON.stringify({ error: "Server configuration error" }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 500 }
       );
     }
-
-    // Extract location data from first result
-    const result = data.results[0];
-    const location_data = {
-      formatted_address: result.formatted_address,
-      location: result.geometry.location,
-      place_id: result.place_id,
-      types: result.types
+    
+    // Encode the query for URL
+    const encodedQuery = encodeURIComponent(searchQuery);
+    
+    // Build the MapBox Geocoding API URL
+    const geocodeUrl = `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodedQuery}.json?access_token=${MAPBOX_TOKEN}&limit=1`;
+    
+    // Make the request to MapBox
+    const response = await fetch(geocodeUrl);
+    
+    if (!response.ok) {
+      console.error(`Geocoding API error: ${response.status} ${response.statusText}`);
+      
+      if (response.status === 404) {
+        return new Response(
+          JSON.stringify({ error: "Location not found", details: "REQUEST_DENIED" }),
+          { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 404 }
+        );
+      }
+      
+      return new Response(
+        JSON.stringify({ error: "Geocoding service error" }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 500 }
+      );
+    }
+    
+    const geocodingData = await response.json();
+    
+    // Check if we have features in the response
+    if (!geocodingData.features || geocodingData.features.length === 0) {
+      console.log("No results found for the location");
+      return new Response(
+        JSON.stringify({ error: "Location not found" }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 404 }
+      );
+    }
+    
+    // Get the first feature (best match)
+    const bestMatch = geocodingData.features[0];
+    
+    // Extract the coordinates (longitude, latitude)
+    const coordinates = bestMatch.center;
+    
+    // Create the response object
+    const geocodeResponse: GeocodeResponse = {
+      location: {
+        lng: coordinates[0],
+        lat: coordinates[1]
+      },
+      address: bestMatch.place_name
     };
-
+    
+    // Return the results
     return new Response(
-      JSON.stringify(location_data),
-      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      JSON.stringify(geocodeResponse),
+      { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 200 }
     );
+    
   } catch (error) {
-    console.error('Error in geocode-location function:', error);
+    console.error(`Error processing request: ${error.message}`);
+    
     return new Response(
-      JSON.stringify({ error: error.message }),
-      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      JSON.stringify({ error: "Internal server error", details: error.message }),
+      { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 500 }
     );
   }
 });

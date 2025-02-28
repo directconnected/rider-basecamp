@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { useCampsiteSearchStore } from "@/stores/campsiteSearchStore";
 import { useLocationSearch } from './useLocationSearch';
@@ -81,7 +82,9 @@ export const useCampsiteSearch = () => {
       const state = searchParams.state;
       
       try {
-        // Use the Places service to find coordinates for the location
+        // Directly use a geocoding library or API to find coordinates
+        // For example, we can use a simple geocoding approach with MapBox API through our edge function
+        console.log("Calling geocode-location function with:", searchTerm);
         const { data, error } = await supabase.functions.invoke('geocode-location', {
           body: { 
             location: searchTerm,
@@ -98,7 +101,7 @@ export const useCampsiteSearch = () => {
           return;
         }
 
-        if (!data?.location) {
+        if (!data || !data.location) {
           console.error("No location found in geocoding response");
           toast.error('Could not find that location. Please try a different search.');
           setIsSearching(false);
