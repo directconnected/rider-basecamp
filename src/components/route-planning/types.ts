@@ -42,6 +42,7 @@ export interface RouteItineraryProps {
   campingStops?: CampingStop[];
   attractionStops?: AttractionStop[];
   currentRoute?: any;
+  preferredLodging?: string;
 }
 
 export type LodgingType = 'hotel' | 'motel' | 'resort' | 'inn' | 'bed_and_breakfast' | 'campground' | 'any';

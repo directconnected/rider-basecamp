@@ -18,7 +18,8 @@ const RouteItinerary = ({
   restaurantStops = [],
   campingStops = [],
   attractionStops = [],
-  currentRoute 
+  currentRoute,
+  preferredLodging = 'any'
 }: RouteItineraryProps) => {
   const formatDuration = (hours: number) => {
     const wholeHours = Math.floor(hours);
@@ -28,24 +29,37 @@ const RouteItinerary = ({
 
   const handleDownloadGPX = () => {
     if (!currentRoute?.geometry?.coordinates) {
-      console.error('Cannot generate GPX: Missing route coordinates');
+      console.error('Cannot generate GPPX: Missing route coordinates');
       return;
     }
     downloadGPX(startPoint, destination, currentRoute, fuelStops);
   };
 
-  // Combine hotel stays and camping into a single array for display
-  const allStays: RatedStop[] = [
-    ...hotelStops.map(hotel => ({
-      ...hotel,
-      lodgingType: hotel.lodgingType === 'any' ? 'hotel' : (hotel.lodgingType || 'hotel')
-    })),
-    ...campingStops.map(camp => ({
-      ...camp,
-      hotelName: camp.campgroundName,
-      lodgingType: camp.campingType === 'any' ? 'campground' : (camp.campingType || 'campground')
-    }))
-  ].sort((a, b) => a.distance - b.distance);
+  // Get the appropriate stays based on preferred lodging type
+  let stayTitle = "Suggested Stays";
+  let stayIcon = Hotel;
+  let stayColor = "bg-purple-500";
+
+  if (preferredLodging === 'campground') {
+    stayTitle = "Suggested Campgrounds";
+    stayIcon = Tent;
+    stayColor = "bg-green-700";
+  }
+
+  // Only use the appropriate stays based on the preferred lodging type
+  const allStays: RatedStop[] = preferredLodging === 'campground'
+    ? campingStops.map(camp => ({
+        ...camp,
+        hotelName: camp.campgroundName,
+        lodgingType: 'campground'
+      }))
+    : hotelStops.map(hotel => ({
+        ...hotel,
+        lodgingType: hotel.lodgingType === 'any' ? 'hotel' : (hotel.lodgingType || 'hotel')
+      }));
+
+  // Sort by distance
+  allStays.sort((a, b) => a.distance - b.distance);
 
   return (
     <Card className="mt-8">
@@ -94,26 +108,28 @@ const RouteItinerary = ({
           </div>
         </div>
 
-        <StopSection
-          title="Suggested Stays"
-          icon={Hotel}
-          color="bg-purple-500"
-          stops={allStays}
-          getStopName={(stop) => {
-            if ('campgroundName' in stop) {
-              return (stop as CampingStop).campgroundName;
-            } else {
-              return (stop as HotelStop).hotelName;
-            }
-          }}
-          getStopType={(stop) => {
-            if ('campgroundName' in stop) {
-              return 'campground';
-            } else {
-              return (stop as HotelStop).lodgingType || 'hotel';
-            }
-          }}
-        />
+        {allStays.length > 0 && (
+          <StopSection
+            title={stayTitle}
+            icon={stayIcon}
+            color={stayColor}
+            stops={allStays}
+            getStopName={(stop) => {
+              if ('campgroundName' in stop) {
+                return (stop as CampingStop).campgroundName;
+              } else {
+                return (stop as HotelStop).hotelName;
+              }
+            }}
+            getStopType={(stop) => {
+              if (preferredLodging === 'campground') {
+                return 'campground';
+              } else {
+                return preferredLodging === 'any' ? 'hotel' : preferredLodging;
+              }
+            }}
+          />
+        )}
 
         <StopSection
           title="Suggested Restaurants"
@@ -134,7 +150,6 @@ const RouteItinerary = ({
           stops={attractionStops}
           getStopName={(stop) => (stop as AttractionStop).attractionName}
           getStopType={(stop) => {
-            // Use the specific attraction type from the AttractionStop
             const attractionStop = stop as AttractionStop;
             return attractionStop.attractionType || 'attraction';
           }}

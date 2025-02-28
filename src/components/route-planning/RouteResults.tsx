@@ -1,5 +1,4 @@
-
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import RouteDetails from './RouteDetails';
 import RouteMap from './RouteMap';
 import RouteItinerary from './RouteItinerary';
@@ -28,29 +27,37 @@ const RouteResults: React.FC<RouteResultsProps> = ({
   fuelStops,
   hotelStops,
 }) => {
-  const [restaurantStops, setRestaurantStops] = React.useState<RestaurantStop[]>([]);
-  const [campingStops, setCampingStops] = React.useState<CampingStop[]>([]);
-  const [attractionStops, setAttractionStops] = React.useState<AttractionStop[]>([]);
+  const [restaurantStops, setRestaurantStops] = useState<RestaurantStop[]>([]);
+  const [campingStops, setCampingStops] = useState<CampingStop[]>([]);
+  const [attractionStops, setAttractionStops] = useState<AttractionStop[]>([]);
+  const [preferredLodging, setPreferredLodging] = useState<string>('any');
+
+  useEffect(() => {
+    const storedPreferredLodging = localStorage.getItem('preferredLodging');
+    if (storedPreferredLodging) {
+      setPreferredLodging(storedPreferredLodging);
+    }
+  }, []);
 
   useEffect(() => {
     const calculateAdditionalStops = async () => {
       if (currentRoute?.geometry?.coordinates) {
         try {
-          // Get user preferences from localStorage
           const preferredRestaurant = localStorage.getItem('preferredRestaurant') || 'any';
           const preferredAttraction = localStorage.getItem('preferredAttraction') || 'any';
           
-          // Calculate restaurant stops every 150 miles
           const restaurants = await calculateRestaurantStops(currentRoute, 150, preferredRestaurant);
           setRestaurantStops(restaurants);
           console.log('Calculated restaurant stops:', restaurants);
 
-          // Calculate camping stops at the same intervals as hotel stops
-          const camping = await calculateCampingStops(currentRoute, Math.floor(routeDetails.distance / hotelStops.length));
-          setCampingStops(camping);
-          console.log('Calculated camping stops:', camping);
+          if (preferredLodging === 'campground') {
+            const camping = await calculateCampingStops(currentRoute, Math.floor(routeDetails.distance / hotelStops.length));
+            setCampingStops(camping);
+            console.log('Calculated camping stops:', camping);
+          } else {
+            setCampingStops([]);
+          }
 
-          // Calculate attraction stops every 100 miles
           const attractions = await calculateAttractionStops(currentRoute, 100, preferredAttraction);
           setAttractionStops(attractions);
           console.log('Calculated attraction stops:', attractions);
@@ -61,10 +68,9 @@ const RouteResults: React.FC<RouteResultsProps> = ({
     };
 
     calculateAdditionalStops();
-  }, [currentRoute, routeDetails, hotelStops]);
+  }, [currentRoute, routeDetails, hotelStops, preferredLodging]);
 
   useEffect(() => {
-    // Debug logging
     console.log('Route Details:', routeDetails);
     console.log('Current Route:', currentRoute);
     console.log('Fuel Stops:', fuelStops);
@@ -74,6 +80,7 @@ const RouteResults: React.FC<RouteResultsProps> = ({
     console.log('Attraction Stops:', attractionStops);
     console.log('Start Coordinates:', startCoords);
     console.log('End Coordinates:', endCoords);
+    console.log('Preferred Lodging Type:', preferredLodging);
 
     if (!routeDetails) {
       console.error('Route details is missing');
@@ -94,7 +101,7 @@ const RouteResults: React.FC<RouteResultsProps> = ({
       console.error('Hotel stops is not an array');
       return;
     }
-  }, [routeDetails, currentRoute, fuelStops, hotelStops, restaurantStops, campingStops, attractionStops, startCoords, endCoords]);
+  }, [routeDetails, currentRoute, fuelStops, hotelStops, restaurantStops, campingStops, attractionStops, startCoords, endCoords, preferredLodging]);
 
   if (!routeDetails || !currentRoute?.geometry?.coordinates || !Array.isArray(fuelStops)) {
     console.error('Missing required data for route rendering');
@@ -122,11 +129,12 @@ const RouteResults: React.FC<RouteResultsProps> = ({
         distance={routeDetails.distance}
         duration={routeDetails.duration}
         fuelStops={fuelStops}
-        hotelStops={hotelStops}
+        hotelStops={preferredLodging === 'campground' ? [] : hotelStops}
         restaurantStops={restaurantStops}
-        campingStops={campingStops}
+        campingStops={preferredLodging === 'campground' ? campingStops : []}
         attractionStops={attractionStops}
         currentRoute={currentRoute}
+        preferredLodging={preferredLodging}
       />
     </>
   );
