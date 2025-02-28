@@ -18,7 +18,19 @@ export const calculateAttractionStops = async (
   if (numStops <= 0) return [];
   
   // Type mapping for consistent comparison
-  const typeMapping: Record<string, string> = {
+  const typeMapping: Record<string, string[]> = {
+    'museum': ['museum'],
+    'park': ['park'],
+    'tourist_attraction': ['tourist_attraction'],
+    'amusement_park': ['amusement_park'],
+    'art_gallery': ['art_gallery'],
+    'historic_site': ['point_of_interest', 'historic'],
+    'natural_feature': ['natural_feature'],
+    'point_of_interest': ['point_of_interest']
+  };
+  
+  // For more user-friendly display, we map the API types to display names
+  const displayTypes: Record<string, string> = {
     'museum': 'museum',
     'park': 'park',
     'tourist_attraction': 'tourist attraction',
@@ -29,9 +41,15 @@ export const calculateAttractionStops = async (
     'point_of_interest': 'point of interest'
   };
   
-  // Convert the selected type to a consistent format for comparison
-  const normalizedSelectedType = typeMapping[attractionType] || attractionType.replace('_', ' ');
-  console.log(`Normalized selected attraction type: ${normalizedSelectedType}`);
+  console.log(`Selected attraction type: ${attractionType}`);
+  
+  // Convert the selected type to the correct API search term 
+  let searchType = attractionType;
+  
+  // Special handling for tourist attractions
+  if (attractionType === 'tourist_attractions') {
+    searchType = 'tourist_attraction';
+  }
   
   for (let i = 1; i <= numStops; i++) {
     const progress = (i * interval) / totalDistance;
@@ -42,7 +60,7 @@ export const calculateAttractionStops = async (
     
     try {
       // Use the specific attraction type when searching for nearby attractions
-      const attraction = await findNearbyAttraction(coordinates, 5000, attractionType);
+      const attraction = await findNearbyAttraction(coordinates, 5000, searchType);
       
       if (attraction) {
         console.log(`Found attraction data for stop ${i}:`, attraction);
@@ -51,33 +69,62 @@ export const calculateAttractionStops = async (
         let specificType = 'attraction';
         if (attraction.types && attraction.types.length > 0) {
           // Try to find a matching type using our mapping
-          for (const type of attraction.types) {
-            if (typeMapping[type]) {
-              specificType = typeMapping[type];
-              break;
+          for (const apiType of attraction.types) {
+            const normalizedType = apiType.replace(/_/g, ' ');
+            for (const [key, value] of Object.entries(displayTypes)) {
+              if (normalizedType === value) {
+                specificType = value;
+                break;
+              }
             }
+            // If we already found a specific type, break out
+            if (specificType !== 'attraction') break;
           }
         }
         
         console.log(`Attraction ${attraction.name} has specific type: ${specificType}`);
-        console.log(`Comparing with selected type: ${normalizedSelectedType}`);
         
-        // Only add this attraction if:
-        // 1. User selected 'any', OR
-        // 2. The specific type matches the normalized selected type, OR
-        // 3. One of the raw types includes the selected type
-        const typeMatches = 
-          attractionType === 'any' || 
-          specificType === normalizedSelectedType ||
-          (attraction.types && attraction.types.some(type => 
-            type === attractionType || 
-            type.includes(attractionType) || 
-            attractionType.includes(type)
-          ));
+        // Check if this attraction matches our filter criteria
+        let typeMatches = false;
+        
+        // "any" type matches everything
+        if (attractionType === 'any') {
+          typeMatches = true;
+        }
+        // Tourist attractions special case
+        else if (attractionType === 'tourist_attractions' && 
+                (attraction.types?.includes('tourist_attraction') || 
+                 specificType === 'tourist attraction')) {
+          typeMatches = true;
+        }
+        // For other specific types
+        else if (attraction.types) {
+          // Check if any of the attraction's types match our search type
+          for (const type of attraction.types) {
+            // Direct match
+            if (type === searchType) {
+              typeMatches = true;
+              break;
+            }
+            
+            // Check against our mapping if available
+            if (typeMapping[searchType]) {
+              if (typeMapping[searchType].some(mappedType => type.includes(mappedType))) {
+                typeMatches = true;
+                break;
+              }
+            }
+          }
+        }
         
         console.log(`Type match result for ${attraction.name}: ${typeMatches}`);
         
         if (typeMatches) {
+          // For tourist attractions, always set the display type correctly
+          if (attractionType === 'tourist_attractions') {
+            specificType = 'tourist attraction';
+          }
+          
           attractionStops.push({
             location: coordinates,
             name: attraction.address,
