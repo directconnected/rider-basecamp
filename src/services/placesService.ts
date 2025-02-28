@@ -1,12 +1,9 @@
 
 import { createClient } from '@supabase/supabase-js';
+import { supabase } from "@/integrations/supabase/client";
 
 // Use a more generic typing approach since we don't have access to the database.types
 type Database = any;
-
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
-const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "";
-const supabase = createClient<Database>(supabaseUrl, supabaseKey);
 
 export const findNearbyGasStation = async (coordinates: [number, number], radius: number = 5000): Promise<any | null> => {
   try {
