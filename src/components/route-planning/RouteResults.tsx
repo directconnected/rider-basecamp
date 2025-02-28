@@ -162,7 +162,7 @@ const RouteResults: React.FC<RouteResultsProps> = ({
           setCampingStops([]);
         }
         
-        // Restaurant stops - we always calculate these regardless of type
+        // Restaurant stops - we calculate based on the requested type
         console.log('Calculating restaurant stops with type:', preferredRestaurant);
         const restaurants = await calculateRestaurantStops(currentRoute, 150, preferredRestaurant);
         console.log('Calculated restaurant stops:', restaurants);

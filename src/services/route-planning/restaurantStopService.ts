@@ -36,14 +36,24 @@ export const calculateRestaurantStops = async (
     while (!restaurant && attempts < maxAttempts) {
       try {
         console.log(`Attempt ${attempts + 1}: Finding restaurant near ${coordinates} with type ${restaurantType} and radius ${searchRadius}m`);
-        restaurant = await findNearbyRestaurant(coordinates, searchRadius, restaurantType);
         
-        if (restaurant) {
-          console.log(`Found restaurant data for stop ${i}:`, restaurant);
+        // Only search for specific type (not any fallback) if a non-any type is requested
+        if (restaurantType !== 'any') {
+          restaurant = await findNearbyRestaurant(coordinates, searchRadius, restaurantType);
           
-          // Ensure the restaurant has the requested type for UI consistency
-          restaurant.restaurantType = restaurantType;
-          break;
+          if (restaurant) {
+            console.log(`Found ${restaurantType} restaurant for stop ${i}:`, restaurant.name);
+            // Ensure it has the specific requested type
+            restaurant.restaurantType = restaurantType;
+            break;
+          }
+        } else {
+          // For 'any' type, just find any restaurant
+          restaurant = await findNearbyRestaurant(coordinates, searchRadius, 'any');
+          if (restaurant) {
+            console.log(`Found any restaurant for stop ${i}:`, restaurant.name);
+            break;
+          }
         }
       } catch (error) {
         console.error(`Error in attempt ${attempts + 1}:`, error);
@@ -62,44 +72,36 @@ export const calculateRestaurantStops = async (
         rating: restaurant.rating,
         website: restaurant.website,
         phone_number: restaurant.phone_number,
-        restaurantType: restaurantType // Use the requested type from UI
+        restaurantType: restaurant.restaurantType || restaurantType // Use the requested type from UI
       });
       
       console.log(`Added restaurant stop ${i}: ${restaurant.name} with type: ${restaurant.restaurantType}`);
-    } else {
+    } else if (restaurantType !== 'any') {
+      // We couldn't find the specific type, don't add a fallback for specific searches
       console.log(`Could not find restaurant of type ${restaurantType} for stop ${i} after ${maxAttempts} attempts`);
+    } else {
+      // For 'any' type, add a placeholder
+      console.log(`Could not find any restaurant for stop ${i} after ${maxAttempts} attempts`);
       
-      // If we can't find the specific type, try to find any restaurant
-      if (restaurantType !== 'any') {
-        console.log('Falling back to any restaurant type');
-        try {
-          const fallbackRestaurant = await findNearbyRestaurant(coordinates, 10000, 'any');
-          if (fallbackRestaurant) {
-            restaurantStops.push({
-              location: coordinates,
-              name: fallbackRestaurant.address,
-              restaurantName: fallbackRestaurant.name,
-              distance: Math.round(progress * totalDistance),
-              rating: fallbackRestaurant.rating,
-              website: fallbackRestaurant.website,
-              phone_number: fallbackRestaurant.phone_number,
-              restaurantType: restaurantType // Show the requested type in UI
-            });
-            console.log(`Added fallback restaurant stop ${i}: ${fallbackRestaurant.name}`);
-          }
-        } catch (error) {
-          console.error('Error finding fallback restaurant:', error);
-        }
-      }
+      const placeholderName = `Restaurant near mile ${Math.round(progress * totalDistance)}`;
+      restaurantStops.push({
+        location: coordinates,
+        name: `Near route point ${Math.round(progress * totalDistance)}`,
+        restaurantName: placeholderName,
+        distance: Math.round(progress * totalDistance),
+        restaurantType: 'any'
+      });
+      console.log(`Added placeholder restaurant stop ${i}`);
     }
   }
 
   console.log(`Final restaurant stops count: ${restaurantStops.length}`);
   
-  // Ensure we have at least some restaurant results
-  if (restaurantStops.length === 0) {
-    console.log('No restaurants found for requested type, will try fallback search');
-    return calculateRestaurantStops(route, interval, 'any');
+  // If we couldn't find any restaurants of the specified type, return an empty array
+  // instead of falling back to 'any'
+  if (restaurantStops.length === 0 && restaurantType !== 'any') {
+    console.log(`No restaurants found of type ${restaurantType}`);
+    return [];
   }
   
   // Log the restaurant types found for debugging

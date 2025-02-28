@@ -36,14 +36,24 @@ export const calculateAttractionStops = async (
     while (!attraction && attempts < maxAttempts) {
       try {
         console.log(`Attempt ${attempts + 1}: Finding attraction near ${coordinates} with type ${attractionType} and radius ${searchRadius}m`);
-        attraction = await findNearbyAttraction(coordinates, searchRadius, attractionType);
         
-        if (attraction) {
-          console.log(`Found attraction data for stop ${i}:`, attraction);
+        // Only search for specific type (not any fallback) if a non-any type is requested
+        if (attractionType !== 'any') {
+          attraction = await findNearbyAttraction(coordinates, searchRadius, attractionType);
           
-          // This ensures the attraction type matches what was selected in the UI
-          attraction.attractionType = attractionType;
-          break;
+          if (attraction) {
+            console.log(`Found ${attractionType} attraction for stop ${i}:`, attraction.name);
+            // Ensure it has the specific requested type
+            attraction.attractionType = attractionType;
+            break;
+          }
+        } else {
+          // For 'any' type, just find any attraction
+          attraction = await findNearbyAttraction(coordinates, searchRadius, 'any');
+          if (attraction) {
+            console.log(`Found any attraction for stop ${i}:`, attraction.name);
+            break;
+          }
         }
       } catch (error) {
         console.error(`Error in attempt ${attempts + 1}:`, error);
@@ -62,45 +72,36 @@ export const calculateAttractionStops = async (
         rating: attraction.rating,
         website: attraction.website,
         phone_number: attraction.phone_number,
-        attractionType: attractionType // Use the selected type from UI
+        attractionType: attraction.attractionType || attractionType // Use the actual type
       });
       
       console.log(`Added attraction stop ${i}: ${attraction.name} with type ${attraction.attractionType}`);
-    } else {
+    } else if (attractionType !== 'any') {
+      // We couldn't find the specific type, don't add a fallback for specific searches
       console.log(`Could not find attraction of type ${attractionType} for stop ${i} after ${maxAttempts} attempts`);
+    } else {
+      // For 'any' type, add a placeholder
+      console.log(`Could not find any attraction for stop ${i} after ${maxAttempts} attempts`);
       
-      // If we can't find the specific type, try to find any attraction
-      if (attractionType !== 'any') {
-        console.log('Falling back to any attraction type');
-        try {
-          const fallbackAttraction = await findNearbyAttraction(coordinates, 10000, 'any');
-          if (fallbackAttraction) {
-            // Still label it with the requested type for consistency in the UI
-            attractionStops.push({
-              location: coordinates,
-              name: fallbackAttraction.address,
-              attractionName: fallbackAttraction.name,
-              distance: Math.round(progress * totalDistance),
-              rating: fallbackAttraction.rating,
-              website: fallbackAttraction.website,
-              phone_number: fallbackAttraction.phone_number,
-              attractionType: attractionType // Keep showing the user's preference
-            });
-            console.log(`Added fallback attraction stop ${i}: ${fallbackAttraction.name}`);
-          }
-        } catch (error) {
-          console.error('Error finding fallback attraction:', error);
-        }
-      }
+      const placeholderName = `Attraction near mile ${Math.round(progress * totalDistance)}`;
+      attractionStops.push({
+        location: coordinates,
+        name: `Near route point ${Math.round(progress * totalDistance)}`,
+        attractionName: placeholderName,
+        distance: Math.round(progress * totalDistance),
+        attractionType: 'any'
+      });
+      console.log(`Added placeholder attraction stop ${i}`);
     }
   }
 
   console.log(`Final attraction stops count: ${attractionStops.length}`);
   
-  // Ensure we have at least some attraction results
-  if (attractionStops.length === 0) {
-    console.log('No attractions found for requested type, will try fallback search');
-    return calculateAttractionStops(route, interval, 'any');
+  // If we couldn't find any attractions of the specified type, return an empty array
+  // instead of falling back to 'any'
+  if (attractionStops.length === 0 && attractionType !== 'any') {
+    console.log(`No attractions found of type ${attractionType}`);
+    return [];
   }
   
   // Log the attraction types found for debugging
