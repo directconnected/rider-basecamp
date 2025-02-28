@@ -55,7 +55,7 @@ const RouteItinerary = ({
       }))
     : hotelStops.map(hotel => ({
         ...hotel,
-        lodgingType: hotel.lodgingType === 'any' ? 'hotel' : (hotel.lodgingType || 'hotel')
+        lodgingType: preferredLodging === 'any' ? 'hotel' : preferredLodging
       }));
 
   // Sort by distance
@@ -158,13 +158,7 @@ const RouteItinerary = ({
                 return (stop as HotelStop).hotelName;
               }
             }}
-            getStopType={(stop) => {
-              if (preferredLodging === 'campground') {
-                return 'campground';
-              } else {
-                return preferredLodging === 'any' ? 'hotel' : preferredLodging;
-              }
-            }}
+            getStopType={(stop) => preferredLodging}
           />
         )}
 

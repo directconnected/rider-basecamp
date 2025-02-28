@@ -24,6 +24,11 @@ const StopSection = ({ title, icon: Icon, color, stops, getStopName, getStopType
   const formatTypeLabel = (type: string | undefined): string => {
     if (!type || type === 'any') return '';
     
+    // Handle special case for bed_and_breakfast
+    if (type === 'bed_and_breakfast' || type === 'bed and breakfast') {
+      return 'Bed & Breakfast';
+    }
+    
     // Replace underscores with spaces and capitalize each word
     return type
       .replace(/_/g, ' ')
