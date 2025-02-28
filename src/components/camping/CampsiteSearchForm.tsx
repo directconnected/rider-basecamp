@@ -3,8 +3,11 @@ import React from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
-import { FormItem, FormLabel, FormControl } from "@/components/ui/form";
+import { Form, FormField, FormItem, FormLabel, FormControl } from "@/components/ui/form";
 import { MapPin, Search, MapPinned } from "lucide-react";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
 
 interface CampsiteSearchFormProps {
   searchParams: {
@@ -19,11 +22,18 @@ interface CampsiteSearchFormProps {
   isSearching: boolean;
 }
 
+const formSchema = z.object({
+  city: z.string().optional(),
+  state: z.string().optional(),
+  zipCode: z.string().optional(),
+  radius: z.string().default("25000")
+});
+
 const radiusOptions = [
-  { value: 5000, label: "5 km" },
-  { value: 10000, label: "10 km" },
-  { value: 25000, label: "25 km" },
-  { value: 50000, label: "50 km" },
+  { value: "5000", label: "5 km" },
+  { value: "10000", label: "10 km" },
+  { value: "25000", label: "25 km" },
+  { value: "50000", label: "50 km" },
 ];
 
 const CampsiteSearchForm = ({
@@ -33,105 +43,152 @@ const CampsiteSearchForm = ({
   onLocationSearch,
   isSearching,
 }: CampsiteSearchFormProps) => {
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
+  const form = useForm({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      city: searchParams.city || "",
+      state: searchParams.state || "",
+      zipCode: searchParams.zipCode || "",
+      radius: searchParams.radius?.toString() || "25000"
+    }
+  });
+
+  const handleChange = (name: string, value: string) => {
     setSearchParams({ ...searchParams, [name]: value });
   };
 
-  const handleRadiusChange = (value: string) => {
-    setSearchParams({ ...searchParams, radius: parseInt(value) });
-  };
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = form.handleSubmit((data) => {
+    setSearchParams({
+      city: data.city,
+      state: data.state,
+      zipCode: data.zipCode,
+      radius: parseInt(data.radius)
+    });
     onSearch();
-  };
+  });
 
   return (
     <div className="bg-white rounded-lg shadow-xl overflow-hidden">
       <div className="p-6 space-y-6">
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <FormItem>
-              <FormLabel>City</FormLabel>
-              <FormControl>
-                <Input
-                  placeholder="Enter city"
-                  name="city"
-                  value={searchParams.city}
-                  onChange={handleChange}
-                />
-              </FormControl>
-            </FormItem>
+        <Form {...form}>
+          <form onSubmit={handleSubmit} className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <FormField
+                control={form.control}
+                name="city"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>City</FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder="Enter city"
+                        {...field}
+                        onChange={(e) => {
+                          field.onChange(e);
+                          handleChange("city", e.target.value);
+                        }}
+                      />
+                    </FormControl>
+                  </FormItem>
+                )}
+              />
+              
+              <FormField
+                control={form.control}
+                name="state"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>State</FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder="Enter state"
+                        {...field}
+                        onChange={(e) => {
+                          field.onChange(e);
+                          handleChange("state", e.target.value);
+                        }}
+                      />
+                    </FormControl>
+                  </FormItem>
+                )}
+              />
+              
+              <FormField
+                control={form.control}
+                name="zipCode"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Zip Code</FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder="Enter zip code"
+                        {...field}
+                        onChange={(e) => {
+                          field.onChange(e);
+                          handleChange("zipCode", e.target.value);
+                        }}
+                      />
+                    </FormControl>
+                  </FormItem>
+                )}
+              />
+            </div>
             
-            <FormItem>
-              <FormLabel>State</FormLabel>
-              <FormControl>
-                <Input
-                  placeholder="Enter state"
-                  name="state"
-                  value={searchParams.state}
-                  onChange={handleChange}
-                />
-              </FormControl>
-            </FormItem>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <FormField
+                control={form.control}
+                name="radius"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Search Radius</FormLabel>
+                    <Select
+                      value={field.value}
+                      onValueChange={(value) => {
+                        field.onChange(value);
+                        handleChange("radius", value);
+                      }}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select radius" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {radiusOptions.map((option) => (
+                          <SelectItem key={option.value} value={option.value}>
+                            {option.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </FormItem>
+                )}
+              />
+            </div>
             
-            <FormItem>
-              <FormLabel>Zip Code</FormLabel>
-              <FormControl>
-                <Input
-                  placeholder="Enter zip code"
-                  name="zipCode"
-                  value={searchParams.zipCode}
-                  onChange={handleChange}
-                />
-              </FormControl>
-            </FormItem>
-          </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <FormItem>
-              <FormLabel>Search Radius</FormLabel>
-              <Select
-                value={searchParams.radius?.toString() || "25000"}
-                onValueChange={handleRadiusChange}
+            <div className="flex flex-col sm:flex-row gap-4">
+              <Button 
+                type="submit" 
+                disabled={isSearching}
+                className="flex items-center gap-2 w-full sm:w-auto"
               >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select radius" />
-                </SelectTrigger>
-                <SelectContent>
-                  {radiusOptions.map((option) => (
-                    <SelectItem key={option.value} value={option.value.toString()}>
-                      {option.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </FormItem>
-          </div>
-          
-          <div className="flex flex-col sm:flex-row gap-4">
-            <Button 
-              type="submit" 
-              disabled={isSearching}
-              className="flex items-center gap-2 w-full sm:w-auto"
-            >
-              <Search className="h-4 w-4" />
-              <span>{isSearching ? "Searching..." : "Search Campgrounds"}</span>
-            </Button>
-            
-            <Button 
-              type="button" 
-              variant="outline" 
-              onClick={onLocationSearch}
-              disabled={isSearching}
-              className="flex items-center gap-2 w-full sm:w-auto"
-            >
-              <MapPinned className="h-4 w-4" />
-              <span>{isSearching ? "Searching..." : "Search Near Me"}</span>
-            </Button>
-          </div>
-        </form>
+                <Search className="h-4 w-4" />
+                <span>{isSearching ? "Searching..." : "Search Campgrounds"}</span>
+              </Button>
+              
+              <Button 
+                type="button" 
+                variant="outline" 
+                onClick={onLocationSearch}
+                disabled={isSearching}
+                className="flex items-center gap-2 w-full sm:w-auto"
+              >
+                <MapPinned className="h-4 w-4" />
+                <span>{isSearching ? "Searching..." : "Search Near Me"}</span>
+              </Button>
+            </div>
+          </form>
+        </Form>
       </div>
     </div>
   );
