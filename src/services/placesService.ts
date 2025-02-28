@@ -125,53 +125,7 @@ export const findNearbyCampgrounds = async (
   try {
     console.log(`Searching for campgrounds near coordinates:`, coordinates, 'with radius:', radius, state ? `in state: ${state}` : '');
     
-    // Try directly using the campsites table if a specific state is provided
-    if (state) {
-      const { data: campsiteData, error: dbError } = await supabase
-        .from('campsites')
-        .select('*')
-        .eq('state', state)
-        .order('camp');
-      
-      if (!dbError && campsiteData && campsiteData.length > 0) {
-        console.log(`Found ${campsiteData.length} campgrounds in ${state} from database`);
-        
-        // Process and return the found places from the database
-        return campsiteData.map(site => ({
-          name: site.camp || 'Unknown Campground',
-          address: site.town ? `${site.town}, ${site.state}` : (site.state || 'Unknown Location'),
-          location: [site.lon || 0, site.lat || 0],
-          rating: 4.0, // Default rating since DB doesn't have this
-          website: site.url,
-          phone_number: site.phone,
-          types: ['campground'],
-          state: site.state,
-          // Existing campground information fields
-          water: site.water,
-          showers: site.showers,
-          season: site.season,
-          sites: site.sites,
-          rv_length: site.rv_length,
-          pets: site.pets,
-          fee: site.fee,
-          type: site.type || 'Campground',
-          // New campground information fields
-          price_per_night: site.fee ? `$${parseFloat(site.fee.replace(/[^\d.]/g, '') || '0').toFixed(2)}` : undefined,
-          monthly_rate: site.fee ? `$${(parseFloat(site.fee.replace(/[^\d.]/g, '') || '0') * 30 * 0.85).toFixed(2)}` : undefined,
-          elev: site.elev,
-          cell_service: site.comments?.includes('cell') ? 
-                       (site.comments.includes('no cell') ? 'No' : 'Yes') : undefined,
-          reviews: site.comments?.length > 10 ? '1 review' : undefined,
-          amenities: site.hookups || (site.water === 'Yes' && site.showers === 'Yes' ? 
-                   'Water, Showers' : 
-                   (site.water === 'Yes' ? 'Water' : 
-                   (site.showers === 'Yes' ? 'Showers' : undefined))),
-          photos: []
-        }));
-      }
-    }
-    
-    // Try Google Places API
+    // We'll use Google Places API directly since we don't have a campsites table
     const { data, error } = await supabase.functions.invoke('find-nearby-places', {
       body: {
         location: [coordinates[1], coordinates[0]], 
@@ -224,7 +178,7 @@ export const findNearbyCampgrounds = async (
         phone_number: place.formatted_phone_number,
         types: place.types,
         state: placeState,
-        // Existing campground information fields
+        // Default camping info fields (since we don't have real data)
         type: 'Campground',
         water: place.types?.includes('rv_park') ? 'Yes' : 'N/A',
         showers: place.types?.includes('rv_park') ? 'Yes' : 'N/A',
@@ -233,7 +187,7 @@ export const findNearbyCampgrounds = async (
         rv_length: place.types?.includes('rv_park') ? 40 : undefined,
         pets: 'N/A',
         fee: 'N/A',
-        // New campground information fields
+        // Additional campground fields
         price_per_night: basePricePerNight,
         monthly_rate: monthlyRate,
         elev: undefined,
