@@ -1,5 +1,6 @@
 
 import { supabase } from "@/integrations/supabase/client";
+import { CampgroundResult } from '@/hooks/useCampsiteSearch';
 
 interface PlaceResult {
   name: string;
@@ -104,6 +105,48 @@ export const findNearbyRestaurant = async (
 
 export const findNearbyCampground = async (coordinates: [number, number], radius: number = 5000): Promise<PlaceResult | null> => {
   return findPlace(coordinates, 'campground', radius);
+};
+
+export const findNearbyCampgrounds = async (coordinates: [number, number], radius: number = 25000): Promise<CampgroundResult[]> => {
+  try {
+    console.log(`Searching for campgrounds near coordinates:`, coordinates, 'with radius:', radius);
+    const { data, error } = await supabase.functions.invoke('find-nearby-places', {
+      body: {
+        location: [coordinates[1], coordinates[0]], 
+        type: 'campground',
+        radius,
+        rankby: 'prominence',
+        fields: ['name', 'vicinity', 'formatted_address', 'geometry', 'rating', 'price_level', 'website', 'formatted_phone_number', 'types'],
+        limit: 20 // Request more results
+      }
+    });
+
+    if (error) {
+      console.error(`Error finding campgrounds:`, error);
+      return [];
+    }
+
+    if (!data?.places || data.places.length === 0) {
+      console.log(`No campgrounds found near coordinates with radius ${radius}:`, coordinates);
+      return [];
+    }
+
+    console.log(`Found ${data.places.length} campgrounds`);
+    
+    // Process and return the found places
+    return data.places.map(place => ({
+      name: place.name,
+      address: place.vicinity || place.formatted_address,
+      location: [place.geometry.location.lng, place.geometry.location.lat],
+      rating: place.rating,
+      website: place.website,
+      phone_number: place.formatted_phone_number,
+      types: place.types
+    }));
+  } catch (error) {
+    console.error(`Error in findNearbyCampgrounds:`, error);
+    return [];
+  }
 };
 
 export const findNearbyAttraction = async (
