@@ -40,6 +40,9 @@ export const calculateRestaurantStops = async (
         
         if (restaurant) {
           console.log(`Found restaurant data for stop ${i}:`, restaurant);
+          
+          // Ensure the restaurant has the requested type for UI consistency
+          restaurant.restaurantType = restaurantType;
           break;
         }
       } catch (error) {
@@ -59,7 +62,7 @@ export const calculateRestaurantStops = async (
         rating: restaurant.rating,
         website: restaurant.website,
         phone_number: restaurant.phone_number,
-        restaurantType: restaurant.restaurantType
+        restaurantType: restaurantType // Use the requested type from UI
       });
       
       console.log(`Added restaurant stop ${i}: ${restaurant.name} with type: ${restaurant.restaurantType}`);
@@ -80,7 +83,7 @@ export const calculateRestaurantStops = async (
               rating: fallbackRestaurant.rating,
               website: fallbackRestaurant.website,
               phone_number: fallbackRestaurant.phone_number,
-              restaurantType: fallbackRestaurant.restaurantType
+              restaurantType: restaurantType // Show the requested type in UI
             });
             console.log(`Added fallback restaurant stop ${i}: ${fallbackRestaurant.name}`);
           }

@@ -40,6 +40,9 @@ export const calculateAttractionStops = async (
         
         if (attraction) {
           console.log(`Found attraction data for stop ${i}:`, attraction);
+          
+          // This ensures the attraction type matches what was selected in the UI
+          attraction.attractionType = attractionType;
           break;
         }
       } catch (error) {
@@ -59,7 +62,7 @@ export const calculateAttractionStops = async (
         rating: attraction.rating,
         website: attraction.website,
         phone_number: attraction.phone_number,
-        attractionType: attraction.attractionType
+        attractionType: attractionType // Use the selected type from UI
       });
       
       console.log(`Added attraction stop ${i}: ${attraction.name} with type ${attraction.attractionType}`);
@@ -72,6 +75,7 @@ export const calculateAttractionStops = async (
         try {
           const fallbackAttraction = await findNearbyAttraction(coordinates, 10000, 'any');
           if (fallbackAttraction) {
+            // Still label it with the requested type for consistency in the UI
             attractionStops.push({
               location: coordinates,
               name: fallbackAttraction.address,
@@ -80,7 +84,7 @@ export const calculateAttractionStops = async (
               rating: fallbackAttraction.rating,
               website: fallbackAttraction.website,
               phone_number: fallbackAttraction.phone_number,
-              attractionType: fallbackAttraction.attractionType
+              attractionType: attractionType // Keep showing the user's preference
             });
             console.log(`Added fallback attraction stop ${i}: ${fallbackAttraction.name}`);
           }

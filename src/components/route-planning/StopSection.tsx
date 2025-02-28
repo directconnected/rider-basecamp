@@ -1,4 +1,3 @@
-
 import React from "react";
 import { LucideIcon } from "lucide-react";
 import RatingDisplay from "./RatingDisplay";
@@ -18,6 +17,7 @@ interface StopSectionProps {
   stops: RatedStop[];
   getStopName: (stop: RatedStop) => string;
   getStopType: (stop: RatedStop) => string;
+  preferredType?: string;
 }
 
 const StopSection = ({ 
@@ -26,11 +26,25 @@ const StopSection = ({
   color, 
   stops, 
   getStopName,
-  getStopType
+  getStopType,
+  preferredType
 }: StopSectionProps) => {
   // Generate a formatted display name for the stop type
   const formatType = (stop: RatedStop): string => {
-    // Determine which type of stop it is
+    // If a preferred type is provided, use that instead of the individual stop's type
+    if (preferredType) {
+      if (preferredType === 'campground') return 'Campground';
+      if (preferredType === 'museum') return 'Museum';
+      if (preferredType.includes('steak')) return 'Steakhouse';
+      
+      // For other types, format them nicely
+      return preferredType
+        .split('_')
+        .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+        .join(' ');
+    }
+    
+    // Otherwise use the stop's type
     if ('restaurantType' in stop && stop.restaurantType) {
       return formatRestaurantType(stop.restaurantType as string);
     } else if ('lodgingType' in stop && stop.lodgingType) {

@@ -61,7 +61,7 @@ const RouteItinerary = ({
   // Sort by distance
   allStays.sort((a, b) => a.distance - b.distance);
 
-  // Get preferred types for display purposes (not for filtering)
+  // Get preferred types for display purposes
   const preferredRestaurant = localStorage.getItem('preferredRestaurant') || 'any';
   const preferredAttraction = localStorage.getItem('preferredAttraction') || 'any';
   
@@ -131,11 +131,11 @@ const RouteItinerary = ({
               }
             }}
             getStopType={(stop) => preferredLodging}
+            preferredType={preferredLodging}
           />
         )}
 
-        {/* Always show restaurant section if there are restaurants, 
-            regardless of whether they match the preferred type */}
+        {/* Always show restaurant section if there are restaurants */}
         {restaurantStops.length > 0 && (
           <StopSection
             title="Suggested Restaurants"
@@ -144,11 +144,11 @@ const RouteItinerary = ({
             stops={restaurantStops}
             getStopName={(stop) => (stop as RestaurantStop).restaurantName}
             getStopType={(stop) => (stop as RestaurantStop).restaurantType}
+            preferredType={preferredRestaurant}
           />
         )}
 
-        {/* Always show attractions section if there are attractions, 
-            regardless of whether they match the preferred type */}
+        {/* Always show attractions section if there are attractions */}
         {attractionStops.length > 0 && (
           <StopSection
             title="Suggested Things to Do"
@@ -157,6 +157,7 @@ const RouteItinerary = ({
             stops={attractionStops}
             getStopName={(stop) => (stop as AttractionStop).attractionName}
             getStopType={(stop) => (stop as AttractionStop).attractionType}
+            preferredType={preferredAttraction}
           />
         )}
 
