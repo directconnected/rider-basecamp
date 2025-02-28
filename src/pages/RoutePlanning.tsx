@@ -35,12 +35,15 @@ const RoutePlanning = () => {
   useEffect(() => {
     if (formData.preferredLodging) {
       localStorage.setItem('preferredLodging', formData.preferredLodging);
+      console.log('Saved preferredLodging to localStorage:', formData.preferredLodging);
     }
     if (formData.preferredRestaurant) {
       localStorage.setItem('preferredRestaurant', formData.preferredRestaurant);
+      console.log('Saved preferredRestaurant to localStorage:', formData.preferredRestaurant);
     }
     if (formData.preferredAttraction) {
       localStorage.setItem('preferredAttraction', formData.preferredAttraction);
+      console.log('Saved preferredAttraction to localStorage:', formData.preferredAttraction);
     }
   }, [formData.preferredLodging, formData.preferredRestaurant, formData.preferredAttraction]);
 

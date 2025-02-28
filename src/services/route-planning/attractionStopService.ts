@@ -22,9 +22,10 @@ export const calculateAttractionStops = async (
     'museum': ['museum'],
     'park': ['park'],
     'tourist_attraction': ['tourist_attraction'],
+    'tourist_attractions': ['tourist_attraction'],
     'amusement_park': ['amusement_park'],
     'art_gallery': ['art_gallery'],
-    'historic_site': ['point_of_interest', 'historic'],
+    'historic_site': ['point_of_interest', 'historic', 'historical'],
     'natural_feature': ['natural_feature'],
     'point_of_interest': ['point_of_interest']
   };
@@ -34,6 +35,7 @@ export const calculateAttractionStops = async (
     'museum': 'museum',
     'park': 'park',
     'tourist_attraction': 'tourist attraction',
+    'tourist_attractions': 'tourist attraction',
     'amusement_park': 'amusement park',
     'art_gallery': 'art gallery',
     'historic_site': 'historic site',
@@ -91,8 +93,8 @@ export const calculateAttractionStops = async (
         if (attractionType === 'any') {
           typeMatches = true;
         }
-        // Tourist attractions special case
-        else if (attractionType === 'tourist_attractions' && 
+        // Tourist attractions special case (handle both singular and plural versions)
+        else if ((attractionType === 'tourist_attractions' || attractionType === 'tourist_attraction') && 
                 (attraction.types?.includes('tourist_attraction') || 
                  specificType === 'tourist attraction')) {
           typeMatches = true;
@@ -115,14 +117,28 @@ export const calculateAttractionStops = async (
               }
             }
           }
+          
+          // For historic sites, check if name or address contains historic-related terms
+          if (!typeMatches && attractionType === 'historic_site') {
+            const historicTerms = ['historic', 'historical', 'heritage', 'monument', 'memorial'];
+            const nameAndAddress = (attraction.name + ' ' + attraction.address).toLowerCase();
+            if (historicTerms.some(term => nameAndAddress.includes(term))) {
+              typeMatches = true;
+            }
+          }
         }
         
         console.log(`Type match result for ${attraction.name}: ${typeMatches}`);
         
         if (typeMatches) {
+          // Set the correct display type
+          let displayType = specificType;
+          
           // For tourist attractions, always set the display type correctly
-          if (attractionType === 'tourist_attractions') {
-            specificType = 'tourist attraction';
+          if (attractionType === 'tourist_attractions' || attractionType === 'tourist_attraction') {
+            displayType = 'tourist attraction';
+          } else if (displayTypes[attractionType]) {
+            displayType = displayTypes[attractionType];
           }
           
           attractionStops.push({
@@ -133,7 +149,7 @@ export const calculateAttractionStops = async (
             rating: attraction.rating,
             website: attraction.website,
             phone_number: attraction.phone_number,
-            attractionType: specificType
+            attractionType: displayType
           });
           console.log(`Added attraction stop: ${attraction.name}`);
         } else {
