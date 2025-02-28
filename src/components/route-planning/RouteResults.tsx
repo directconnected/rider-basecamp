@@ -38,43 +38,49 @@ const RouteResults: React.FC<RouteResultsProps> = ({
   const [preferredAttraction, setPreferredAttraction] = useState<AttractionType>('any');
   const [isCalculating, setIsCalculating] = useState<boolean>(false);
   
-  // Use refs to track when preferences change
+  // Use this to force recalculation when preferences change
+  const [needsRefresh, setNeedsRefresh] = useState<boolean>(true);
+  
+  // Store previous preferences to detect changes
   const prevLodgingRef = useRef<string>('any');
   const prevRestaurantRef = useRef<RestaurantType>('any');
   const prevAttractionRef = useRef<AttractionType>('any');
-  const intervalIdRef = useRef<number | null>(null);
 
-  // Define the checkForPreferenceChanges function here
-  const checkForPreferenceChanges = () => {
-    const storedLodging = localStorage.getItem('preferredLodging');
-    const storedRestaurant = localStorage.getItem('preferredRestaurant');
-    const storedAttraction = localStorage.getItem('preferredAttraction');
+  // Check for preference changes in localStorage
+  useEffect(() => {
+    const intervalId = setInterval(() => {
+      const storedLodging = localStorage.getItem('preferredLodging');
+      const storedRestaurant = localStorage.getItem('preferredRestaurant');
+      const storedAttraction = localStorage.getItem('preferredAttraction');
+      
+      let changed = false;
+      
+      if (storedLodging && storedLodging !== preferredLodging) {
+        setPreferredLodging(storedLodging);
+        changed = true;
+        console.log('Preference changed: lodging from', preferredLodging, 'to', storedLodging);
+      }
+      
+      if (storedRestaurant && storedRestaurant !== preferredRestaurant) {
+        setPreferredRestaurant(storedRestaurant as RestaurantType);
+        changed = true;
+        console.log('Preference changed: restaurant from', preferredRestaurant, 'to', storedRestaurant);
+      }
+      
+      if (storedAttraction && storedAttraction !== preferredAttraction) {
+        setPreferredAttraction(storedAttraction as AttractionType);
+        changed = true;
+        console.log('Preference changed: attraction from', preferredAttraction, 'to', storedAttraction);
+      }
+      
+      if (changed) {
+        setNeedsRefresh(true);
+        console.log('Preferences changed, will recalculate stops');
+      }
+    }, 500);
     
-    let changed = false;
-    
-    if (storedLodging && storedLodging !== preferredLodging) {
-      setPreferredLodging(storedLodging);
-      changed = true;
-      console.log('Preference changed: lodging from', preferredLodging, 'to', storedLodging);
-    }
-    
-    if (storedRestaurant && storedRestaurant !== preferredRestaurant) {
-      setPreferredRestaurant(storedRestaurant as RestaurantType);
-      changed = true;
-      console.log('Preference changed: restaurant from', preferredRestaurant, 'to', storedRestaurant);
-    }
-    
-    if (storedAttraction && storedAttraction !== preferredAttraction) {
-      setPreferredAttraction(storedAttraction as AttractionType);
-      changed = true;
-      console.log('Preference changed: attraction from', preferredAttraction, 'to', storedAttraction);
-    }
-    
-    if (changed) {
-      // Set a flag to force recalculation on the next effect run
-      localStorage.setItem('forceRefresh', 'true');
-    }
-  };
+    return () => clearInterval(intervalId);
+  }, [preferredLodging, preferredRestaurant, preferredAttraction]);
 
   // Load preferences from localStorage on initial render
   useEffect(() => {
@@ -99,26 +105,6 @@ const RouteResults: React.FC<RouteResultsProps> = ({
       setPreferredAttraction(storedAttraction as AttractionType);
       prevAttractionRef.current = storedAttraction as AttractionType;
     }
-    
-    // Clear any pending preference change flags
-    localStorage.setItem('preferencesChanged', 'false');
-    localStorage.setItem('forceRefresh', 'false');
-    
-    // One-time check for preference changes when component mounts
-    checkForPreferenceChanges();
-    
-    // Setup a polling interval to check for preference changes
-    intervalIdRef.current = window.setInterval(() => {
-      checkForPreferenceChanges();
-    }, 1000) as unknown as number;
-    
-    // Clean up interval on unmount
-    return () => {
-      if (intervalIdRef.current) {
-        clearInterval(intervalIdRef.current);
-        intervalIdRef.current = null;
-      }
-    };
   }, []);
 
   // Check if preferences have changed
@@ -151,12 +137,11 @@ const RouteResults: React.FC<RouteResultsProps> = ({
       if (!currentRoute?.geometry?.coordinates) return;
       
       const preferenceChanged = havePreferencesChanged();
-      const forceRefresh = localStorage.getItem('forceRefresh') === 'true';
       
       if (isCalculating) return;
       
       // Check if we need to recalculate
-      if (!preferenceChanged && !forceRefresh && restaurantStops.length > 0) {
+      if (!needsRefresh && !preferenceChanged && restaurantStops.length > 0) {
         console.log('Skipping recalculation as nothing has changed');
         return;
       }
@@ -170,34 +155,58 @@ const RouteResults: React.FC<RouteResultsProps> = ({
           duration: 3000,
         });
         
+        // Reset all collections before recalculating
+        setRestaurantStops([]);
+        setAttractionStops([]);
+        if (preferredLodging === 'campground') {
+          setCampingStops([]);
+        }
+        
         // Restaurant stops
         console.log('Calculating restaurant stops with type:', preferredRestaurant);
         const restaurants = await calculateRestaurantStops(currentRoute, 150, preferredRestaurant);
-        setRestaurantStops(restaurants);
         console.log('Calculated restaurant stops:', restaurants);
-        console.log('Restaurant types:', restaurants.map(r => r.restaurantType));
+        setRestaurantStops(restaurants);
+        
+        // Verify restaurant types - debug logging
+        if (restaurants.length > 0) {
+          console.log('Restaurant types calculated:', restaurants.map(r => ({
+            name: r.restaurantName,
+            type: r.restaurantType
+          })));
+        } else {
+          console.log('No restaurant stops found for type:', preferredRestaurant);
+        }
 
         // Camping stops (only if preferred lodging is campground)
         if (preferredLodging === 'campground') {
           console.log('Calculating camping stops for campground preference');
-          const camping = await calculateCampingStops(currentRoute, Math.floor(routeDetails.distance / hotelStops.length));
+          const camping = await calculateCampingStops(
+            currentRoute, 
+            Math.floor(routeDetails.distance / (hotelStops.length || 1))
+          );
           setCampingStops(camping);
           console.log('Calculated camping stops:', camping);
-        } else {
-          setCampingStops([]);
         }
 
         // Attraction stops with proper type filtering
         console.log('Calculating attraction stops with type:', preferredAttraction);
-        // Reduce interval for attraction stops to get more results
         const attractions = await calculateAttractionStops(currentRoute, 100, preferredAttraction);
-        setAttractionStops(attractions);
         console.log('Calculated attraction stops:', attractions);
-        console.log('Attraction types:', attractions.map(a => a.attractionType));
+        setAttractionStops(attractions);
         
-        // Clear the force refresh flag
-        localStorage.setItem('forceRefresh', 'false');
-        localStorage.setItem('preferencesChanged', 'false');
+        // Verify attraction types - debug logging
+        if (attractions.length > 0) {
+          console.log('Attraction types calculated:', attractions.map(a => ({
+            name: a.attractionName,
+            type: a.attractionType
+          })));
+        } else {
+          console.log('No attraction stops found for type:', preferredAttraction);
+        }
+        
+        // Reset the refresh flag
+        setNeedsRefresh(false);
         
         toast({
           title: "Route updated",
@@ -218,7 +227,7 @@ const RouteResults: React.FC<RouteResultsProps> = ({
     };
 
     calculateAdditionalStops();
-  }, [currentRoute, routeDetails, hotelStops, preferredLodging, preferredRestaurant, preferredAttraction, isCalculating]);
+  }, [currentRoute, routeDetails, hotelStops, preferredLodging, preferredRestaurant, preferredAttraction, needsRefresh]);
 
   // Debug logging
   useEffect(() => {

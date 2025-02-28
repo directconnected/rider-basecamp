@@ -47,13 +47,25 @@ export const findNearbyLodging = async (
   try {
     console.log(`Finding lodging near ${coordinates} with radius ${radius} and type ${lodgingType}`);
 
+    // Handle different lodging types
+    let placeType = 'lodging';
+    let keyword = null;
+    
+    // Special handling for bed and breakfast
+    if (lodgingType === 'bed_and_breakfast') {
+      keyword = 'bed and breakfast';
+    } else if (lodgingType !== 'any') {
+      keyword = lodgingType.replace(/_/g, ' ');
+    }
+    
+    console.log(`Searching for ${placeType} with keyword: "${keyword}"`);
+
     const { data, error } = await supabase.functions.invoke('find-nearby-places', {
       body: {
         coordinates,
         radius,
-        type: 'lodging',
-        specificType: lodgingType === 'any' ? null : lodgingType,
-        keyword: lodgingType === 'any' ? null : lodgingType.replace('_', ' ')
+        type: placeType,
+        keyword: keyword
       }
     });
 
@@ -63,19 +75,49 @@ export const findNearbyLodging = async (
     }
 
     if (!data || !data.results || data.results.length === 0) {
-      console.log('No lodging found');
+      console.log(`No lodging found for type ${lodgingType}`);
       return null;
     }
 
-    const lodging = data.results[0];
+    // For specific lodging types, try to find a better match
+    let bestMatch = data.results[0];
+    
+    if (lodgingType !== 'any') {
+      // Try to find exact matches in the name or types
+      const typeKeywords = {
+        'hotel': ['hotel'],
+        'motel': ['motel'],
+        'resort': ['resort'],
+        'bed_and_breakfast': ['bed and breakfast', 'b&b', 'b & b', 'inn'],
+        'inn': ['inn'],
+        'lodge': ['lodge'],
+        'cabin': ['cabin'],
+        'apartment': ['apartment', 'condo', 'flat'],
+        'hostel': ['hostel']
+      };
+      
+      // Look for specific keywords in name or types
+      const keywords = typeKeywords[lodgingType as keyof typeof typeKeywords] || [];
+      
+      for (const result of data.results) {
+        const nameLower = result.name.toLowerCase();
+        const isMatch = keywords.some(keyword => nameLower.includes(keyword));
+        
+        if (isMatch) {
+          bestMatch = result;
+          console.log(`Found better match for ${lodgingType}: ${result.name}`);
+          break;
+        }
+      }
+    }
 
     return {
-      name: lodging.name,
-      address: lodging.vicinity || lodging.formatted_address,
-      location: [lodging.geometry.location.lng, lodging.geometry.location.lat],
-      rating: lodging.rating,
-      website: lodging.website,
-      phone_number: lodging.formatted_phone_number,
+      name: bestMatch.name,
+      address: bestMatch.vicinity || bestMatch.formatted_address,
+      location: [bestMatch.geometry.location.lng, bestMatch.geometry.location.lat],
+      rating: bestMatch.rating,
+      website: bestMatch.website,
+      phone_number: bestMatch.formatted_phone_number,
       lodgingType: lodgingType
     };
   } catch (error) {
@@ -92,275 +134,170 @@ export const findNearbyRestaurant = async (
   try {
     console.log(`Finding restaurant near ${coordinates} with radius ${radius} and type ${requestedType}`);
     
-    // If we're looking for a specific type, we should be more aggressive about filtering
-    const maxAttempts = requestedType === 'any' ? 1 : 5; // Try harder when a specific type is requested
-    let attempt = 0;
-    let searchRadius = radius;
-    let restaurant = null;
+    // Map our internal types to Google Places API types and keywords
+    let placeType = 'restaurant';
+    let keyword = null;
     
-    while (attempt < maxAttempts && !restaurant) {
-      // Map our internal types to Google Places API types and keywords
-      let placeType = 'restaurant';
-      let keyword = '';
-      
-      // Map specific restaurant types to the appropriate search parameters
-      if (requestedType !== 'any') {
-        switch (requestedType) {
-          case 'italian':
-            placeType = 'restaurant';
-            keyword = 'italian restaurant';
-            break;
-          case 'mexican':
-            placeType = 'restaurant';
-            keyword = 'mexican restaurant';
-            break;
-          case 'chinese':
-            placeType = 'restaurant';
-            keyword = 'chinese restaurant';
-            break;
-          case 'american':
-            placeType = 'restaurant';
-            keyword = 'american restaurant';
-            break;
-          case 'thai':
-            placeType = 'restaurant';
-            keyword = 'thai restaurant';
-            break;
-          case 'japanese':
-            placeType = 'restaurant';
-            keyword = 'japanese restaurant';
-            break;
-          case 'indian':
-            placeType = 'restaurant';
-            keyword = 'indian restaurant';
-            break;
-          case 'fast_food':
-            placeType = 'restaurant';
-            keyword = 'fast food';
-            break;
-          case 'pizza':
-            placeType = 'restaurant';
-            keyword = 'pizza';
-            break;
-          case 'seafood':
-            placeType = 'restaurant';
-            keyword = 'seafood restaurant';
-            break;
-          case 'steakhouse':
-            placeType = 'restaurant';
-            keyword = 'steakhouse';
-            break;
-          case 'vegetarian':
-            placeType = 'restaurant';
-            keyword = 'vegetarian restaurant';
-            break;
-          case 'breakfast':
-            placeType = 'restaurant';
-            keyword = 'breakfast';
-            break;
-          case 'cafe':
-            placeType = 'cafe';
-            break;
-          case 'barbecue':
-            placeType = 'restaurant';
-            keyword = 'bbq restaurant';
-            break;
-          case 'fine_dining':
-            placeType = 'restaurant';
-            keyword = 'fine dining';
-            break;
-          case 'casual':
-            placeType = 'restaurant';
-            keyword = 'casual dining';
-            break;
-          case 'asian':
-            placeType = 'restaurant';
-            keyword = 'asian restaurant';
-            break;
-          default:
-            // Type assertion to string to avoid 'never' type error
-            keyword = (requestedType as string).replace(/_/g, ' ');
-        }
+    // Map specific restaurant types to the appropriate search parameters
+    if (requestedType !== 'any') {
+      switch (requestedType) {
+        case 'italian':
+          keyword = 'italian restaurant';
+          break;
+        case 'mexican':
+          keyword = 'mexican restaurant';
+          break;
+        case 'chinese':
+          keyword = 'chinese restaurant';
+          break;
+        case 'american':
+          keyword = 'american restaurant';
+          break;
+        case 'thai':
+          keyword = 'thai restaurant';
+          break;
+        case 'japanese':
+          keyword = 'japanese restaurant';
+          break;
+        case 'indian':
+          keyword = 'indian restaurant';
+          break;
+        case 'fast_food':
+          keyword = 'fast food';
+          break;
+        case 'pizza':
+          keyword = 'pizza';
+          break;
+        case 'seafood':
+          keyword = 'seafood restaurant';
+          break;
+        case 'steakhouse':
+          keyword = 'steakhouse';
+          break;
+        case 'vegetarian':
+          keyword = 'vegetarian restaurant';
+          break;
+        case 'breakfast':
+          keyword = 'breakfast restaurant';
+          break;
+        case 'cafe':
+          placeType = 'cafe';
+          break;
+        case 'barbecue':
+          keyword = 'bbq restaurant';
+          break;
+        case 'fine_dining':
+          keyword = 'fine dining restaurant';
+          break;
+        case 'casual':
+          keyword = 'casual dining restaurant';
+          break;
+        case 'asian':
+          keyword = 'asian restaurant';
+          break;
+        default:
+          // Type assertion to string to avoid 'never' type error
+          keyword = (requestedType as string).replace(/_/g, ' ') + ' restaurant';
       }
-      
-      console.log(`Attempt ${attempt+1}: Searching for ${placeType} with keyword: "${keyword}" at radius ${searchRadius}m`);
-      
-      const { data, error } = await supabase.functions.invoke('find-nearby-places', {
-        body: {
-          coordinates,
-          radius: searchRadius,
-          type: placeType,
-          keyword: keyword || null
-        }
-      });
-      
-      if (error) {
-        console.error('Error finding nearby restaurant:', error);
-        break;
-      }
-      
-      if (!data || !data.results || data.results.length === 0) {
-        console.log(`No restaurants found for type "${requestedType}" in this attempt`);
-        attempt++;
-        searchRadius += 5000; // Increase radius and try again
-        continue;
-      }
-      
-      // For specific types, try to verify the result matches what we want
-      if (requestedType !== 'any') {
-        // Try to find a result that matches our requested type better
-        const results = data.results;
-        let bestMatch = null;
-        
-        // Keywords that should appear in the name or types for each restaurant type
-        const typeKeywords: Record<RestaurantType, string[]> = {
-          'any': [],
-          'italian': ['italian', 'pasta', 'pizzeria'],
-          'mexican': ['mexican', 'taco', 'burrito'],
-          'chinese': ['chinese', 'asian', 'wok', 'panda'],
-          'american': ['american', 'burger', 'grill', 'diner'],
-          'thai': ['thai'],
-          'japanese': ['japanese', 'sushi', 'ramen'],
-          'indian': ['indian', 'curry'],
-          'fast_food': ['fast', 'mcdonald', 'burger king', 'wendy', 'taco bell', 'kfc', 'subway'],
-          'pizza': ['pizza', 'pizzeria'],
-          'seafood': ['seafood', 'fish', 'lobster', 'crab'],
-          'steakhouse': ['steak', 'steakhouse', 'grill', 'beef', 'outback', 'longhorn'],
-          'vegetarian': ['vegetarian', 'vegan', 'plant'],
-          'breakfast': ['breakfast', 'brunch', 'pancake', 'waffle', 'ihop', 'denny'],
-          'cafe': ['cafe', 'coffee', 'starbucks', 'bakery', 'pastry'],
-          'barbecue': ['bbq', 'barbecue', 'grill', 'smokehouse'],
-          'fine_dining': ['fine dining', 'upscale', 'gourmet', 'fancy'],
-          'casual': ['casual', 'family', 'pub', 'bar & grill'],
-          'asian': ['asian', 'chinese', 'japanese', 'thai', 'vietnamese', 'korean']
-        };
-        
-        // First pass - check place types and name for exact match
-        for (const result of results) {
-          const nameLower = result.name.toLowerCase();
-          const typesLower = result.types ? result.types.join(' ').toLowerCase() : '';
-          const vicinity = result.vicinity ? result.vicinity.toLowerCase() : '';
-          const keywords = typeKeywords[requestedType];
-          
-          const isMatch = keywords.some(keyword => 
-            nameLower.includes(keyword) || 
-            typesLower.includes(keyword) || 
-            vicinity.includes(keyword)
-          );
-          
-          if (isMatch) {
-            bestMatch = result;
-            console.log(`Found matching restaurant: ${result.name} matches ${requestedType} keywords`);
-            break;
-          }
-        }
-        
-        // If we still don't have a match, just use the first result but mark its type correctly
-        if (!bestMatch && results.length > 0) {
-          bestMatch = results[0];
-          console.log(`No exact match found, using ${bestMatch.name} but will set correct type`);
-        }
-        
-        if (bestMatch) {
-          restaurant = bestMatch;
-        }
-      } else {
-        // If we don't need a specific type, just use the first result
-        restaurant = data.results[0];
-      }
-      
-      attempt++;
     }
     
-    if (!restaurant) {
-      console.log(`Could not find restaurant of type ${requestedType} after ${maxAttempts} attempts`);
+    console.log(`Searching for ${placeType} with keyword: "${keyword}"`);
+    
+    const { data, error } = await supabase.functions.invoke('find-nearby-places', {
+      body: {
+        coordinates,
+        radius,
+        type: placeType,
+        keyword: keyword
+      }
+    });
+    
+    if (error) {
+      console.error('Error finding nearby restaurant:', error);
       return null;
     }
     
-    console.log('Found restaurant:', restaurant.name, 'types:', restaurant.types);
+    if (!data || !data.results || data.results.length === 0) {
+      console.log(`No restaurants found for type "${requestedType}"`);
+      return null;
+    }
     
-    // For specific requested types, always use the requested type
-    // (We already filtered for restaurants matching this type)
-    let displayType: RestaurantType = requestedType !== 'any' ? requestedType : 'any';
+    // For specific types, try to verify the result matches what we want
+    let bestMatch = data.results[0];
     
-    // For generic searches, try to determine the best type
-    if (requestedType === 'any' && restaurant.types) {
-      // Check for specific cuisine types in the API response
-      const typeMapping: Record<string, RestaurantType> = {
-        'restaurant': 'any',
-        'cafe': 'cafe',
-        'meal_takeaway': 'fast_food',
-        'bakery': 'cafe',
-        'food': 'any'
-      };
+    // Keywords that should appear in the name or types for each restaurant type
+    const typeKeywords: Record<string, string[]> = {
+      'italian': ['italian', 'pasta', 'pizzeria'],
+      'mexican': ['mexican', 'taco', 'burrito'],
+      'chinese': ['chinese', 'asian', 'wok', 'panda'],
+      'american': ['american', 'burger', 'grill', 'diner'],
+      'thai': ['thai'],
+      'japanese': ['japanese', 'sushi', 'ramen'],
+      'indian': ['indian', 'curry'],
+      'fast_food': ['fast', 'mcdonald', 'burger king', 'wendy', 'taco bell', 'kfc'],
+      'pizza': ['pizza', 'pizzeria'],
+      'seafood': ['seafood', 'fish', 'lobster', 'crab'],
+      'steakhouse': ['steak', 'steakhouse', 'grill', 'beef', 'outback', 'longhorn'],
+      'vegetarian': ['vegetarian', 'vegan', 'plant'],
+      'breakfast': ['breakfast', 'brunch', 'pancake', 'waffle', 'ihop', 'denny'],
+      'cafe': ['cafe', 'coffee', 'starbucks', 'bakery', 'pastry'],
+      'barbecue': ['bbq', 'barbecue', 'grill', 'smokehouse'],
+      'fine_dining': ['fine dining', 'upscale', 'gourmet', 'fancy'],
+      'casual': ['casual', 'family', 'pub', 'bar & grill'],
+      'asian': ['asian', 'chinese', 'japanese', 'thai', 'vietnamese', 'korean']
+    };
+    
+    // For specific requested types, look for a better match
+    if (requestedType !== 'any') {
+      const keywords = typeKeywords[requestedType] || [];
       
-      // Check for cuisine in name
-      const cuisineKeywords: Record<string, RestaurantType> = {
-        'italian': 'italian',
-        'mexican': 'mexican',
-        'chinese': 'chinese',
-        'thai': 'thai',
-        'japanese': 'japanese',
-        'indian': 'indian',
-        'pizza': 'pizza',
-        'seafood': 'seafood',
-        'steak': 'steakhouse',
-        'steakhouse': 'steakhouse',
-        'bbq': 'barbecue',
-        'barbecue': 'barbecue',
-        'burger': 'american',
-        'american': 'american',
-        'breakfast': 'breakfast',
-        'asian': 'asian'
-      };
-      
-      // First try to find a cuisine from the name
-      const nameLower = restaurant.name.toLowerCase();
-      const cuisineFound = Object.keys(cuisineKeywords).find(key => nameLower.includes(key));
-      
-      if (cuisineFound) {
-        displayType = cuisineKeywords[cuisineFound];
-      } else {
-        // If no cuisine in name, try to use the place types
-        for (const type of restaurant.types) {
-          if (typeMapping[type]) {
-            displayType = typeMapping[type];
-            break;
-          }
+      // Try to find a better match from results
+      for (const result of data.results) {
+        const nameLower = result.name.toLowerCase();
+        const typesLower = result.types ? result.types.join(' ').toLowerCase() : '';
+        const vicinity = result.vicinity ? result.vicinity.toLowerCase() : '';
+        
+        const isMatch = keywords.some(keyword => 
+          nameLower.includes(keyword) || 
+          typesLower.includes(keyword) || 
+          vicinity.includes(keyword)
+        );
+        
+        if (isMatch) {
+          bestMatch = result;
+          console.log(`Found better match for ${requestedType}: ${result.name}`);
+          break;
         }
       }
       
-      // Manual overrides for well-known chains
-      if (nameLower.includes('mcdonald') || nameLower.includes('burger king') || 
-          nameLower.includes('wendy') || nameLower.includes('taco bell')) {
-        displayType = 'fast_food';
-      } else if (nameLower.includes('cracker barrel')) {
-        displayType = 'american';
-      } else if (nameLower.includes('olive garden')) {
-        displayType = 'italian';
-      } else if (nameLower.includes('panda express')) {
-        displayType = 'chinese';
-      } else if (nameLower.includes('ruby tuesday')) {
-        displayType = 'american';
-      } else if (nameLower.includes('outback') || nameLower.includes('longhorn')) {
-        displayType = 'steakhouse';
-      } else if (nameLower.includes('red lobster')) {
-        displayType = 'seafood';
-      } else if (nameLower.includes('subway')) {
-        displayType = 'fast_food';
+      // If we don't find a good match, return null instead of a bad match
+      const nameLower = bestMatch.name.toLowerCase();
+      const typesLower = bestMatch.types ? bestMatch.types.join(' ').toLowerCase() : '';
+      const vicinity = bestMatch.vicinity ? bestMatch.vicinity.toLowerCase() : '';
+      
+      const hasAnyMatch = keywords.some(keyword => 
+        nameLower.includes(keyword) || 
+        typesLower.includes(keyword) || 
+        vicinity.includes(keyword)
+      );
+      
+      // If we requested a specific type but found no matches, return null
+      if (!hasAnyMatch && requestedType !== 'any') {
+        console.log(`No good matches found for ${requestedType} - would have returned ${bestMatch.name} which doesn't match`);
+        return null;
       }
     }
     
-    console.log(`Restaurant "${restaurant.name}" will be displayed with type: ${displayType}`);
+    console.log(`Restaurant "${bestMatch.name}" will be displayed with type: ${requestedType}`);
     
     return {
-      name: restaurant.name,
-      address: restaurant.vicinity || restaurant.formatted_address,
-      location: [restaurant.geometry.location.lng, restaurant.geometry.location.lat],
-      rating: restaurant.rating,
-      website: restaurant.website,
-      phone_number: restaurant.formatted_phone_number,
-      restaurantType: displayType
+      name: bestMatch.name,
+      address: bestMatch.vicinity || bestMatch.formatted_address,
+      location: [bestMatch.geometry.location.lng, bestMatch.geometry.location.lat],
+      rating: bestMatch.rating,
+      website: bestMatch.website,
+      phone_number: bestMatch.formatted_phone_number,
+      restaurantType: requestedType
     };
   } catch (error) {
     console.error('Error in findNearbyRestaurant:', error);
@@ -378,7 +315,7 @@ export const findNearbyAttraction = async (
 
     // Maps our internal type to Google Places API type and keywords
     let placeType = 'tourist_attraction';
-    let keyword = '';
+    let keyword = null;
     
     if (attractionType !== 'any') {
       switch (attractionType) {
@@ -420,7 +357,7 @@ export const findNearbyAttraction = async (
         coordinates,
         radius,
         type: placeType,
-        keyword: keyword || null
+        keyword: keyword
       }
     });
 
@@ -433,42 +370,40 @@ export const findNearbyAttraction = async (
       console.log(`No attractions found for type "${attractionType}"`);
       return null;
     }
-
-    const attraction = data.results[0];
-    console.log('Found attraction:', attraction.name, 'types:', attraction.types);
     
-    // When we specifically requested a type, use that type for consistency
-    let displayType: AttractionType = attractionType !== 'any' ? attractionType : 'tourist_attraction';
+    // Ensure we're not returning a hotel or restaurant as an attraction
+    const nonValidTypes = ['lodging', 'restaurant', 'cafe', 'food', 'bar'];
     
-    // If we didn't request a specific type, determine the best type to display
-    if (attractionType === 'any' && attraction.types) {
-      const attractionTypeMapping: Record<string, AttractionType> = {
-        'museum': 'museum',
-        'park': 'park',
-        'tourist_attraction': 'tourist_attraction',
-        'amusement_park': 'amusement_park',
-        'art_gallery': 'art_gallery',
-        'natural_feature': 'natural_feature',
-        'point_of_interest': 'point_of_interest'
-      };
+    // Find the first result that's not a hotel or restaurant
+    let validAttraction = null;
+    
+    for (const result of data.results) {
+      // Skip if result has any of the non-valid types
+      const isNonValid = result.types && result.types.some((type: string) => nonValidTypes.includes(type));
       
-      for (const type of attraction.types) {
-        if (attractionTypeMapping[type]) {
-          displayType = attractionTypeMapping[type];
-          break;
-        }
+      if (!isNonValid) {
+        validAttraction = result;
+        break;
       }
     }
     
-    console.log(`Attraction "${attraction.name}" will be displayed with type: ${displayType}`);
+    if (!validAttraction) {
+      console.log('Found results but they were all invalid types (hotels/restaurants)');
+      return null;
+    }
+
+    // When we specifically requested a type, use that type for consistency  
+    let displayType: AttractionType = attractionType !== 'any' ? attractionType : 'tourist_attraction';
+    
+    console.log(`Attraction "${validAttraction.name}" will be displayed with type: ${displayType}`);
 
     return {
-      name: attraction.name,
-      address: attraction.vicinity || attraction.formatted_address,
-      location: [attraction.geometry.location.lng, attraction.geometry.location.lat],
-      rating: attraction.rating,
-      website: attraction.website,
-      phone_number: attraction.formatted_phone_number,
+      name: validAttraction.name,
+      address: validAttraction.vicinity || validAttraction.formatted_address,
+      location: [validAttraction.geometry.location.lng, validAttraction.geometry.location.lat],
+      rating: validAttraction.rating,
+      website: validAttraction.website,
+      phone_number: validAttraction.formatted_phone_number,
       attractionType: displayType
     };
   } catch (error) {

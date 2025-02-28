@@ -24,33 +24,52 @@ export const calculateRestaurantStops = async (
     const pointIndex = Math.floor(progress * route.geometry.coordinates.length);
     const coordinates = route.geometry.coordinates[pointIndex] as [number, number];
     
-    try {
-      console.log(`Finding restaurant near ${coordinates} with type ${restaurantType}`);
-      const restaurant = await findNearbyRestaurant(coordinates, 5000, restaurantType);
-      
-      if (restaurant) {
-        console.log(`Found restaurant data for stop ${i}:`, restaurant);
+    // Try multiple times with increasing radius if we don't find the preferred type
+    let restaurant = null;
+    let attempts = 0;
+    let searchRadius = 5000; // Start with 5km
+    const maxAttempts = restaurantType === 'any' ? 2 : 5; // Try harder for specific types
+    
+    while (!restaurant && attempts < maxAttempts) {
+      try {
+        console.log(`Attempt ${attempts + 1}: Finding restaurant near ${coordinates} with type ${restaurantType} and radius ${searchRadius}m`);
+        restaurant = await findNearbyRestaurant(coordinates, searchRadius, restaurantType);
         
-        // Strict type checking: Only add restaurants if they match the requested type exactly
-        if (restaurantType === 'any' || restaurant.restaurantType === restaurantType) {
-          restaurantStops.push({
-            location: coordinates,
-            name: restaurant.address,
-            restaurantName: restaurant.name,
-            distance: Math.round(progress * totalDistance),
-            rating: restaurant.rating,
-            website: restaurant.website,
-            phone_number: restaurant.phone_number,
-            restaurantType: restaurant.restaurantType
-          });
+        if (restaurant) {
+          console.log(`Found restaurant data for stop ${i}:`, restaurant);
           
-          console.log(`Added restaurant stop ${i}: ${restaurant.name} with type ${restaurant.restaurantType}`);
-        } else {
-          console.log(`Skipped restaurant ${restaurant.name} because type ${restaurant.restaurantType} doesn't match requested type ${restaurantType}`);
+          // Only add this restaurant if it's the requested type or if we requested "any"
+          if (restaurantType === 'any' || restaurant.restaurantType === restaurantType) {
+            console.log(`Found matching restaurant: ${restaurant.name} with type: ${restaurant.restaurantType}`);
+            break;
+          } else {
+            console.log(`Restaurant ${restaurant.name} has type ${restaurant.restaurantType} which doesn't match requested ${restaurantType}, trying again`);
+            restaurant = null; // Reset and try again
+          }
         }
+      } catch (error) {
+        console.error(`Error in attempt ${attempts + 1}:`, error);
       }
-    } catch (error) {
-      console.error('Error finding restaurant:', error);
+      
+      attempts++;
+      searchRadius += 5000; // Increase radius by 5km each attempt
+    }
+    
+    if (restaurant) {
+      restaurantStops.push({
+        location: coordinates,
+        name: restaurant.address,
+        restaurantName: restaurant.name,
+        distance: Math.round(progress * totalDistance),
+        rating: restaurant.rating,
+        website: restaurant.website,
+        phone_number: restaurant.phone_number,
+        restaurantType: restaurant.restaurantType
+      });
+      
+      console.log(`Added restaurant stop ${i}: ${restaurant.name} with type: ${restaurant.restaurantType}`);
+    } else {
+      console.log(`Could not find restaurant of type ${restaurantType} for stop ${i} after ${maxAttempts} attempts`);
     }
   }
 
