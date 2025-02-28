@@ -44,6 +44,38 @@ const RouteResults: React.FC<RouteResultsProps> = ({
   const prevAttractionRef = useRef<AttractionType>('any');
   const intervalIdRef = useRef<number | null>(null);
 
+  // Define the checkForPreferenceChanges function here
+  const checkForPreferenceChanges = () => {
+    const storedLodging = localStorage.getItem('preferredLodging');
+    const storedRestaurant = localStorage.getItem('preferredRestaurant');
+    const storedAttraction = localStorage.getItem('preferredAttraction');
+    
+    let changed = false;
+    
+    if (storedLodging && storedLodging !== preferredLodging) {
+      setPreferredLodging(storedLodging);
+      changed = true;
+      console.log('Preference changed: lodging from', preferredLodging, 'to', storedLodging);
+    }
+    
+    if (storedRestaurant && storedRestaurant !== preferredRestaurant) {
+      setPreferredRestaurant(storedRestaurant as RestaurantType);
+      changed = true;
+      console.log('Preference changed: restaurant from', preferredRestaurant, 'to', storedRestaurant);
+    }
+    
+    if (storedAttraction && storedAttraction !== preferredAttraction) {
+      setPreferredAttraction(storedAttraction as AttractionType);
+      changed = true;
+      console.log('Preference changed: attraction from', preferredAttraction, 'to', storedAttraction);
+    }
+    
+    if (changed) {
+      // Set a flag to force recalculation on the next effect run
+      localStorage.setItem('forceRefresh', 'true');
+    }
+  };
+
   // Load preferences from localStorage on initial render
   useEffect(() => {
     const storedLodging = localStorage.getItem('preferredLodging');
@@ -86,37 +118,6 @@ const RouteResults: React.FC<RouteResultsProps> = ({
 
   // Setup a one-time listener for localStorage changes, not an interval
   useEffect(() => {
-    function checkForPreferenceChanges() {
-      const storedLodging = localStorage.getItem('preferredLodging');
-      const storedRestaurant = localStorage.getItem('preferredRestaurant');
-      const storedAttraction = localStorage.getItem('preferredAttraction');
-      
-      let changed = false;
-      
-      if (storedLodging && storedLodging !== preferredLodging) {
-        setPreferredLodging(storedLodging);
-        changed = true;
-        console.log('Preference changed: lodging from', preferredLodging, 'to', storedLodging);
-      }
-      
-      if (storedRestaurant && storedRestaurant !== preferredRestaurant) {
-        setPreferredRestaurant(storedRestaurant as RestaurantType);
-        changed = true;
-        console.log('Preference changed: restaurant from', preferredRestaurant, 'to', storedRestaurant);
-      }
-      
-      if (storedAttraction && storedAttraction !== preferredAttraction) {
-        setPreferredAttraction(storedAttraction as AttractionType);
-        changed = true;
-        console.log('Preference changed: attraction from', preferredAttraction, 'to', storedAttraction);
-      }
-      
-      if (changed) {
-        // Set a flag to force recalculation on the next effect run
-        localStorage.setItem('forceRefresh', 'true');
-      }
-    }
-    
     // Listen for storage events instead of polling
     const handleStorageChange = (event: StorageEvent) => {
       if (event.key === 'preferredLodging' || 
