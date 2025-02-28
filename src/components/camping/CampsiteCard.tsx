@@ -1,129 +1,88 @@
 
 import React from "react";
-import { Card } from "@/components/ui/card";
-import { MapPin, Phone, Compass, Trees, Dog, Droplet, Droplets, DoorOpen, Bath, Info } from "lucide-react";
-import { CampgroundResult } from "@/hooks/useCampsiteSearch";
+import { Link } from "react-router-dom";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { CampgroundResult } from "@/hooks/camping/types";
+import { Badge } from "@/components/ui/badge";
+import { MapPin, Phone, Globe } from "lucide-react";
 
 interface CampsiteCardProps {
   campsite: CampgroundResult;
 }
 
 const CampsiteCard = ({ campsite }: CampsiteCardProps) => {
-  const formatUrl = (url: string | null) => {
-    if (!url) return null;
-    return url.startsWith('http') ? url : `https://${url}`;
-  };
-
   return (
-    <Card className="overflow-hidden hover:shadow-lg transition-shadow bg-white">
-      <div className="p-6 space-y-6">
-        {/* Header */}
-        <div>
-          <h3 className="text-xl font-bold text-gray-900 mb-2">{campsite.name || 'Unnamed Campsite'}</h3>
-          <div className="flex items-center text-gray-600 text-sm">
-            <MapPin className="w-4 h-4 mr-1" />
-            <span>{campsite.address || 'N/A'}</span>
+    <Card className="h-full flex flex-col">
+      <CardHeader>
+        <CardTitle className="text-xl">{campsite.name}</CardTitle>
+        <CardDescription className="flex items-start gap-2">
+          <MapPin className="h-4 w-4 mt-1 flex-shrink-0" />
+          <span>{campsite.address}</span>
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="flex-grow">
+        {campsite.distance !== undefined && (
+          <div className="text-sm text-gray-600 mb-2">
+            <span className="font-medium">{campsite.distance} miles</span> from search location
           </div>
-        </div>
-
-        {/* Main Info */}
-        <div className="grid grid-cols-2 gap-4 text-sm border-t border-b border-gray-100 py-4">
-          <div className="flex items-center">
-            <Compass className="w-4 h-4 mr-2 text-theme-600" />
-            <div>
-              <p className="text-gray-500">Elevation</p>
-              <p className="font-medium">{campsite.elev ? `${campsite.elev} ft` : 'N/A'}</p>
-            </div>
-          </div>
-          <div className="flex items-center">
-            <Trees className="w-4 h-4 mr-2 text-theme-600" />
-            <div>
-              <p className="text-gray-500">Season</p>
-              <p className="font-medium">{campsite.season || 'N/A'}</p>
-            </div>
-          </div>
-        </div>
-
-        {/* Amenities */}
-        <div className="space-y-3">
-          <h4 className="font-semibold text-gray-900">Amenities</h4>
-          <div className="grid grid-cols-2 gap-3 text-sm">
-            <div className="flex items-center text-gray-600">
-              <Dog className="w-4 h-4 mr-2" />
-              <span>Pets: {campsite.pets || 'N/A'}</span>
-            </div>
-            <div className="flex items-center text-gray-600">
-              <Droplet className="w-4 h-4 mr-2" />
-              <span>Showers: {campsite.showers || 'N/A'}</span>
-            </div>
-            <div className="flex items-center text-gray-600">
-              <Droplets className="w-4 h-4 mr-2" />
-              <span>Water: {campsite.water || 'N/A'}</span>
-            </div>
-            <div className="flex items-center text-gray-600">
-              <DoorOpen className="w-4 h-4 mr-2" />
-              <span>Type: {campsite.type || 'N/A'}</span>
-            </div>
-            <div className="flex items-center text-gray-600">
-              <Bath className="w-4 h-4 mr-2" />
-              <span>Fee: {campsite.fee || 'N/A'}</span>
-            </div>
-          </div>
-
-          {/* Legend */}
-          <div className="mt-4 p-3 bg-gray-50 rounded-md text-xs space-y-1.5">
-            <div className="flex items-start gap-1">
-              <Info className="w-3 h-3 text-theme-600 mt-0.5 flex-shrink-0" />
-              <div className="text-gray-600">
-                <span className="font-medium">Legend:</span>
-                <ul className="mt-1 space-y-1">
-                  <li><span className="font-medium">RS</span> - Reservations Required</li>
-                  <li><span className="font-medium">PA</span> - Pets Allowed</li>
-                  <li><span className="font-medium">DW</span> - Drinking Water</li>
-                  <li><span className="font-medium">SH</span> - Shower House</li>
-                  <li><span className="font-medium">E</span> - Electric Available</li>
-                  <li><span className="font-medium">NH</span> - No Hookups</li>
-                  <li><span className="font-medium">NS</span> - No Showers</li>
-                  <li><span className="font-medium">N/A</span> - Data Not Available</li>
-                </ul>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Footer */}
-        <div className="space-y-3 pt-4 border-t border-gray-100">
-          {campsite.phone_number && (
-            <div className="flex items-center text-sm text-gray-600">
-              <Phone className="w-4 h-4 mr-2" />
-              <span>{campsite.phone_number}</span>
+        )}
+        
+        {campsite.types && campsite.types.map((type, index) => (
+          <Badge key={index} variant="outline" className="mr-2 mb-2">
+            {type}
+          </Badge>
+        ))}
+        
+        <div className="space-y-2 mt-4">
+          {campsite.water && (
+            <div className="text-sm">
+              <span className="font-medium">Water:</span> {campsite.water}
             </div>
           )}
           
-          {campsite.website && (
+          {campsite.showers && (
+            <div className="text-sm">
+              <span className="font-medium">Showers:</span> {campsite.showers}
+            </div>
+          )}
+          
+          {campsite.pets && (
+            <div className="text-sm">
+              <span className="font-medium">Pets:</span> {campsite.pets}
+            </div>
+          )}
+          
+          {campsite.fee && (
+            <div className="text-sm">
+              <span className="font-medium">Fee:</span> {campsite.fee}
+            </div>
+          )}
+        </div>
+      </CardContent>
+      <CardFooter className="border-t pt-4 flex flex-col items-start space-y-2">
+        {campsite.phone_number && (
+          <div className="flex items-center gap-2 text-gray-600">
+            <Phone className="h-4 w-4" />
+            <a href={`tel:${campsite.phone_number}`} className="hover:underline">
+              {campsite.phone_number}
+            </a>
+          </div>
+        )}
+        
+        {campsite.website && (
+          <div className="flex items-center gap-2 text-gray-600">
+            <Globe className="h-4 w-4" />
             <a 
-              href={formatUrl(campsite.website)} 
+              href={campsite.website.startsWith('http') ? campsite.website : `https://${campsite.website}`} 
               target="_blank" 
               rel="noopener noreferrer"
-              className="inline-flex items-center text-sm text-theme-600 hover:text-theme-700"
+              className="hover:underline"
             >
               Visit Website
             </a>
-          )}
-          
-          <div className="text-sm">
-            <span className="font-medium">Price: </span>
-            <span className="text-gray-600">{campsite.price_per_night || 'N/A'}</span>
           </div>
-          
-          {campsite.rating && (
-            <div className="text-sm">
-              <span className="font-medium">Rating: </span>
-              <span className="text-gray-600">{campsite.rating} stars</span>
-            </div>
-          )}
-        </div>
-      </div>
+        )}
+      </CardFooter>
     </Card>
   );
 };

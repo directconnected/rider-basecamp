@@ -1,98 +1,73 @@
 
 import { useState } from 'react';
-import { toast } from "sonner";
-import { findNearbyCampgrounds } from '@/services/placesService';
-import { CampgroundResult } from './useCampsiteSearch';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
+import { CampgroundResult } from '@/hooks/camping/types';
 
 type SearchParams = {
-  state: string;
-  city: string;
-  zipCode: string;
-  radius?: number;
+  keyword: string;
+  type?: string;
+  state?: string;
 };
 
 export const useRegularSearch = (
-  searchParams: SearchParams,
-  setSearchResults: (results: CampgroundResult[]) => void,
-  setTotalResults: (total: number) => void,
-  setCurrentPage: (page: number) => void,
-  ITEMS_PER_PAGE: number
+  setIsLoading: (isLoading: boolean) => void,
+  setSearchResults: (results: CampgroundResult[]) => void
 ) => {
-  const [isSearching, setIsSearching] = useState(false);
+  const [searchParams, setSearchParams] = useState<SearchParams>({
+    keyword: '',
+    type: '',
+    state: '',
+  });
 
   const handleSearch = async () => {
-    setIsSearching(true);
+    if (!searchParams.keyword && !searchParams.type && !searchParams.state) {
+      toast.error('Please enter at least one search parameter');
+      return;
+    }
+
+    setIsLoading(true);
     setSearchResults([]);
-    setCurrentPage(1);
-    
+
     try {
-      if (!searchParams.state.trim() && !searchParams.city.trim() && !searchParams.zipCode.trim()) {
-        toast.error('Please enter at least one search criteria');
-        setIsSearching(false);
+      let query = supabase
+        .from('campgrounds')
+        .select('*');
+
+      // Apply filters
+      if (searchParams.keyword) {
+        query = query.or(`name.ilike.%${searchParams.keyword}%,address.ilike.%${searchParams.keyword}%`);
+      }
+
+      if (searchParams.type) {
+        query = query.eq('type', searchParams.type);
+      }
+
+      if (searchParams.state) {
+        query = query.eq('state', searchParams.state);
+      }
+
+      const { data, error } = await query;
+
+      if (error) {
+        console.error('Error searching campgrounds:', error);
+        toast.error('Failed to search campgrounds');
         return;
       }
 
-      // Use the Google Places API through our Places Service
-      // For geocoding we'll use a central point in the requested state or a default location
-      let geocodedCoordinates: [number, number] = [-98.5795, 39.8283]; // Center of US
-      
-      // Try to geocode based on the search parameters
-      if (searchParams.state || searchParams.city || searchParams.zipCode) {
-        try {
-          const searchTerm = 
-            searchParams.zipCode || 
-            (searchParams.city && searchParams.state ? `${searchParams.city}, ${searchParams.state}` : 
-             (searchParams.city || searchParams.state || ''));
-             
-          if (searchTerm) {
-            const { data, error } = await supabase.functions.invoke('geocode-location', {
-              body: { 
-                location: searchTerm,
-                state: searchParams.state
-              }
-            });
-            
-            if (!error && data?.location) {
-              geocodedCoordinates = [data.location.lng, data.location.lat];
-              console.log("Using coordinates from geocoding:", geocodedCoordinates);
-            }
-          }
-        } catch (error) {
-          console.log("Geocoding error:", error);
-        }
-      }
-      
-      // Convert miles to meters for the API
-      const radiusMeters = (searchParams.radius || 50) * 1609.34;
-      
-      const results = await findNearbyCampgrounds(
-        geocodedCoordinates, 
-        radiusMeters,
-        searchParams.state || undefined
-      );
-      
-      if (results && results.length > 0) {
-        // Take the first page of results
-        const firstPageResults = results.slice(0, ITEMS_PER_PAGE);
-        setSearchResults(firstPageResults);
-        setTotalResults(results.length);
-        toast.success(`Found ${results.length} campsites`);
+      if (data && data.length > 0) {
+        setSearchResults(data as CampgroundResult[]);
+        toast.success(`Found ${data.length} campgrounds`);
       } else {
-        toast.info('No campsites found matching your criteria');
-        setSearchResults([]);
-        setTotalResults(0);
+        toast.info('No campgrounds found matching your search criteria');
       }
-
     } catch (error) {
       console.error('Error in handleSearch:', error);
-      toast.error('Failed to search campsites. Please try again.');
+      toast.error('An unexpected error occurred');
     } finally {
-      setIsSearching(false);
+      setIsLoading(false);
     }
   };
 
-  return { handleSearch, isSearching };
+  return { searchParams, setSearchParams, handleSearch };
 };
-
-// Import Supabase client for geocoding
-import { supabase } from "@/integrations/supabase/client";

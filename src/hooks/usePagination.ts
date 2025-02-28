@@ -1,58 +1,60 @@
 
-import { useState } from 'react';
-import { toast } from "sonner";
-import { CampgroundResult } from './useCampsiteSearch';
-import { findNearbyCampgrounds } from '@/services/placesService';
+import { useState, useEffect } from "react";
+import { CampgroundResult } from "@/hooks/camping/types";
 
-type SearchParams = {
-  state: string;
-  city: string;
-  zipCode: string;
-  radius?: number;
-};
+interface PaginationOptions {
+  initialPage?: number;
+  itemsPerPage?: number;
+}
 
-export const usePagination = (
-  searchParams: SearchParams,
-  setSearchResults: (results: CampgroundResult[]) => void,
-  ITEMS_PER_PAGE: number
+export const usePagination = <T>(
+  items: T[],
+  { initialPage = 1, itemsPerPage = 10 }: PaginationOptions = {}
 ) => {
-  const [isSearching, setIsSearching] = useState(false);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [totalResults, setTotalResults] = useState(0);
-  const [allResults, setAllResults] = useState<CampgroundResult[]>([]);
+  const [currentPage, setCurrentPage] = useState(initialPage);
+  const totalPages = Math.ceil(items.length / itemsPerPage);
 
-  const handlePageChange = async (page: number) => {
-    setIsSearching(true);
-    try {
-      if (allResults.length === 0) {
-        // Initial search hasn't been done yet
-        toast.error('Please perform a search first');
-        setIsSearching(false);
-        return;
-      }
-      
-      const start = (page - 1) * ITEMS_PER_PAGE;
-      const end = Math.min(start + ITEMS_PER_PAGE, allResults.length);
-      
-      const pagedResults = allResults.slice(start, end);
-      setSearchResults(pagedResults);
-      setCurrentPage(page);
-    } catch (error) {
-      console.error('Error fetching page:', error);
-      toast.error('Failed to fetch results. Please try again.');
-    } finally {
-      setIsSearching(false);
+  // Reset to first page when items change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [items.length]);
+
+  // Make sure currentPage is within valid range
+  useEffect(() => {
+    if (currentPage > totalPages && totalPages > 0) {
+      setCurrentPage(totalPages);
+    }
+  }, [currentPage, totalPages]);
+
+  // Get current items for the page
+  const paginatedItems = items.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
+
+  const goToPage = (page: number) => {
+    const validPage = Math.max(1, Math.min(page, totalPages));
+    setCurrentPage(validPage);
+  };
+
+  const nextPage = () => {
+    if (currentPage < totalPages) {
+      setCurrentPage(currentPage + 1);
+    }
+  };
+
+  const prevPage = () => {
+    if (currentPage > 1) {
+      setCurrentPage(currentPage - 1);
     }
   };
 
   return {
     currentPage,
-    setCurrentPage,
-    totalResults,
-    setTotalResults,
-    setAllResults,
-    totalPages: Math.ceil(totalResults / ITEMS_PER_PAGE),
-    handlePageChange,
-    isSearching
+    totalPages,
+    paginatedItems,
+    goToPage,
+    nextPage,
+    prevPage,
   };
 };

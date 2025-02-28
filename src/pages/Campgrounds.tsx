@@ -4,7 +4,7 @@ import Navigation from "@/components/Navigation";
 import Footer from "@/components/layout/Footer";
 import CampsiteSearchForm from "@/components/camping/CampsiteSearchForm";
 import CampsiteSearchResults from "@/components/camping/CampsiteSearchResults";
-import { useCampsiteSearch } from "@/hooks/useCampsiteSearch";
+import useCampsiteSearch from "@/hooks/useCampsiteSearch";
 import Breadcrumbs from "@/components/Breadcrumbs";
 
 const Campgrounds = () => {
