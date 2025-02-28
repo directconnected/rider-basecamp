@@ -1,13 +1,11 @@
 
 import React from "react";
 import { Card } from "@/components/ui/card";
-import { Database } from "@/integrations/supabase/types";
 import { MapPin, Phone, Compass, Trees, Dog, Droplet, Droplets, DoorOpen, Bath, Info } from "lucide-react";
-
-type Campsite = Database['public']['Tables']['campsites']['Row'];
+import { CampgroundResult } from "@/hooks/useCampsiteSearch";
 
 interface CampsiteCardProps {
-  campsite: Campsite;
+  campsite: CampgroundResult;
 }
 
 const CampsiteCard = ({ campsite }: CampsiteCardProps) => {
@@ -21,10 +19,10 @@ const CampsiteCard = ({ campsite }: CampsiteCardProps) => {
       <div className="p-6 space-y-6">
         {/* Header */}
         <div>
-          <h3 className="text-xl font-bold text-gray-900 mb-2">{campsite.camp || 'Unnamed Campsite'}</h3>
+          <h3 className="text-xl font-bold text-gray-900 mb-2">{campsite.name || 'Unnamed Campsite'}</h3>
           <div className="flex items-center text-gray-600 text-sm">
             <MapPin className="w-4 h-4 mr-1" />
-            <span>{campsite.town || 'N/A'}, {campsite.state || 'N/A'} {campsite.nforg || ''}</span>
+            <span>{campsite.address || 'N/A'}</span>
           </div>
         </div>
 
@@ -64,11 +62,11 @@ const CampsiteCard = ({ campsite }: CampsiteCardProps) => {
             </div>
             <div className="flex items-center text-gray-600">
               <DoorOpen className="w-4 h-4 mr-2" />
-              <span>Hookups: {campsite.hookups || 'N/A'}</span>
+              <span>Type: {campsite.type || 'N/A'}</span>
             </div>
             <div className="flex items-center text-gray-600">
               <Bath className="w-4 h-4 mr-2" />
-              <span>Toilets: {campsite.toilets || 'N/A'}</span>
+              <span>Fee: {campsite.fee || 'N/A'}</span>
             </div>
           </div>
 
@@ -95,16 +93,16 @@ const CampsiteCard = ({ campsite }: CampsiteCardProps) => {
 
         {/* Footer */}
         <div className="space-y-3 pt-4 border-t border-gray-100">
-          {campsite.phone && (
+          {campsite.phone_number && (
             <div className="flex items-center text-sm text-gray-600">
               <Phone className="w-4 h-4 mr-2" />
-              <span>{campsite.phone}</span>
+              <span>{campsite.phone_number}</span>
             </div>
           )}
           
-          {campsite.url && (
+          {campsite.website && (
             <a 
-              href={formatUrl(campsite.url)} 
+              href={formatUrl(campsite.website)} 
               target="_blank" 
               rel="noopener noreferrer"
               className="inline-flex items-center text-sm text-theme-600 hover:text-theme-700"
@@ -114,14 +112,14 @@ const CampsiteCard = ({ campsite }: CampsiteCardProps) => {
           )}
           
           <div className="text-sm">
-            <span className="font-medium">Reservations: </span>
-            <span className="text-gray-600">{campsite.reservations || 'N/A'}</span>
+            <span className="font-medium">Price: </span>
+            <span className="text-gray-600">{campsite.price_per_night || 'N/A'}</span>
           </div>
           
-          {campsite.fee && (
+          {campsite.rating && (
             <div className="text-sm">
-              <span className="font-medium">Fee: </span>
-              <span className="text-gray-600">{campsite.fee}</span>
+              <span className="font-medium">Rating: </span>
+              <span className="text-gray-600">{campsite.rating} stars</span>
             </div>
           )}
         </div>
