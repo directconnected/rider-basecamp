@@ -9,7 +9,7 @@ import {
   calculateCampingStops, 
   calculateAttractionStops 
 } from '@/services/route-planning';
-import { RestaurantStop, CampingStop, AttractionStop, AttractionType } from './types';
+import { RestaurantStop, CampingStop, AttractionStop, AttractionType, RestaurantType } from './types';
 
 interface RouteResultsProps {
   routeDetails: RouteDetailsType;
@@ -32,7 +32,7 @@ const RouteResults: React.FC<RouteResultsProps> = ({
   const [campingStops, setCampingStops] = useState<CampingStop[]>([]);
   const [attractionStops, setAttractionStops] = useState<AttractionStop[]>([]);
   const [preferredLodging, setPreferredLodging] = useState<string>('any');
-  const [preferredRestaurant, setPreferredRestaurant] = useState<string>('any');
+  const [preferredRestaurant, setPreferredRestaurant] = useState<RestaurantType>('any');
   const [preferredAttraction, setPreferredAttraction] = useState<AttractionType>('any');
 
   // Load preferences from localStorage on initial render
@@ -45,7 +45,8 @@ const RouteResults: React.FC<RouteResultsProps> = ({
     
     const storedRestaurant = localStorage.getItem('preferredRestaurant');
     if (storedRestaurant) {
-      setPreferredRestaurant(storedRestaurant);
+      // Cast to RestaurantType for type safety
+      setPreferredRestaurant(storedRestaurant as RestaurantType);
       console.log('Loaded stored restaurant preference:', storedRestaurant);
     }
     
