@@ -61,6 +61,32 @@ const RouteItinerary = ({
   // Sort by distance
   allStays.sort((a, b) => a.distance - b.distance);
 
+  // Filter attraction stops based on preferred attraction type from localStorage
+  const preferredAttraction = localStorage.getItem('preferredAttraction') || 'any';
+  
+  // If preferredAttraction is not 'any', filter the attractions to match only that type
+  const filteredAttractionStops = preferredAttraction === 'any' 
+    ? attractionStops 
+    : attractionStops.filter(stop => {
+        // Handle the special case for tourist attractions (singular vs plural)
+        if (preferredAttraction === 'tourist_attractions' && 
+            (stop.attractionType === 'tourist attraction' || 
+             stop.attractionType?.includes('tourist'))) {
+          return true;
+        }
+        
+        // Convert stored preference to display format for comparison
+        const preferredTypeFormatted = preferredAttraction.replace(/_/g, ' ');
+        
+        // Direct match or contains the preferred type
+        return stop.attractionType === preferredTypeFormatted || 
+               stop.attractionType?.includes(preferredTypeFormatted);
+      });
+
+  console.log(`Filtered attractions from ${attractionStops.length} to ${filteredAttractionStops.length}`,
+              `based on preference: ${preferredAttraction}`);
+  console.log('Attraction types after filtering:', filteredAttractionStops.map(a => a.attractionType));
+
   return (
     <Card className="mt-8">
       <CardHeader className="flex flex-row items-center justify-between">
@@ -147,7 +173,7 @@ const RouteItinerary = ({
           title="Suggested Things to Do"
           icon={Landmark}
           color="bg-blue-500"
-          stops={attractionStops}
+          stops={filteredAttractionStops}
           getStopName={(stop) => (stop as AttractionStop).attractionName}
           getStopType={(stop) => {
             const attractionStop = stop as AttractionStop;
