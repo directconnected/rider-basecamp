@@ -1,73 +1,74 @@
 
 import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { toast } from 'sonner';
-import { CampgroundResult } from '@/hooks/camping/types';
+import { Motorcycle } from '@/types/motorcycle';
+import { PostgrestError } from '@supabase/supabase-js';
 
-type SearchParams = {
-  keyword: string;
-  type?: string;
-  state?: string;
-};
+export const useRegularSearch = () => {
+  const [results, setResults] = useState<Motorcycle[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<PostgrestError | null>(null);
 
-export const useRegularSearch = (
-  setIsLoading: (isLoading: boolean) => void,
-  setSearchResults: (results: CampgroundResult[]) => void
-) => {
-  const [searchParams, setSearchParams] = useState<SearchParams>({
-    keyword: '',
-    type: '',
-    state: '',
-  });
+  // Format currency values for display
+  const formatCurrency = (value: string | null | number): string => {
+    if (value === null || value === undefined) return 'N/A';
+    
+    // Convert to number if it's a string
+    const numberValue = typeof value === 'string' ? parseFloat(value) : value;
+    
+    // Check if value is valid number
+    if (isNaN(numberValue)) return 'N/A';
+    
+    // Format the number as currency
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
+    }).format(numberValue);
+  };
 
-  const handleSearch = async () => {
-    if (!searchParams.keyword && !searchParams.type && !searchParams.state) {
-      toast.error('Please enter at least one search parameter');
-      return;
-    }
-
+  // Perform search based on parameters
+  const search = async (make: string, model: string, yearFrom: string, yearTo: string) => {
     setIsLoading(true);
-    setSearchResults([]);
-
+    setError(null);
+    
     try {
-      let query = supabase
-        .from('campgrounds')
-        .select('*');
-
+      let query = supabase.from('data_2025').select('*');
+      
       // Apply filters
-      if (searchParams.keyword) {
-        query = query.or(`name.ilike.%${searchParams.keyword}%,address.ilike.%${searchParams.keyword}%`);
+      if (make) {
+        query = query.ilike('make', `%${make}%`);
       }
-
-      if (searchParams.type) {
-        query = query.eq('type', searchParams.type);
+      
+      if (model) {
+        query = query.ilike('model', `%${model}%`);
       }
-
-      if (searchParams.state) {
-        query = query.eq('state', searchParams.state);
+      
+      if (yearFrom) {
+        query = query.gte('year', yearFrom);
       }
-
+      
+      if (yearTo) {
+        query = query.lte('year', yearTo);
+      }
+      
       const { data, error } = await query;
-
+      
       if (error) {
-        console.error('Error searching campgrounds:', error);
-        toast.error('Failed to search campgrounds');
-        return;
-      }
-
-      if (data && data.length > 0) {
-        setSearchResults(data as CampgroundResult[]);
-        toast.success(`Found ${data.length} campgrounds`);
+        setError(error);
+        setResults([]);
       } else {
-        toast.info('No campgrounds found matching your search criteria');
+        // Cast data to the Motorcycle type
+        setResults(data as unknown as Motorcycle[]);
       }
-    } catch (error) {
-      console.error('Error in handleSearch:', error);
-      toast.error('An unexpected error occurred');
+    } catch (err) {
+      console.error('Search error:', err);
+      setResults([]);
     } finally {
       setIsLoading(false);
     }
   };
 
-  return { searchParams, setSearchParams, handleSearch };
+  return { results, isLoading, error, search, formatCurrency };
 };

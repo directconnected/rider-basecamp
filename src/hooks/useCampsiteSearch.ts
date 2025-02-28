@@ -26,7 +26,7 @@ const useCampsiteSearch = () => {
   });
 
   // Initialize the address-based search hook
-  const { handleAddressSearch } = useAddressSearch({
+  const { handleSearch: handleAddressSearch } = useAddressSearch({
     searchParams,
     setSearchResults: (results) => setSearchState(prev => ({ ...prev, searchResults: results })),
     setIsSearching: (isSearching) => setSearchState(prev => ({ ...prev, isSearching })),
