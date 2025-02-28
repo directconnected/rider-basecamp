@@ -107,6 +107,11 @@ const RouteResults: React.FC<RouteResultsProps> = ({
     // One-time check for preference changes when component mounts
     checkForPreferenceChanges();
     
+    // Setup a polling interval to check for preference changes
+    intervalIdRef.current = window.setInterval(() => {
+      checkForPreferenceChanges();
+    }, 1000) as unknown as number;
+    
     // Clean up interval on unmount
     return () => {
       if (intervalIdRef.current) {
@@ -115,27 +120,6 @@ const RouteResults: React.FC<RouteResultsProps> = ({
       }
     };
   }, []);
-
-  // Setup a one-time listener for localStorage changes, not an interval
-  useEffect(() => {
-    // Listen for storage events instead of polling
-    const handleStorageChange = (event: StorageEvent) => {
-      if (event.key === 'preferredLodging' || 
-          event.key === 'preferredRestaurant' || 
-          event.key === 'preferredAttraction' ||
-          event.key === 'preferencesChanged' ||
-          event.key === 'forceRefresh') {
-        checkForPreferenceChanges();
-      }
-    };
-    
-    window.addEventListener('storage', handleStorageChange);
-    
-    // Clean up the event listener
-    return () => {
-      window.removeEventListener('storage', handleStorageChange);
-    };
-  }, [preferredLodging, preferredRestaurant, preferredAttraction]);
 
   // Check if preferences have changed
   const havePreferencesChanged = () => {

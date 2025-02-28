@@ -31,18 +31,23 @@ export const calculateAttractionStops = async (
       if (attraction) {
         console.log(`Found attraction data for stop ${i}:`, attraction);
         
-        attractionStops.push({
-          location: coordinates,
-          name: attraction.address,
-          attractionName: attraction.name,
-          distance: Math.round(progress * totalDistance),
-          rating: attraction.rating,
-          website: attraction.website,
-          phone_number: attraction.phone_number,
-          attractionType: attraction.attractionType
-        });
-        
-        console.log(`Added attraction stop ${i}: ${attraction.name} with type ${attraction.attractionType}`);
+        // Only add this attraction if it's the requested type or if we requested "any"
+        if (attractionType === 'any' || attraction.attractionType === attractionType) {
+          attractionStops.push({
+            location: coordinates,
+            name: attraction.address,
+            attractionName: attraction.name,
+            distance: Math.round(progress * totalDistance),
+            rating: attraction.rating,
+            website: attraction.website,
+            phone_number: attraction.phone_number,
+            attractionType: attraction.attractionType
+          });
+          
+          console.log(`Added attraction stop ${i}: ${attraction.name} with type ${attraction.attractionType}`);
+        } else {
+          console.log(`Skipped attraction ${attraction.name} because type ${attraction.attractionType} doesn't match requested type ${attractionType}`);
+        }
       }
     } catch (error) {
       console.error('Error finding attraction:', error);

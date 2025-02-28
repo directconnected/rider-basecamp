@@ -31,18 +31,23 @@ export const calculateRestaurantStops = async (
       if (restaurant) {
         console.log(`Found restaurant data for stop ${i}:`, restaurant);
         
-        restaurantStops.push({
-          location: coordinates,
-          name: restaurant.address,
-          restaurantName: restaurant.name,
-          distance: Math.round(progress * totalDistance),
-          rating: restaurant.rating,
-          website: restaurant.website,
-          phone_number: restaurant.phone_number,
-          restaurantType: restaurant.restaurantType
-        });
-        
-        console.log(`Added restaurant stop ${i}: ${restaurant.name} with type ${restaurant.restaurantType}`);
+        // Only add this restaurant if it's the requested type or if we requested "any"
+        if (restaurantType === 'any' || restaurant.restaurantType === restaurantType) {
+          restaurantStops.push({
+            location: coordinates,
+            name: restaurant.address,
+            restaurantName: restaurant.name,
+            distance: Math.round(progress * totalDistance),
+            rating: restaurant.rating,
+            website: restaurant.website,
+            phone_number: restaurant.phone_number,
+            restaurantType: restaurant.restaurantType
+          });
+          
+          console.log(`Added restaurant stop ${i}: ${restaurant.name} with type ${restaurant.restaurantType}`);
+        } else {
+          console.log(`Skipped restaurant ${restaurant.name} because type ${restaurant.restaurantType} doesn't match requested type ${restaurantType}`);
+        }
       }
     } catch (error) {
       console.error('Error finding restaurant:', error);

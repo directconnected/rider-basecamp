@@ -96,6 +96,7 @@ export const calculateHotelStops = async (
   const hotelStops: HotelStop[] = [];
   let currentMiles = 0;
   let lastStopIndex = 0;
+  let maxAttempts = 10; // Maximum number of attempts to find a matching lodging
 
   console.log(`Calculate hotel stops with preferred lodging type: ${preferredLodgingType}`);
 
@@ -110,14 +111,37 @@ export const calculateHotelStops = async (
     if (!stopCoordinates) continue;
 
     console.log(`Looking for ${preferredLodgingType} near mile ${currentMiles}`);
-    const hotel = await findNearbyLodging(
-      [stopCoordinates[0], stopCoordinates[1]], 
-      5000, 
-      preferredLodgingType
-    );
+    
+    // Try multiple times with increasing radius if we don't find the preferred type
+    let hotel = null;
+    let attempts = 0;
+    let searchRadius = 5000; // Start with 5km
+    
+    while (!hotel && attempts < maxAttempts) {
+      hotel = await findNearbyLodging(
+        [stopCoordinates[0], stopCoordinates[1]], 
+        searchRadius, 
+        preferredLodgingType
+      );
+      
+      if (hotel) {
+        // Check if the lodging type matches our preference
+        if (preferredLodgingType === 'any' || hotel.lodgingType === preferredLodgingType) {
+          console.log(`Found matching lodging: ${hotel.name} with type: ${hotel.lodgingType}`);
+          break;
+        } else {
+          console.log(`Found lodging ${hotel.name} but type ${hotel.lodgingType} doesn't match requested ${preferredLodgingType}, trying again`);
+          hotel = null; // Reset and try again
+        }
+      }
+      
+      attempts++;
+      searchRadius += 5000; // Increase radius by 5km each attempt
+      console.log(`Attempt ${attempts}: Increasing search radius to ${searchRadius}m`);
+    }
     
     if (hotel) {
-      console.log(`Found lodging: ${hotel.name} with rating: ${hotel.rating}, type: ${preferredLodgingType}`);
+      console.log(`Found lodging: ${hotel.name} with rating: ${hotel.rating}, type: ${hotel.lodgingType}`);
       hotelStops.push({
         location: hotel.location,
         name: hotel.address,
@@ -126,8 +150,10 @@ export const calculateHotelStops = async (
         rating: hotel.rating,
         website: hotel.website,
         phone_number: hotel.phone_number,
-        lodgingType: preferredLodgingType
+        lodgingType: hotel.lodgingType
       });
+    } else {
+      console.log(`Could not find ${preferredLodgingType} after ${maxAttempts} attempts, moving to next stop`);
     }
 
     lastStopIndex = stopIndex;
