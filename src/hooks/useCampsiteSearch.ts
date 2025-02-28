@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useCampsiteSearchStore } from "@/stores/campsiteSearchStore";
 import { useLocationSearch } from './useLocationSearch';
@@ -40,18 +39,26 @@ export const useCampsiteSearch = () => {
     try {
       // Format the search location
       let locationString = '';
-      if (searchParams.city) locationString += searchParams.city + ', ';
-      if (searchParams.state) locationString += searchParams.state + ' ';
-      if (searchParams.zipCode) locationString += searchParams.zipCode;
+      let searchTerm = '';
       
-      if (!locationString.trim()) {
+      // Check if we have a zip code - if so, that becomes the primary search term
+      if (searchParams.zipCode) {
+        searchTerm = searchParams.zipCode;
+        console.log("Searching for ZIP code:", searchTerm);
+      } else {
+        // Otherwise create a location string from city and state
+        if (searchParams.city) locationString += searchParams.city + ', ';
+        if (searchParams.state) locationString += searchParams.state;
+        searchTerm = locationString.trim();
+        console.log("Searching for location:", searchTerm);
+      }
+      
+      if (!searchTerm) {
         toast.error('Please enter a location to search');
         setIsSearching(false);
         return;
       }
 
-      console.log("Searching for location:", locationString);
-      
       // Use the state parameter directly for filtering
       const state = searchParams.state;
       
@@ -62,7 +69,7 @@ export const useCampsiteSearch = () => {
         // Use the Places service to find coordinates for the location
         const { data, error } = await supabase.functions.invoke('geocode-location', {
           body: { 
-            location: locationString,
+            location: searchTerm,
             state: state
           }
         });
@@ -122,16 +129,20 @@ export const useCampsiteSearch = () => {
       if (processedResults.length > 0) {
         setSearchResults(processedResults);
         
+        const displayLocation = searchParams.zipCode || searchParams.city || searchTerm;
+        
         if (isAnyDistance) {
-          toast.success(`Found ${processedResults.length} campgrounds near ${searchParams.city || locationString}`);
+          toast.success(`Found ${processedResults.length} campgrounds near ${displayLocation}`);
         } else {
-          toast.success(`Found ${processedResults.length} campgrounds within ${radiusMiles} miles of ${searchParams.city || locationString}`);
+          toast.success(`Found ${processedResults.length} campgrounds within ${radiusMiles} miles of ${displayLocation}`);
         }
       } else {
+        const displayLocation = searchParams.zipCode || searchParams.city || searchTerm;
+        
         if (isAnyDistance) {
-          toast.info(`No campgrounds found near ${searchParams.city || locationString}`);
+          toast.info(`No campgrounds found near ${displayLocation}`);
         } else {
-          toast.info(`No campgrounds found within ${radiusMiles} miles of ${searchParams.city || locationString}`);
+          toast.info(`No campgrounds found within ${radiusMiles} miles of ${displayLocation}`);
         }
       }
     } catch (error) {
