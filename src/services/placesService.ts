@@ -252,6 +252,7 @@ export const findNearbyRestaurant = async (
       const keywords = typeKeywords[requestedType as string] || [];
       
       // Try to find a better match from results
+      let foundMatch = false;
       for (const result of data.results) {
         const nameLower = result.name.toLowerCase();
         const typesLower = result.types ? result.types.join(' ').toLowerCase() : '';
@@ -265,26 +266,15 @@ export const findNearbyRestaurant = async (
         
         if (isMatch) {
           bestMatch = result;
+          foundMatch = true;
           console.log(`Found better match for ${requestedType}: ${result.name}`);
           break;
         }
       }
       
-      // If we don't find a good match, return null instead of a bad match
-      const nameLower = bestMatch.name.toLowerCase();
-      const typesLower = bestMatch.types ? bestMatch.types.join(' ').toLowerCase() : '';
-      const vicinity = bestMatch.vicinity ? bestMatch.vicinity.toLowerCase() : '';
-      
-      const hasAnyMatch = keywords.some(keyword => 
-        nameLower.includes(keyword) || 
-        typesLower.includes(keyword) || 
-        vicinity.includes(keyword)
-      );
-      
-      // If we requested a specific type but found no matches, return null
-      if (!hasAnyMatch && requestedType !== 'any' as RestaurantType) {
-        console.log(`No good matches found for ${requestedType} - would have returned ${bestMatch.name} which doesn't match`);
-        return null;
+      // If we don't find a good match but it's a specific type request, return the best we have anyway
+      if (!foundMatch) {
+        console.log(`No perfect matches found for ${requestedType} - using best available: ${bestMatch.name}`);
       }
     }
     
@@ -387,13 +377,18 @@ export const findNearbyAttraction = async (
       }
     }
     
-    if (!validAttraction) {
-      console.log('Found results but they were all invalid types (hotels/restaurants)');
+    // If we can't find a valid attraction from filtered results, just use the first result
+    if (!validAttraction && data.results.length > 0) {
+      console.log('Could not find attractions without hotel/restaurant types, using first result');
+      validAttraction = data.results[0];
+    } else if (!validAttraction) {
+      console.log('No attractions found');
       return null;
     }
 
     // When we specifically requested a type, use that type for consistency  
-    let displayType: AttractionType = attractionType !== 'any' as AttractionType ? attractionType : 'tourist_attraction';
+    let displayType: AttractionType = attractionType !== 'any' as AttractionType ? 
+      attractionType : 'tourist_attraction';
     
     console.log(`Attraction "${validAttraction.name}" will be displayed with type: ${displayType}`);
 

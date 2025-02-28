@@ -162,7 +162,7 @@ const RouteResults: React.FC<RouteResultsProps> = ({
           setCampingStops([]);
         }
         
-        // Restaurant stops
+        // Restaurant stops - we always calculate these regardless of type
         console.log('Calculating restaurant stops with type:', preferredRestaurant);
         const restaurants = await calculateRestaurantStops(currentRoute, 150, preferredRestaurant);
         console.log('Calculated restaurant stops:', restaurants);
@@ -247,6 +247,11 @@ const RouteResults: React.FC<RouteResultsProps> = ({
     console.error('Missing required data for route rendering');
     return null;
   }
+
+  // Create force refresh function to make it easier to debug
+  const forceRefreshStops = () => {
+    setNeedsRefresh(true);
+  };
 
   return (
     <>

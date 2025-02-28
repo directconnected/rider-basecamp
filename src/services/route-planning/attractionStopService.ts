@@ -17,8 +17,11 @@ export const calculateAttractionStops = async (
   
   if (numStops <= 0) return [];
   
-  for (let i = 1; i <= numStops; i++) {
-    const progress = (i * interval) / totalDistance;
+  // Always try to find at least 3 attraction stops
+  const actualNumStops = Math.max(3, numStops);
+  
+  for (let i = 1; i <= actualNumStops; i++) {
+    const progress = i / actualNumStops;
     if (progress >= 1) break;
     
     const pointIndex = Math.floor(progress * route.geometry.coordinates.length);
@@ -28,7 +31,7 @@ export const calculateAttractionStops = async (
     let attraction = null;
     let attempts = 0;
     let searchRadius = 5000; // Start with 5km
-    const maxAttempts = attractionType === 'any' ? 2 : 4; // Try harder for specific types
+    const maxAttempts = 6; // Increase max attempts to find attractions
     
     while (!attraction && attempts < maxAttempts) {
       try {
@@ -37,15 +40,7 @@ export const calculateAttractionStops = async (
         
         if (attraction) {
           console.log(`Found attraction data for stop ${i}:`, attraction);
-          
-          // Only add this attraction if it's the requested type or if we requested "any"
-          if (attractionType === 'any' || attraction.attractionType === attractionType) {
-            console.log(`Found matching attraction: ${attraction.name} with type: ${attraction.attractionType}`);
-            break;
-          } else {
-            console.log(`Attraction ${attraction.name} has type ${attraction.attractionType} which doesn't match requested ${attractionType}, trying again`);
-            attraction = null; // Reset and try again
-          }
+          break;
         }
       } catch (error) {
         console.error(`Error in attempt ${attempts + 1}:`, error);
@@ -70,10 +65,39 @@ export const calculateAttractionStops = async (
       console.log(`Added attraction stop ${i}: ${attraction.name} with type ${attraction.attractionType}`);
     } else {
       console.log(`Could not find attraction of type ${attractionType} for stop ${i} after ${maxAttempts} attempts`);
+      
+      // If we can't find the specific type, try to find any attraction
+      if (attractionType !== 'any') {
+        console.log('Falling back to any attraction type');
+        try {
+          const fallbackAttraction = await findNearbyAttraction(coordinates, 10000, 'any');
+          if (fallbackAttraction) {
+            attractionStops.push({
+              location: coordinates,
+              name: fallbackAttraction.address,
+              attractionName: fallbackAttraction.name,
+              distance: Math.round(progress * totalDistance),
+              rating: fallbackAttraction.rating,
+              website: fallbackAttraction.website,
+              phone_number: fallbackAttraction.phone_number,
+              attractionType: fallbackAttraction.attractionType
+            });
+            console.log(`Added fallback attraction stop ${i}: ${fallbackAttraction.name}`);
+          }
+        } catch (error) {
+          console.error('Error finding fallback attraction:', error);
+        }
+      }
     }
   }
 
   console.log(`Final attraction stops count: ${attractionStops.length}`);
+  
+  // Ensure we have at least some attraction results
+  if (attractionStops.length === 0) {
+    console.log('No attractions found for requested type, will try fallback search');
+    return calculateAttractionStops(route, interval, 'any');
+  }
   
   // Log the attraction types found for debugging
   if (attractionStops.length > 0) {
