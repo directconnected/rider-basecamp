@@ -14,7 +14,7 @@ interface CampsiteSearchFormProps {
     state: string;
     city: string;
     zipCode: string;
-    radius?: number;
+    radius: number;
   };
   setSearchParams: (params: any) => void;
   onSearch: () => void;
@@ -26,14 +26,14 @@ const formSchema = z.object({
   city: z.string().optional(),
   state: z.string().optional(),
   zipCode: z.string().optional(),
-  radius: z.string().default("25000")
+  radius: z.coerce.number().default(25)
 });
 
 const radiusOptions = [
-  { value: "5000", label: "5 km" },
-  { value: "10000", label: "10 km" },
-  { value: "25000", label: "25 km" },
-  { value: "50000", label: "50 km" },
+  { value: "5", label: "5 miles" },
+  { value: "10", label: "10 miles" },
+  { value: "25", label: "25 miles" },
+  { value: "50", label: "50 miles" },
 ];
 
 const CampsiteSearchForm = ({
@@ -49,11 +49,11 @@ const CampsiteSearchForm = ({
       city: searchParams.city || "",
       state: searchParams.state || "",
       zipCode: searchParams.zipCode || "",
-      radius: searchParams.radius?.toString() || "25000"
+      radius: searchParams.radius || 25
     }
   });
 
-  const handleChange = (name: string, value: string) => {
+  const handleChange = (name: string, value: string | number) => {
     setSearchParams({ ...searchParams, [name]: value });
   };
 
@@ -62,7 +62,7 @@ const CampsiteSearchForm = ({
       city: data.city,
       state: data.state,
       zipCode: data.zipCode,
-      radius: parseInt(data.radius)
+      radius: data.radius
     });
     onSearch();
   });
@@ -142,10 +142,11 @@ const CampsiteSearchForm = ({
                   <FormItem>
                     <FormLabel>Search Radius</FormLabel>
                     <Select
-                      value={field.value}
+                      value={field.value.toString()}
                       onValueChange={(value) => {
-                        field.onChange(value);
-                        handleChange("radius", value);
+                        const numValue = parseInt(value, 10);
+                        field.onChange(numValue);
+                        handleChange("radius", numValue);
                       }}
                     >
                       <FormControl>
