@@ -171,7 +171,7 @@ export const findNearbyRestaurant = async (
           keyword = 'asian restaurant';
           break;
         default:
-          keyword = requestedType.replace('_', ' ');
+          keyword = requestedType.replace(/_/g, ' ');
       }
     }
     
@@ -200,18 +200,17 @@ export const findNearbyRestaurant = async (
     console.log('Found restaurant:', restaurant.name, 'types:', restaurant.types);
     
     // When we specifically requested a type, use that type
-    let displayType = requestedType !== 'any' ? requestedType : 'restaurant';
+    let displayType: RestaurantType = requestedType !== 'any' ? requestedType : 'any';
     
     // If we didn't request a specific type, try to determine the type from the result
     if (requestedType === 'any' && restaurant.types) {
       // Check for specific cuisine types in the API response
       const typeMapping: Record<string, RestaurantType> = {
-        'restaurant': 'restaurant',
+        'restaurant': 'any',
         'cafe': 'cafe',
-        'bar': 'bar',
         'meal_takeaway': 'fast_food',
         'bakery': 'cafe',
-        'food': 'restaurant'
+        'food': 'any'
       };
       
       // Check for cuisine in name
@@ -228,7 +227,6 @@ export const findNearbyRestaurant = async (
         'steakhouse': 'steakhouse',
         'bbq': 'barbecue',
         'barbecue': 'barbecue',
-        'sandwich': 'sandwich',
         'burger': 'american',
         'american': 'american',
         'breakfast': 'breakfast',
@@ -329,7 +327,7 @@ export const findNearbyAttraction = async (
           placeType = 'point_of_interest';
           break;
         default:
-          keyword = attractionType.replace('_', ' ');
+          keyword = attractionType.replace(/_/g, ' ');
       }
     }
 
@@ -358,7 +356,7 @@ export const findNearbyAttraction = async (
     console.log('Found attraction:', attraction.name, 'types:', attraction.types);
     
     // When we specifically requested a type, use that type for consistency
-    let displayType = attractionType !== 'any' ? attractionType : 'tourist_attraction';
+    let displayType: AttractionType = attractionType !== 'any' ? attractionType : 'tourist_attraction';
     
     // If we didn't request a specific type, determine the best type to display
     if (attractionType === 'any' && attraction.types) {
