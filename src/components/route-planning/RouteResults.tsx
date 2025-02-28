@@ -45,6 +45,7 @@ const RouteResults: React.FC<RouteResultsProps> = ({
     const storedRestaurant = localStorage.getItem('preferredRestaurant');
     if (storedRestaurant) {
       setPreferredRestaurant(storedRestaurant);
+      console.log('Loaded stored restaurant preference:', storedRestaurant);
     }
     
     const storedAttraction = localStorage.getItem('preferredAttraction');
@@ -64,6 +65,7 @@ const RouteResults: React.FC<RouteResultsProps> = ({
           const restaurants = await calculateRestaurantStops(currentRoute, 150, preferredRestaurant);
           setRestaurantStops(restaurants);
           console.log('Calculated restaurant stops:', restaurants);
+          console.log('Restaurant types:', restaurants.map(r => r.restaurantType));
 
           // Camping stops (only if preferred lodging is campground)
           if (preferredLodging === 'campground') {

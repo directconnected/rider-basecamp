@@ -91,6 +91,11 @@ const RouteItinerary = ({
   console.log(`Restaurant stops: ${restaurantStops.length} based on preference: ${preferredRestaurant}`);
   console.log('Restaurant stop types:', restaurantStops.map(r => r.restaurantType));
 
+  // Debug specific properties for restaurant stops
+  restaurantStops.forEach((stop, index) => {
+    console.log(`Restaurant ${index}: ${stop.restaurantName}, type: ${stop.restaurantType}`);
+  });
+
   return (
     <Card className="mt-8">
       <CardHeader className="flex flex-row items-center justify-between">
@@ -168,9 +173,10 @@ const RouteItinerary = ({
           stops={restaurantStops}
           getStopName={(stop) => (stop as RestaurantStop).restaurantName}
           getStopType={(stop) => {
-            const type = (stop as RestaurantStop).restaurantType;
-            // Return the actual type rather than defaulting to 'restaurant'
-            return type || 'restaurant';
+            // Make sure we're returning the actual restaurant type
+            const restaurantStop = stop as RestaurantStop;
+            console.log(`Getting type for restaurant ${restaurantStop.restaurantName}: ${restaurantStop.restaurantType}`);
+            return restaurantStop.restaurantType || 'restaurant';
           }}
         />
 

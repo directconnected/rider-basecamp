@@ -37,8 +37,10 @@ export const calculateRestaurantStops = async (
           rating: restaurant.rating,
           website: restaurant.website,
           phone_number: restaurant.phone_number,
-          restaurantType: restaurantType // Ensure this is correctly passed
+          restaurantType: restaurantType // Ensure this is correctly passed through
         });
+        
+        console.log(`Added restaurant stop ${i} with type: ${restaurantType}`);
       }
     } catch (error) {
       console.error('Error finding restaurant:', error);

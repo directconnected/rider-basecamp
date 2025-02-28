@@ -39,6 +39,9 @@ const StopSection = ({ title, icon: Icon, color, stops, getStopName, getStopType
           const StopType = getStopType ? getStopType(stop) : undefined;
           const formattedType = formatTypeLabel(StopType);
           
+          // Debug logging for type labels
+          console.log(`Stop ${index} (${StopName}): Type=${StopType}, Formatted=${formattedType}`);
+          
           return (
             <div key={`${title}-${index}`} className="flex flex-col gap-2 p-4 rounded-lg bg-gray-50">
               <div className="flex items-start gap-4">
