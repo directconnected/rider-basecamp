@@ -1,3 +1,4 @@
+
 import { supabase } from "@/integrations/supabase/client";
 import { CampgroundResult } from '@/hooks/useCampsiteSearch';
 
@@ -135,8 +136,8 @@ export const findNearbyCampgrounds = async (
         .from('campsites')
         .select('*')
         .eq('state', state)
-        .order('camp')
-        .limit(20);
+        .order('camp');
+      // Removed the limit(20) that was here previously
       
       if (!dbError && campsiteData && campsiteData.length > 0) {
         console.log(`Found ${campsiteData.length} campgrounds in ${state} from database`);
@@ -164,7 +165,7 @@ export const findNearbyCampgrounds = async (
         rankby: 'prominence',
         fields: ['name', 'vicinity', 'formatted_address', 'geometry', 'rating', 'price_level', 'website', 'formatted_phone_number', 'types'],
         keyword: state ? `campground ${state}` : 'campground',
-        limit: 20 // Request more results
+        limit: 60 // Increased the limit from 20 to a higher value
       }
     });
 

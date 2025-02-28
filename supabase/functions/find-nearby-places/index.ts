@@ -1,162 +1,147 @@
 
 import { serve } from 'https://deno.land/std@0.131.0/http/server.ts'
-import { corsHeaders } from '../_shared/cors.ts'
+
+const GOOGLE_PLACES_API_KEY = Deno.env.get('GOOGLE_PLACES_API_KEY') || '';
+
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+}
 
 serve(async (req) => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
-    return new Response('ok', { headers: corsHeaders })
+    return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    const { location, type, radius, rankby, fields, keyword, limit = 5, state } = await req.json()
+    // Parse request body
+    const { location, type, radius, rankby, fields, keyword, limit = 60 } = await req.json();
 
     if (!location || !Array.isArray(location) || location.length !== 2) {
       return new Response(
-        JSON.stringify({ error: 'Valid location is required' }),
+        JSON.stringify({ error: 'Invalid location. Must be an array of [latitude, longitude]' }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 400 }
-      )
+      );
     }
 
-    const [lat, lng] = location
-    
-    // Get the API key
-    const GOOGLE_PLACES_API_KEY = Deno.env.get('GOOGLE_PLACES_API_KEY')
-    
-    if (!GOOGLE_PLACES_API_KEY) {
+    if (!type) {
       return new Response(
-        JSON.stringify({ error: 'Places API key is missing' }),
+        JSON.stringify({ error: 'Type parameter is required' }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 400 }
+      );
+    }
+
+    // Construct Places API URL
+    const baseUrl = 'https://maps.googleapis.com/maps/api/place/nearbysearch/json';
+    const locationParam = `${location[0]},${location[1]}`;
+    
+    let url = `${baseUrl}?location=${locationParam}&type=${type}&key=${GOOGLE_PLACES_API_KEY}`;
+    
+    // Add either radius or rankby parameter (they are mutually exclusive)
+    if (rankby && rankby === 'distance') {
+      url += `&rankby=distance`;
+    } else {
+      url += `&radius=${radius || 5000}`;
+    }
+    
+    if (keyword) {
+      url += `&keyword=${encodeURIComponent(keyword)}`;
+    }
+
+    console.log('Sending request to Google Places API:', url.replace(GOOGLE_PLACES_API_KEY, '[API_KEY]'));
+
+    // Fetch places data
+    const response = await fetch(url);
+    const data = await response.json();
+
+    // Check for API errors
+    if (data.status !== 'OK' && data.status !== 'ZERO_RESULTS') {
+      console.error('Google Places API error:', data.status, data.error_message);
+      return new Response(
+        JSON.stringify({ error: `Google Places API error: ${data.status}`, details: data.error_message }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 500 }
-      )
+      );
     }
-    
-    // Build the URL for the Places API
-    let placesUrl = `https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=${lat},${lng}&radius=${radius}`
-    
-    if (type) {
-      placesUrl += `&type=${type}`
-    }
-    
-    let adjustedKeyword = keyword;
-    // If a state was provided and it's a campground search, include the state in the keyword
-    if (state && type === 'campground') {
-      adjustedKeyword = keyword ? `${keyword} ${state}` : `campground ${state}`;
-    }
-    
-    if (adjustedKeyword) {
-      placesUrl += `&keyword=${encodeURIComponent(adjustedKeyword)}`
-    }
-    
-    // Add ranking if provided
-    if (rankby === 'prominence' || rankby === 'distance') {
-      placesUrl += `&rankby=${rankby}`
-      
-      // If rankby=distance, radius cannot be specified
-      if (rankby === 'distance') {
-        placesUrl = placesUrl.replace(/&radius=\d+/, '')
-      }
-    }
-    
-    placesUrl += `&key=${GOOGLE_PLACES_API_KEY}`
-    
-    console.log(`Making request to: ${placesUrl.replace(GOOGLE_PLACES_API_KEY, 'API_KEY')}`)
-    
-    // Make the request to the Places API
-    const placesResponse = await fetch(placesUrl)
-    const placesData = await placesResponse.json()
-    
-    // If there are no results or an error occurred
-    if (placesData.status !== 'OK' || !placesData.results || placesData.results.length === 0) {
-      console.log('No places found or API error:', placesData.status)
-      return new Response(
-        JSON.stringify({ places: [] }),
-        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      )
-    }
-    
-    // Limit results
-    let filteredResults = placesData.results;
-    
-    // If we're looking for campgrounds in a specific state, try to filter by address
-    if (state && type === 'campground') {
-      filteredResults = filteredResults.filter(place => {
-        const stateAbbr = state.toUpperCase();
-        if (place.vicinity) {
-          return place.vicinity.includes(`, ${stateAbbr} `) || 
-                 place.vicinity.includes(`, ${stateAbbr},`) ||
-                 place.vicinity.endsWith(`, ${stateAbbr}`);
-        }
-        return true; // Keep results without vicinity info
-      });
-    }
-    
-    // Limit to requested number
-    const limitedResults = filteredResults.slice(0, limit);
 
-    // If fields were specified, get additional details for each place
-    if (fields && fields.length > 0) {
-      const detailedPlaces = []
+    let places = data.results || [];
+    let nextPageToken = data.next_page_token;
+    
+    // If we have a limit and there's more pages, fetch additional pages up to the limit
+    if (limit > 20 && nextPageToken && places.length < limit) {
+      // Get second page and possibly third page to reach the limit
+      let attempts = 0;
+      const maxPages = Math.ceil(limit / 20);
       
-      // Process each place to get additional details if needed
-      for (const place of limitedResults) {
-        const basicPlace = {
-          name: place.name,
-          vicinity: place.vicinity,
-          geometry: place.geometry,
-          types: place.types,
-          rating: place.rating,
-          place_id: place.place_id
+      while (nextPageToken && places.length < limit && attempts < maxPages - 1) {
+        // Need to wait a bit before using the pagetoken
+        await new Promise(resolve => setTimeout(resolve, 2000));
+        
+        const nextPageUrl = `${baseUrl}?pagetoken=${nextPageToken}&key=${GOOGLE_PLACES_API_KEY}`;
+        console.log('Fetching next page of results');
+        
+        const nextPageResponse = await fetch(nextPageUrl);
+        const nextPageData = await nextPageResponse.json();
+        
+        if (nextPageData.status === 'OK') {
+          places = [...places, ...nextPageData.results];
+          nextPageToken = nextPageData.next_page_token;
+        } else {
+          console.error('Error fetching next page:', nextPageData.status);
+          break;
         }
         
-        // Check if we need details like website, phone number, etc.
-        const needsDetails = fields.some(field => 
-          !basicPlace[field] && ['website', 'formatted_phone_number', 'formatted_address'].includes(field)
-        )
-        
-        if (needsDetails) {
-          try {
-            // Make additional request to get place details
-            const detailsUrl = `https://maps.googleapis.com/maps/api/place/details/json?place_id=${place.place_id}&fields=${fields.join(',')}&key=${GOOGLE_PLACES_API_KEY}`
-            console.log(`Getting details for ${place.name}`)
-            
-            const detailsResponse = await fetch(detailsUrl)
-            const detailsData = await detailsResponse.json()
-            
-            if (detailsData.status === 'OK' && detailsData.result) {
-              // Merge the details with the basic place info
-              detailedPlaces.push({
-                ...basicPlace,
-                ...detailsData.result
-              })
-            } else {
-              detailedPlaces.push(basicPlace)
-            }
-          } catch (error) {
-            console.error(`Error getting details for ${place.name}:`, error)
-            detailedPlaces.push(basicPlace)
+        attempts++;
+      }
+    }
+    
+    console.log(`Found ${places.length} places of type ${type}`);
+
+    // If we have specific fields to return, get the details for each place
+    if (fields && fields.length > 0 && fields.some(f => !['name', 'vicinity', 'geometry'].includes(f))) {
+      console.log(`Fetching details for ${Math.min(places.length, limit)} places with fields:`, fields);
+      
+      const detailedPlaces = [];
+      const detailFields = fields.join(',');
+      
+      // Only fetch details for places up to the limit
+      for (let i = 0; i < Math.min(places.length, limit); i++) {
+        const place = places[i];
+        try {
+          const detailsUrl = `https://maps.googleapis.com/maps/api/place/details/json?place_id=${place.place_id}&fields=${detailFields}&key=${GOOGLE_PLACES_API_KEY}`;
+          const detailsResponse = await fetch(detailsUrl);
+          const detailsData = await detailsResponse.json();
+          
+          if (detailsData.status === 'OK' && detailsData.result) {
+            // Merge the basic place data with the detailed data
+            detailedPlaces.push({
+              ...place,
+              ...detailsData.result
+            });
+          } else {
+            detailedPlaces.push(place);
           }
-        } else {
-          detailedPlaces.push(basicPlace)
+        } catch (error) {
+          console.error('Error fetching place details:', error);
+          detailedPlaces.push(place);
         }
       }
       
-      return new Response(
-        JSON.stringify({ places: detailedPlaces }),
-        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      )
+      places = detailedPlaces;
+    } else {
+      // If no detailed fields requested, just enforce the limit
+      places = places.slice(0, limit);
     }
-    
-    // Return the results
+
     return new Response(
-      JSON.stringify({ places: limitedResults }),
+      JSON.stringify({ places }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-    )
+    );
   } catch (error) {
-    console.error('Error in find-nearby-places:', error)
-    
+    console.error('Error processing request:', error);
     return new Response(
-      JSON.stringify({ error: 'Internal server error', details: error.message }),
+      JSON.stringify({ error: 'Internal server error' }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 500 }
-    )
+    );
   }
 })
