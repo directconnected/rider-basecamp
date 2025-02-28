@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { useEffect } from "react";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/layout/Footer";
 import Breadcrumbs from "@/components/Breadcrumbs";
@@ -30,6 +30,19 @@ const RoutePlanning = () => {
   } = useRoutePlanning();
 
   const { calculateRoute } = useRouteCalculation();
+
+  // Store preferences in localStorage whenever they change
+  useEffect(() => {
+    if (formData.preferredLodging) {
+      localStorage.setItem('preferredLodging', formData.preferredLodging);
+    }
+    if (formData.preferredRestaurant) {
+      localStorage.setItem('preferredRestaurant', formData.preferredRestaurant);
+    }
+    if (formData.preferredAttraction) {
+      localStorage.setItem('preferredAttraction', formData.preferredAttraction);
+    }
+  }, [formData.preferredLodging, formData.preferredRestaurant, formData.preferredAttraction]);
 
   const handlePlanRoute = async () => {
     await calculateRoute(formData, {

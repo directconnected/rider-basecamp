@@ -36,8 +36,12 @@ const RouteResults: React.FC<RouteResultsProps> = ({
     const calculateAdditionalStops = async () => {
       if (currentRoute?.geometry?.coordinates) {
         try {
+          // Get user preferences from localStorage
+          const preferredRestaurant = localStorage.getItem('preferredRestaurant') || 'any';
+          const preferredAttraction = localStorage.getItem('preferredAttraction') || 'any';
+          
           // Calculate restaurant stops every 150 miles
-          const restaurants = await calculateRestaurantStops(currentRoute, 150);
+          const restaurants = await calculateRestaurantStops(currentRoute, 150, preferredRestaurant);
           setRestaurantStops(restaurants);
           console.log('Calculated restaurant stops:', restaurants);
 
@@ -47,7 +51,7 @@ const RouteResults: React.FC<RouteResultsProps> = ({
           console.log('Calculated camping stops:', camping);
 
           // Calculate attraction stops every 100 miles
-          const attractions = await calculateAttractionStops(currentRoute, 100);
+          const attractions = await calculateAttractionStops(currentRoute, 100, preferredAttraction);
           setAttractionStops(attractions);
           console.log('Calculated attraction stops:', attractions);
         } catch (error) {

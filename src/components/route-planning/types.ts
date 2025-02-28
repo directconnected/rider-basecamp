@@ -28,6 +28,7 @@ export interface CampingStop extends RatedStop {
 
 export interface AttractionStop extends RatedStop {
   attractionName: string;
+  attractionType?: string;
 }
 
 export interface RouteItineraryProps {
@@ -45,3 +46,4 @@ export interface RouteItineraryProps {
 
 export type LodgingType = 'hotel' | 'motel' | 'resort' | 'inn' | 'bed_and_breakfast' | 'campground' | 'any';
 export type RestaurantType = 'fine_dining' | 'casual' | 'fast_food' | 'cafe' | 'steakhouse' | 'seafood' | 'italian' | 'mexican' | 'asian' | 'any';
+export type AttractionType = 'museum' | 'park' | 'tourist_attraction' | 'amusement_park' | 'art_gallery' | 'historic_site' | 'natural_feature' | 'point_of_interest' | 'any';

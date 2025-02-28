@@ -3,8 +3,12 @@ import { findNearestPointIndex } from './routeUtils';
 import { findNearbyAttraction } from '../placesService';
 import { AttractionStop } from '@/components/route-planning/types';
 
-export const calculateAttractionStops = async (route: any, interval: number): Promise<AttractionStop[]> => {
-  console.log('Calculating attraction stops every:', interval, 'miles');
+export const calculateAttractionStops = async (
+  route: any, 
+  interval: number = 100,
+  attractionType: string = 'any'
+): Promise<AttractionStop[]> => {
+  console.log('Calculating attraction stops every:', interval, 'miles, type:', attractionType);
   
   const attractionStops: AttractionStop[] = [];
   const totalDistance = route.distance / 1609.34;
@@ -21,7 +25,7 @@ export const calculateAttractionStops = async (route: any, interval: number): Pr
     const coordinates = route.geometry.coordinates[pointIndex] as [number, number];
     
     try {
-      const attraction = await findNearbyAttraction(coordinates);
+      const attraction = await findNearbyAttraction(coordinates, 5000, attractionType);
       
       if (attraction) {
         console.log(`Attraction data for stop ${i}:`, attraction);
@@ -32,7 +36,8 @@ export const calculateAttractionStops = async (route: any, interval: number): Pr
           distance: Math.round(progress * totalDistance),
           rating: attraction.rating,
           website: attraction.website,
-          phone_number: attraction.phone_number
+          phone_number: attraction.phone_number,
+          attractionType: attractionType
         });
         console.log(`Added attraction stop ${i}: ${attraction.name} with website: ${attraction.website} and phone: ${attraction.phone_number}`);
       }

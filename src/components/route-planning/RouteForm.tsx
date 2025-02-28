@@ -1,11 +1,11 @@
 
 import React from "react";
-import { Compass, MapPin, Clock, Calendar, Fuel, LayoutGrid, UtensilsCrossed, Hotel } from "lucide-react";
+import { Compass, MapPin, Clock, Calendar, Fuel, LayoutGrid, UtensilsCrossed, Hotel, Landmark } from "lucide-react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { LodgingType, RestaurantType } from "./types";
+import { LodgingType, RestaurantType, AttractionType } from "./types";
 
 interface FormData {
   startPoint: string;
@@ -16,6 +16,7 @@ interface FormData {
   milesPerDay: string;
   preferredLodging: LodgingType;
   preferredRestaurant: RestaurantType;
+  preferredAttraction: AttractionType;
 }
 
 interface RouteFormProps {
@@ -183,6 +184,34 @@ const RouteForm = ({ formData, isLoading, onFormDataChange, onPlanRoute }: Route
                 <UtensilsCrossed className="h-4 w-4" />
               </Button>
             </div>
+          </div>
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium mb-2">Preferred Attraction Type</label>
+          <div className="flex gap-2">
+            <Select 
+              value={formData.preferredAttraction} 
+              onValueChange={(value: AttractionType) => onFormDataChange({ preferredAttraction: value })}
+            >
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Select attraction type" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="any">Any Attraction</SelectItem>
+                <SelectItem value="museum">Museums</SelectItem>
+                <SelectItem value="park">Parks</SelectItem>
+                <SelectItem value="tourist_attraction">Tourist Attractions</SelectItem>
+                <SelectItem value="amusement_park">Amusement Parks</SelectItem>
+                <SelectItem value="art_gallery">Art Galleries</SelectItem>
+                <SelectItem value="historic_site">Historic Sites</SelectItem>
+                <SelectItem value="natural_feature">Natural Features</SelectItem>
+                <SelectItem value="point_of_interest">Points of Interest</SelectItem>
+              </SelectContent>
+            </Select>
+            <Button variant="outline" size="icon">
+              <Landmark className="h-4 w-4" />
+            </Button>
           </div>
         </div>
 

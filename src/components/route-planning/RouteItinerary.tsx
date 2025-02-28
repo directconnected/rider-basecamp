@@ -114,6 +114,7 @@ const RouteItinerary = ({
           color="bg-blue-500"
           stops={attractionStops}
           getStopName={(stop) => (stop as AttractionStop).attractionName}
+          getStopType={(stop) => (stop as AttractionStop).attractionType}
         />
 
         <div className="flex items-center gap-4">

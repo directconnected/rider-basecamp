@@ -14,7 +14,7 @@ interface PlaceResult {
 
 const findPlace = async (
   coordinates: [number, number], 
-  type: 'lodging' | 'gas_station' | 'restaurant' | 'campground' | 'tourist_attraction', 
+  type: 'lodging' | 'gas_station' | 'restaurant' | 'campground' | 'tourist_attraction' | 'museum' | 'park' | 'amusement_park' | 'art_gallery' | 'historic_site' | 'natural_feature' | 'point_of_interest', 
   initialRadius: number = 5000,
   keyword?: string
 ): Promise<PlaceResult | null> => {
@@ -106,6 +106,16 @@ export const findNearbyCampground = async (coordinates: [number, number], radius
   return findPlace(coordinates, 'campground', radius);
 };
 
-export const findNearbyAttraction = async (coordinates: [number, number], radius: number = 5000): Promise<PlaceResult | null> => {
-  return findPlace(coordinates, 'tourist_attraction', radius);
+export const findNearbyAttraction = async (
+  coordinates: [number, number], 
+  radius: number = 5000,
+  attractionType: string = 'any'
+): Promise<PlaceResult | null> => {
+  if (attractionType === 'any') {
+    return findPlace(coordinates, 'tourist_attraction', radius);
+  } else {
+    // Use specific attraction type
+    const placeType = attractionType as 'museum' | 'park' | 'tourist_attraction' | 'amusement_park' | 'art_gallery' | 'historic_site' | 'natural_feature' | 'point_of_interest';
+    return findPlace(coordinates, placeType, radius);
+  }
 };
