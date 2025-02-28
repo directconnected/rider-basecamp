@@ -55,7 +55,7 @@ const RouteItinerary = ({
       }))
     : hotelStops.map(hotel => ({
         ...hotel,
-        lodgingType: preferredLodging
+        lodgingType: preferredLodging === 'any' ? 'any' : preferredLodging
       }));
 
   // Sort by distance
@@ -69,14 +69,6 @@ const RouteItinerary = ({
   console.log('All attraction stops before filtering:', attractionStops.length, 
     attractionStops.map(a => ({name: a.attractionName, type: a.attractionType}))
   );
-  
-  // Special handling for tourist attractions - they should all show up when that type is selected
-  if (preferredAttraction === 'tourist_attractions') {
-    console.log('Tourist attractions selected - showing all tourist attractions');
-  }
-  
-  // Display all attractions if selected 'any' or using the preferred type
-  // No additional filtering needed here as the filtering is already done in the attractionStopService
   
   // Get preferred restaurant type from localStorage
   const preferredRestaurant = localStorage.getItem('preferredRestaurant') || 'any';
@@ -155,8 +147,8 @@ const RouteItinerary = ({
             getStopType={(stop) => {
               const restaurantStop = stop as RestaurantStop;
               return preferredRestaurant === 'any' ? 
-                (restaurantStop.restaurantType || 'restaurant') : 
-                preferredRestaurant;
+                'any' : 
+                (restaurantStop.restaurantType || preferredRestaurant);
             }}
           />
         )}
@@ -171,8 +163,8 @@ const RouteItinerary = ({
             getStopType={(stop) => {
               const attractionStop = stop as AttractionStop;
               return preferredAttraction === 'any' ? 
-                (attractionStop.attractionType || 'attraction') : 
-                preferredAttraction.replace('_', ' ');
+                'any' : 
+                (attractionStop.attractionType || preferredAttraction.replace('_', ' '));
             }}
           />
         )}

@@ -66,7 +66,7 @@ const StopSection = ({ title, icon: Icon, color, stops, getStopName, getStopType
                 <div className="flex-1">
                   <div className="flex items-center justify-between">
                     <p className="text-base font-medium">{stopName}</p>
-                    {formattedType && (
+                    {formattedType && stopType !== 'any' && (
                       <Badge variant="outline" className="ml-2">
                         {formattedType}
                       </Badge>
