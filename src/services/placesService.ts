@@ -171,7 +171,8 @@ export const findNearbyRestaurant = async (
           keyword = 'asian restaurant';
           break;
         default:
-          keyword = requestedType.replace(/_/g, ' ');
+          // Type assertion to string to avoid 'never' type error
+          keyword = (requestedType as string).replace(/_/g, ' ');
       }
     }
     
@@ -327,7 +328,8 @@ export const findNearbyAttraction = async (
           placeType = 'point_of_interest';
           break;
         default:
-          keyword = attractionType.replace(/_/g, ' ');
+          // Type assertion to string to avoid 'never' type error
+          keyword = (attractionType as string).replace(/_/g, ' ');
       }
     }
 
