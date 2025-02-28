@@ -63,28 +63,21 @@ const RouteItinerary = ({
 
   // Get preferred attraction type from localStorage
   const preferredAttraction = localStorage.getItem('preferredAttraction') || 'any';
+  console.log('Preferred attraction type from localStorage:', preferredAttraction);
   
-  // If preferredAttraction is not 'any', filter the attractions to match only that type
-  let filteredAttractionStops = attractionStops;
-  if (preferredAttraction !== 'any' && attractionStops.length > 0) {
-    // Handle the special case for tourist attractions (singular vs plural)
-    if (preferredAttraction === 'tourist_attractions') {
-      filteredAttractionStops = attractionStops.filter(stop => 
-        stop.attractionType === 'tourist_attraction' || 
-        stop.attractionType === 'tourist attraction' || 
-        (stop.attractionType && stop.attractionType.includes('tourist'))
-      );
-    } else {
-      // Convert stored preference to display format for comparison
-      const preferredTypeFormatted = preferredAttraction.replace(/_/g, ' ');
-      
-      filteredAttractionStops = attractionStops.filter(stop => 
-        stop.attractionType === preferredTypeFormatted || 
-        (stop.attractionType && stop.attractionType.includes(preferredTypeFormatted))
-      );
-    }
+  // Log all attraction stops for debugging
+  console.log('All attraction stops before filtering:', attractionStops.length, 
+    attractionStops.map(a => ({name: a.attractionName, type: a.attractionType}))
+  );
+  
+  // Special handling for tourist attractions - they should all show up when that type is selected
+  if (preferredAttraction === 'tourist_attractions') {
+    console.log('Tourist attractions selected - showing all tourist attractions');
   }
-
+  
+  // Display all attractions if selected 'any' or using the preferred type
+  // No additional filtering needed here as the filtering is already done in the attractionStopService
+  
   // Get preferred restaurant type from localStorage
   const preferredRestaurant = localStorage.getItem('preferredRestaurant') || 'any';
   
@@ -168,18 +161,18 @@ const RouteItinerary = ({
           />
         )}
 
-        {filteredAttractionStops.length > 0 && (
+        {attractionStops.length > 0 && (
           <StopSection
             title="Suggested Things to Do"
             icon={Landmark}
             color="bg-blue-500"
-            stops={filteredAttractionStops}
+            stops={attractionStops}
             getStopName={(stop) => (stop as AttractionStop).attractionName}
             getStopType={(stop) => {
               const attractionStop = stop as AttractionStop;
               return preferredAttraction === 'any' ? 
                 (attractionStop.attractionType || 'attraction') : 
-                preferredAttraction;
+                preferredAttraction.replace('_', ' ');
             }}
           />
         )}

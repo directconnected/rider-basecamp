@@ -81,6 +81,7 @@ const RouteResults: React.FC<RouteResultsProps> = ({
 
           // Attraction stops with proper type filtering
           console.log('Calculating attraction stops with type:', preferredAttraction);
+          // Reduce interval for attraction stops to get more results
           const attractions = await calculateAttractionStops(currentRoute, 100, preferredAttraction);
           setAttractionStops(attractions);
           console.log('Calculated attraction stops:', attractions);

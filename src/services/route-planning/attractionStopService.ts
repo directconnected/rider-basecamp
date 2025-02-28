@@ -30,6 +30,22 @@ export const calculateAttractionStops = async (
     'any': []
   };
   
+  // Convert the search type for the API request
+  let searchType = 'tourist_attraction'; // Default search type
+  
+  // Map our internal attraction types to Google Places API types
+  if (attractionType === 'museum') {
+    searchType = 'museum';
+  } else if (attractionType === 'park') {
+    searchType = 'park';
+  } else if (attractionType === 'amusement_park') {
+    searchType = 'amusement_park';
+  } else if (attractionType === 'art_gallery') {
+    searchType = 'art_gallery';
+  }
+  
+  console.log(`Using search type for API request: ${searchType}`);
+  
   for (let i = 1; i <= numStops; i++) {
     const progress = (i * interval) / totalDistance;
     if (progress >= 1) break;
@@ -38,11 +54,9 @@ export const calculateAttractionStops = async (
     const coordinates = route.geometry.coordinates[pointIndex] as [number, number];
     
     try {
-      // For tourist attractions, make sure to use the right search term
-      const searchType = attractionType === 'tourist_attractions' ? 'tourist_attraction' : attractionType;
-      
       console.log(`Finding attraction near ${coordinates} with type ${searchType}`);
-      const attraction = await findNearbyAttraction(coordinates, 5000, searchType);
+      // Wider search radius to find more attractions
+      const attraction = await findNearbyAttraction(coordinates, 10000, searchType);
       
       if (attraction) {
         console.log(`Found attraction data for stop ${i}:`, attraction);

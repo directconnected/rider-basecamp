@@ -148,12 +148,21 @@ export const findNearbyAttraction = async (
   try {
     console.log(`Finding attraction near ${coordinates} with radius ${radius} and type ${attractionType}`);
 
+    // Maps our internal type to Google Places API type
+    let searchType = attractionType;
+    if (attractionType === 'any' || attractionType === 'tourist_attractions') {
+      searchType = 'tourist_attraction';
+    }
+
     const { data, error } = await supabase.functions.invoke('find-nearby-places', {
       body: {
         coordinates,
         radius,
-        type: 'tourist_attraction',
-        specificType: attractionType === 'any' ? null : attractionType
+        type: searchType,
+        // Only send specificType if it's not a built-in Google Place type
+        specificType: ['museum', 'park', 'tourist_attraction', 'amusement_park', 'art_gallery'].includes(searchType) 
+          ? null 
+          : attractionType
       }
     });
 
@@ -179,6 +188,13 @@ export const findNearbyAttraction = async (
         actualType = specificTypes[0];
       }
     }
+
+    // If we specifically searched for a type, use that type
+    if (attractionType !== 'any' && attractionType !== 'tourist_attractions') {
+      actualType = attractionType;
+    }
+
+    console.log(`Found attraction: ${attraction.name} with type: ${actualType}`);
 
     return {
       name: attraction.name,
