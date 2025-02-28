@@ -56,13 +56,16 @@ export const useCampsiteSearch = () => {
       // Use the state parameter directly for filtering
       const state = searchParams.state;
       
-      // For debugging, let's search directly in Pennsylvania if API geocoding fails
+      // Default coordinates for when geocoding fails - use central location of the state if possible
       let coordinates: [number, number] = [-76.8867, 40.2732]; // Default to central PA
       
       try {
         // Use the Places service to find coordinates for the location
         const { data, error } = await supabase.functions.invoke('geocode-location', {
-          body: { location: locationString }
+          body: { 
+            location: locationString,
+            state: state
+          }
         });
 
         console.log("Geocode response:", data, error);
@@ -79,11 +82,14 @@ export const useCampsiteSearch = () => {
         toast.warning('Using approximate location - geocoding service unavailable');
       }
 
-      const radius = searchParams.radius || 25000; // Default to 25km if not specified
-      console.log(`Searching for campgrounds near coordinates ${coordinates} with radius ${radius}m`);
+      // Convert radius from miles to meters for the API
+      const radiusMiles = searchParams.radius || 25; // Default to 25 miles if not specified
+      const radiusMeters = radiusMiles * 1609.34; // Convert miles to meters
+      
+      console.log(`Searching for campgrounds near coordinates ${coordinates} with radius ${radiusMiles} miles (${radiusMeters}m)`);
       
       // Get campgrounds near the location
-      const results = await findNearbyCampgrounds(coordinates, radius, state);
+      const results = await findNearbyCampgrounds(coordinates, radiusMeters, state);
       console.log("Search results:", results);
       
       if (results && results.length > 0) {
@@ -121,11 +127,16 @@ export const useCampsiteSearch = () => {
       const coordinates: [number, number] = [position.coords.longitude, position.coords.latitude];
       console.log("Using geolocation coordinates:", coordinates);
       
-      const radius = searchParams.radius || 25000; // Default to 25km
+      // Convert radius from miles to meters for the API
+      const radiusMiles = searchParams.radius || 25; // Default to 25 miles if not specified
+      const radiusMeters = radiusMiles * 1609.34; // Convert miles to meters
+      
       const state = searchParams.state; // Use selected state for filtering
       
+      console.log(`Searching for campgrounds near your location with radius ${radiusMiles} miles (${radiusMeters}m)`);
+      
       // Get campgrounds near current location
-      const results = await findNearbyCampgrounds(coordinates, radius, state);
+      const results = await findNearbyCampgrounds(coordinates, radiusMeters, state);
       console.log("Search results from geolocation:", results);
       
       if (results && results.length > 0) {

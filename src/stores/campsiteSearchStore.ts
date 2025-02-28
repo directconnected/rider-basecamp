@@ -5,7 +5,7 @@ interface CampsiteSearchParams {
   state: string;
   city: string;
   zipCode: string;
-  radius?: number;
+  radius: number;
 }
 
 interface CampsiteSearchStore {
