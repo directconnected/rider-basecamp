@@ -59,7 +59,6 @@ export const useRegularSearch = () => {
         setError(error);
         setResults([]);
       } else {
-        // Cast data to the Motorcycle type
         setResults(data as unknown as Motorcycle[]);
       }
     } catch (err) {
