@@ -2,7 +2,7 @@
 import React from "react";
 import { CampgroundResult } from "@/hooks/useCampsiteSearch";
 import { Badge } from "@/components/ui/badge";
-import { MapPin, Phone, Globe, Star, Droplet, Shower, Calendar, Tent, Truck, Dog, Info, Trees } from "lucide-react";
+import { MapPin, Phone, Globe, Star, Droplet, ShowerHead, Calendar, Tent, Truck, Dog, Info, Trees } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Card } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
@@ -116,7 +116,7 @@ const CampsiteSearchResults = ({
                     </div>
                     
                     <div className="flex items-center gap-2">
-                      <Shower className="h-4 w-4 text-blue-500" />
+                      <ShowerHead className="h-4 w-4 text-blue-500" />
                       <span>Showers: {formatFeature(showers)}</span>
                     </div>
                     
