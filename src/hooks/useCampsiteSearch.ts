@@ -14,6 +14,7 @@ export interface CampgroundResult {
   phone_number?: string;
   website?: string;
   types?: string[];
+  state?: string;
 }
 
 export const useCampsiteSearch = () => {
@@ -52,6 +53,9 @@ export const useCampsiteSearch = () => {
 
       console.log("Searching for location:", locationString);
       
+      // Use the state parameter directly for filtering
+      const state = searchParams.state;
+      
       // For debugging, let's search directly in Pennsylvania if API geocoding fails
       let coordinates: [number, number] = [-76.8867, 40.2732]; // Default to central PA
       
@@ -79,7 +83,7 @@ export const useCampsiteSearch = () => {
       console.log(`Searching for campgrounds near coordinates ${coordinates} with radius ${radius}m`);
       
       // Get campgrounds near the location
-      const results = await findNearbyCampgrounds(coordinates, radius);
+      const results = await findNearbyCampgrounds(coordinates, radius, state);
       console.log("Search results:", results);
       
       if (results && results.length > 0) {
@@ -118,9 +122,10 @@ export const useCampsiteSearch = () => {
       console.log("Using geolocation coordinates:", coordinates);
       
       const radius = searchParams.radius || 25000; // Default to 25km
+      const state = searchParams.state; // Use selected state for filtering
       
       // Get campgrounds near current location
-      const results = await findNearbyCampgrounds(coordinates, radius);
+      const results = await findNearbyCampgrounds(coordinates, radius, state);
       console.log("Search results from geolocation:", results);
       
       if (results && results.length > 0) {

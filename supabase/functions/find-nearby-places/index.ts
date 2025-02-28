@@ -9,7 +9,7 @@ serve(async (req) => {
   }
 
   try {
-    const { location, type, radius, rankby, fields, keyword, limit = 5 } = await req.json()
+    const { location, type, radius, rankby, fields, keyword, limit = 5, state } = await req.json()
 
     if (!location || !Array.isArray(location) || location.length !== 2) {
       return new Response(
@@ -37,8 +37,14 @@ serve(async (req) => {
       placesUrl += `&type=${type}`
     }
     
-    if (keyword) {
-      placesUrl += `&keyword=${encodeURIComponent(keyword)}`
+    let adjustedKeyword = keyword;
+    // If a state was provided and it's a campground search, include the state in the keyword
+    if (state && type === 'campground') {
+      adjustedKeyword = keyword ? `${keyword} ${state}` : `campground ${state}`;
+    }
+    
+    if (adjustedKeyword) {
+      placesUrl += `&keyword=${encodeURIComponent(adjustedKeyword)}`
     }
     
     // Add ranking if provided
@@ -69,7 +75,23 @@ serve(async (req) => {
     }
     
     // Limit results
-    const limitedResults = placesData.results.slice(0, limit)
+    let filteredResults = placesData.results;
+    
+    // If we're looking for campgrounds in a specific state, try to filter by address
+    if (state && type === 'campground') {
+      filteredResults = filteredResults.filter(place => {
+        const stateAbbr = state.toUpperCase();
+        if (place.vicinity) {
+          return place.vicinity.includes(`, ${stateAbbr} `) || 
+                 place.vicinity.includes(`, ${stateAbbr},`) ||
+                 place.vicinity.endsWith(`, ${stateAbbr}`);
+        }
+        return true; // Keep results without vicinity info
+      });
+    }
+    
+    // Limit to requested number
+    const limitedResults = filteredResults.slice(0, limit);
 
     // If fields were specified, get additional details for each place
     if (fields && fields.length > 0) {

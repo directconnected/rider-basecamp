@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import { CampgroundResult } from '@/hooks/useCampsiteSearch';
 
@@ -11,6 +10,7 @@ interface PlaceResult {
   website?: string;
   phone_number?: string;
   types?: string[];
+  state?: string;
 }
 
 const findPlace = async (
@@ -49,6 +49,19 @@ const findPlace = async (
       const place = data.places[0];
       console.log(`Found ${type}:`, place);
       
+      // Extract state from address if available
+      let state = null;
+      if (place.vicinity) {
+        const addressParts = place.vicinity.split(',');
+        if (addressParts.length > 1) {
+          const lastPart = addressParts[addressParts.length - 1].trim();
+          const stateParts = lastPart.split(' ');
+          if (stateParts.length > 0) {
+            state = stateParts[0].trim();
+          }
+        }
+      }
+      
       return {
         name: place.name,
         address: place.vicinity || place.formatted_address,
@@ -57,7 +70,8 @@ const findPlace = async (
         price_level: place.price_level,
         website: place.website,
         phone_number: place.formatted_phone_number,
-        types: place.types
+        types: place.types,
+        state: state
       };
     } catch (error) {
       console.error(`Error in findPlace for ${type}:`, error);
@@ -107,31 +121,38 @@ export const findNearbyCampground = async (coordinates: [number, number], radius
   return findPlace(coordinates, 'campground', radius);
 };
 
-export const findNearbyCampgrounds = async (coordinates: [number, number], radius: number = 25000): Promise<CampgroundResult[]> => {
+export const findNearbyCampgrounds = async (
+  coordinates: [number, number], 
+  radius: number = 25000,
+  state?: string
+): Promise<CampgroundResult[]> => {
   try {
-    console.log(`Searching for campgrounds near coordinates:`, coordinates, 'with radius:', radius);
+    console.log(`Searching for campgrounds near coordinates:`, coordinates, 'with radius:', radius, state ? `in state: ${state}` : '');
     
-    // Try directly using the campsites table if the Places API fails
-    // This is a fallback approach
-    const { data: campsiteData, error: dbError } = await supabase
-      .from('campsites')
-      .select('*')
-      .order('camp')
-      .limit(20);
-    
-    if (!dbError && campsiteData && campsiteData.length > 0) {
-      console.log(`Found ${campsiteData.length} campgrounds in database`);
+    // Try directly using the campsites table if a specific state is provided
+    if (state) {
+      const { data: campsiteData, error: dbError } = await supabase
+        .from('campsites')
+        .select('*')
+        .eq('state', state)
+        .order('camp')
+        .limit(20);
       
-      // Process and return the found places from the database
-      return campsiteData.map(site => ({
-        name: site.camp || 'Unknown Campground',
-        address: site.town ? `${site.town}, ${site.state}` : (site.state || 'Unknown Location'),
-        location: [site.lon || 0, site.lat || 0],
-        rating: 4.0, // Default rating since DB doesn't have this
-        website: site.url,
-        phone_number: site.phone,
-        types: ['campground']
-      }));
+      if (!dbError && campsiteData && campsiteData.length > 0) {
+        console.log(`Found ${campsiteData.length} campgrounds in ${state} from database`);
+        
+        // Process and return the found places from the database
+        return campsiteData.map(site => ({
+          name: site.camp || 'Unknown Campground',
+          address: site.town ? `${site.town}, ${site.state}` : (site.state || 'Unknown Location'),
+          location: [site.lon || 0, site.lat || 0],
+          rating: 4.0, // Default rating since DB doesn't have this
+          website: site.url,
+          phone_number: site.phone,
+          types: ['campground'],
+          state: site.state
+        }));
+      }
     }
     
     // Try Google Places API
@@ -142,7 +163,7 @@ export const findNearbyCampgrounds = async (coordinates: [number, number], radiu
         radius,
         rankby: 'prominence',
         fields: ['name', 'vicinity', 'formatted_address', 'geometry', 'rating', 'price_level', 'website', 'formatted_phone_number', 'types'],
-        keyword: 'campground',
+        keyword: state ? `campground ${state}` : 'campground',
         limit: 20 // Request more results
       }
     });
@@ -159,16 +180,51 @@ export const findNearbyCampgrounds = async (coordinates: [number, number], radiu
 
     console.log(`Found ${data.places.length} campgrounds from Places API`);
     
-    // Process and return the found places
-    return data.places.map(place => ({
-      name: place.name,
-      address: place.vicinity || place.formatted_address,
-      location: [place.geometry.location.lng, place.geometry.location.lat],
-      rating: place.rating,
-      website: place.website,
-      phone_number: place.formatted_phone_number,
-      types: place.types
-    }));
+    // Process the places and filter by state if needed
+    let places = data.places.map(place => {
+      // Extract state from address
+      let placeState = null;
+      if (place.vicinity) {
+        const addressParts = place.vicinity.split(',');
+        if (addressParts.length > 1) {
+          const lastPart = addressParts[addressParts.length - 1].trim();
+          const stateParts = lastPart.split(' ');
+          if (stateParts.length > 0) {
+            placeState = stateParts[0].trim();
+          }
+        }
+      }
+      
+      return {
+        name: place.name,
+        address: place.vicinity || place.formatted_address,
+        location: [place.geometry.location.lng, place.geometry.location.lat],
+        rating: place.rating,
+        website: place.website,
+        phone_number: place.formatted_phone_number,
+        types: place.types,
+        state: placeState
+      };
+    });
+    
+    // Filter by state if one was provided
+    if (state) {
+      places = places.filter(place => {
+        // If we have an extracted state, check if it matches
+        if (place.state) {
+          return place.state.toUpperCase() === state.toUpperCase() || 
+                 place.address.includes(state) ||
+                 (place.address.includes(', ' + state + ' '));
+        }
+        // Otherwise check if the address contains the state
+        return place.address.includes(state) || 
+               (place.address.includes(', ' + state + ' '));
+      });
+      
+      console.log(`Filtered to ${places.length} campgrounds in ${state}`);
+    }
+    
+    return places;
   } catch (error) {
     console.error(`Error in findNearbyCampgrounds:`, error);
     return [];
