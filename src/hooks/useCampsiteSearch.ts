@@ -24,6 +24,14 @@ export interface CampgroundResult {
   pets?: string;
   fee?: string;
   type?: string;
+  // New campground information
+  price_per_night?: string;
+  monthly_rate?: string;
+  elev?: number;
+  cell_service?: string;
+  reviews?: string;
+  amenities?: string;
+  photos?: string[];
 }
 
 export const useCampsiteSearch = () => {

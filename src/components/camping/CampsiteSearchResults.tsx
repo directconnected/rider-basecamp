@@ -1,7 +1,8 @@
+
 import React from "react";
 import { CampgroundResult } from "@/hooks/useCampsiteSearch";
 import { Badge } from "@/components/ui/badge";
-import { MapPin, Phone, Globe, Star, Droplet, ShowerHead, Calendar, Tent, Truck, Dog, Info, Trees } from "lucide-react";
+import { MapPin, Phone, Globe, Star, Droplet, ShowerHead, Calendar, Tent, Truck, Dog, Info, Trees, DollarSign, Wifi, Mountain, Map, MessageSquare, Sparkles, Image } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Card } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
@@ -101,6 +102,17 @@ const CampsiteSearchResults = ({
             const fees = campsite.fee || 'N/A';
             const campType = campsite.type || 'Standard';
             
+            // New fields
+            const pricePerNight = campsite.price_per_night || 'N/A';
+            const monthlyRate = campsite.monthly_rate || 'N/A';
+            const elevation = campsite.elev ? `${campsite.elev} ft` : 'N/A';
+            const coordinates = campsite.location ? 
+              `${campsite.location[1].toFixed(6)}, ${campsite.location[0].toFixed(6)}` : 'N/A';
+            const cellService = campsite.cell_service || 'N/A';
+            const reviews = campsite.reviews || 'N/A';
+            const amenities = campsite.amenities || 'N/A';
+            const photos = campsite.photos || [];
+            
             return (
               <Card key={index} className="overflow-hidden hover:shadow-lg transition-shadow">
                 <div className="p-6 space-y-4">
@@ -162,9 +174,49 @@ const CampsiteSearchResults = ({
                       <span>Pets: {formatFeature(petFriendly)}</span>
                     </div>
                     
-                    <div className="flex items-center gap-2 col-span-2">
+                    <div className="flex items-center gap-2">
                       <Info className="h-4 w-4 text-purple-500" />
                       <span>Fees: {formatFeature(fees)}</span>
+                    </div>
+                    
+                    <div className="flex items-center gap-2">
+                      <DollarSign className="h-4 w-4 text-green-600" />
+                      <span>Price/Night: {formatFeature(pricePerNight)}</span>
+                    </div>
+                    
+                    <div className="flex items-center gap-2">
+                      <DollarSign className="h-4 w-4 text-green-600" />
+                      <span>Monthly: {formatFeature(monthlyRate)}</span>
+                    </div>
+                    
+                    <div className="flex items-center gap-2">
+                      <Mountain className="h-4 w-4 text-brown-500" />
+                      <span>Elevation: {formatFeature(elevation)}</span>
+                    </div>
+                    
+                    <div className="flex items-center gap-2">
+                      <Map className="h-4 w-4 text-blue-700" />
+                      <span title={coordinates} className="truncate">GPS: {formatFeature(coordinates)}</span>
+                    </div>
+                    
+                    <div className="flex items-center gap-2">
+                      <Wifi className="h-4 w-4 text-blue-600" />
+                      <span>Cell Service: {formatFeature(cellService)}</span>
+                    </div>
+                    
+                    <div className="flex items-center gap-2">
+                      <MessageSquare className="h-4 w-4 text-gray-600" />
+                      <span>Reviews: {formatFeature(reviews)}</span>
+                    </div>
+                    
+                    <div className="flex items-center gap-2">
+                      <Sparkles className="h-4 w-4 text-amber-500" />
+                      <span>Amenities: {formatFeature(amenities)}</span>
+                    </div>
+                    
+                    <div className="flex items-center gap-2">
+                      <Image className="h-4 w-4 text-indigo-500" />
+                      <span>Photos: {photos.length > 0 ? `${photos.length} available` : 'N/A'}</span>
                     </div>
                   </div>
                   
