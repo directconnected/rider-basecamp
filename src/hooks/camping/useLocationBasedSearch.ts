@@ -1,7 +1,5 @@
 
 import { toast } from 'sonner';
-import { supabase } from '@/integrations/supabase/client';
-import { processSearchResults } from './campsiteUtils';
 import { CampgroundResult } from './types';
 
 interface LocationSearchProps {
@@ -41,7 +39,7 @@ export const useLocationBasedSearch = ({
       const coordinates: [number, number] = [position.coords.longitude, position.coords.latitude];
       console.log("Using geolocation coordinates:", coordinates);
       
-      // Since we're removing Google Places API functionality, we'll return a message
+      // Since we're removing Google Places API functionality, we'll return a placeholder message
       toast.info('Campground search functionality has been removed');
       
       // Return empty results

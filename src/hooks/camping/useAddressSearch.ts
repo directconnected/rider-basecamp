@@ -1,9 +1,6 @@
 
-import { useState } from 'react';
-import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { CampgroundResult } from '@/hooks/camping/types';
-import { processSearchResults } from '@/hooks/camping/campsiteUtils';
 
 type AddressSearchParams = {
   searchParams: {
@@ -43,7 +40,9 @@ export const useAddressSearch = ({
         return;
       }
 
-      // Since we're removing Google Places API functionality, we'll return a message
+      console.log(`Address search: ${addressString}, radius: ${searchParams.radius}mi`);
+      
+      // Since we're removing Google Places API functionality, we'll return a placeholder message
       toast.info('Campground search functionality has been removed');
       
       // Return empty results

@@ -1,36 +1,32 @@
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useCampsiteSearchStore } from '@/stores/campsiteSearchStore';
 import { toast } from 'sonner';
-import { CampgroundResult, CampsiteSearchState } from '@/hooks/camping/types';
+import { CampgroundResult } from '@/hooks/camping/types';
 import { useLocationBasedSearch } from '@/hooks/camping/useLocationBasedSearch';
 import { useAddressSearch } from '@/hooks/camping/useAddressSearch';
 
-// This is now a simplified hook that combines the functionality of useLocationBasedSearch and useAddressSearch
+// This hook combines functionality for searching campgrounds
 const useCampsiteSearch = () => {
   const { searchParams, setSearchParams } = useCampsiteSearchStore();
-  const [searchState, setSearchState] = useState<CampsiteSearchState>({
-    searchResults: [],
-    isSearching: false,
-    currentPage: 1
-  });
-
-  const { searchResults, isSearching, currentPage } = searchState;
+  const [searchResults, setSearchResults] = useState<CampgroundResult[]>([]);
+  const [isSearching, setIsSearching] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
 
   // Initialize the location-based search hook
   const { handleLocationSearch } = useLocationBasedSearch({
     searchParams,
-    setSearchResults: (results) => setSearchState(prev => ({ ...prev, searchResults: results })),
-    setIsSearching: (isSearching) => setSearchState(prev => ({ ...prev, isSearching })),
-    setCurrentPage: (page) => setSearchState(prev => ({ ...prev, currentPage: page }))
+    setSearchResults,
+    setIsSearching,
+    setCurrentPage
   });
 
   // Initialize the address-based search hook
   const { handleSearch: handleAddressSearch } = useAddressSearch({
     searchParams,
-    setSearchResults: (results) => setSearchState(prev => ({ ...prev, searchResults: results })),
-    setIsSearching: (isSearching) => setSearchState(prev => ({ ...prev, isSearching })),
-    setCurrentPage: (page) => setSearchState(prev => ({ ...prev, currentPage: page }))
+    setSearchResults,
+    setIsSearching,
+    setCurrentPage
   });
 
   // Calculate total pages based on the number of search results
@@ -39,7 +35,7 @@ const useCampsiteSearch = () => {
 
   // Handle page changes for pagination
   const handlePageChange = (page: number) => {
-    setSearchState(prev => ({ ...prev, currentPage: page }));
+    setCurrentPage(page);
     // Scroll to top of results when changing pages
     window.scrollTo({
       top: document.getElementById('search-results')?.offsetTop || 0,

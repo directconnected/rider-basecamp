@@ -3,6 +3,7 @@ import mapboxgl from 'mapbox-gl';
 import { FuelStop, HotelStop } from "@/hooks/useRoutePlanning";
 import { LodgingType } from '@/components/route-planning/types';
 
+// Helper function to find the nearest point index along route for a given distance
 const findNearestPointIndex = (coordinates: [number, number][], distance: number): number => {
   let accumulatedDistance = 0;
   for (let i = 0; i < coordinates.length - 1; i++) {
@@ -17,6 +18,7 @@ const findNearestPointIndex = (coordinates: [number, number][], distance: number
   return coordinates.length - 1;
 };
 
+// Calculate the distance between two points using the Haversine formula
 const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number): number => {
   const R = 6371e3; // metres
   const φ1 = lat1 * Math.PI / 180; // φ, λ in radians
@@ -33,6 +35,7 @@ const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: numbe
   return d;
 }
 
+// Plan a route between two points using Mapbox Directions API
 export const planRoute = async (start: [number, number], end: [number, number]) => {
   try {
     const url = `https://api.mapbox.com/directions/v5/mapbox/driving/${start[0]},${start[1]};${end[0]},${end[1]}?geometries=geojson&access_token=${mapboxgl.accessToken}`;
@@ -51,6 +54,7 @@ export const planRoute = async (start: [number, number], end: [number, number]) 
   }
 };
 
+// Calculate fuel stops along a route based on vehicle's fuel mileage
 export const calculateFuelStops = async (route: any, fuelMileage: number): Promise<FuelStop[]> => {
   const totalDistanceInMeters = route.distance;
   const totalDistanceInMiles = totalDistanceInMeters / 1609.34;
@@ -67,7 +71,7 @@ export const calculateFuelStops = async (route: any, fuelMileage: number): Promi
     const stopCoordinates = coordinates[stopIndex];
     if (!stopCoordinates) continue;
 
-    // Removed Google Places API dependency, now just create a placeholder fuel stop
+    // Create a placeholder fuel stop (no Places API)
     fuelStops.push({
       location: [stopCoordinates[0], stopCoordinates[1]],
       name: `Fuel Stop at mile ${Math.round(currentMiles)}`,
@@ -81,6 +85,7 @@ export const calculateFuelStops = async (route: any, fuelMileage: number): Promi
   return fuelStops;
 };
 
+// Calculate hotel/lodging stops along a route based on miles per day
 export const calculateHotelStops = async (
   route: any, 
   milesPerDay: number,
@@ -108,7 +113,7 @@ export const calculateHotelStops = async (
 
     console.log(`Looking for ${preferredLodgingType} near mile ${currentMiles}`);
     
-    // Since we removed Google Places API dependency, create a placeholder hotel stop
+    // Create a placeholder hotel stop (no Places API)
     const hotelStop: HotelStop = {
       location: [stopCoordinates[0], stopCoordinates[1]],
       name: `${preferredLodgingType === 'campground' ? 'Campground' : 'Accommodation'} at mile ${Math.round(currentMiles)}`,
