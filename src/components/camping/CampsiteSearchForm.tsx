@@ -26,14 +26,17 @@ const formSchema = z.object({
   city: z.string().optional(),
   state: z.string().optional(),
   zipCode: z.string().optional(),
-  radius: z.coerce.number().default(25)
+  radius: z.coerce.number().default(0)
 });
 
 const radiusOptions = [
+  { value: "0", label: "Any Distance" },
   { value: "5", label: "5 miles" },
-  { value: "10", label: "10 miles" },
+  { value: "15", label: "15 miles" },
   { value: "25", label: "25 miles" },
   { value: "50", label: "50 miles" },
+  { value: "100", label: "100 miles" },
+  { value: "200", label: "200 miles" },
 ];
 
 const CampsiteSearchForm = ({
@@ -49,7 +52,7 @@ const CampsiteSearchForm = ({
       city: searchParams.city || "",
       state: searchParams.state || "",
       zipCode: searchParams.zipCode || "",
-      radius: searchParams.radius || 25
+      radius: searchParams.radius || 0
     }
   });
 

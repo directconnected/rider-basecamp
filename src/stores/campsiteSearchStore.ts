@@ -18,7 +18,7 @@ export const useCampsiteSearchStore = create<CampsiteSearchStore>((set) => ({
     state: "",
     city: "",
     zipCode: "",
-    radius: 25,
+    radius: 0, // Default to "Any Distance" (0)
   },
   setSearchParams: (params) =>
     set((state) => ({
