@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { downloadGPX } from "@/utils/gpxGenerator";
 import StopSection from "./StopSection";
 import TravelTips from "./TravelTips";
-import { RouteItineraryProps, HotelStop, RestaurantStop, CampingStop, AttractionStop } from "./types";
+import { RouteItineraryProps, HotelStop, RestaurantStop, CampingStop, AttractionStop, RatedStop } from "./types";
 
 const RouteItinerary = ({ 
   startPoint, 
@@ -33,6 +33,16 @@ const RouteItinerary = ({
     }
     downloadGPX(startPoint, destination, currentRoute, fuelStops);
   };
+
+  // Combine hotel stays and camping into a single array for display
+  const allStays: RatedStop[] = [
+    ...hotelStops,
+    ...campingStops.map(camp => ({
+      ...camp,
+      hotelName: camp.campgroundName,
+      lodgingType: camp.campingType || 'campground'
+    }))
+  ].sort((a, b) => a.distance - b.distance);
 
   return (
     <Card className="mt-8">
@@ -85,9 +95,21 @@ const RouteItinerary = ({
           title="Suggested Stays"
           icon={Hotel}
           color="bg-purple-500"
-          stops={hotelStops}
-          getStopName={(stop) => (stop as HotelStop).hotelName}
-          getStopType={(stop) => (stop as HotelStop).lodgingType}
+          stops={allStays}
+          getStopName={(stop) => {
+            if ('campgroundName' in stop) {
+              return (stop as CampingStop).campgroundName;
+            } else {
+              return (stop as HotelStop).hotelName;
+            }
+          }}
+          getStopType={(stop) => {
+            if ('campgroundName' in stop) {
+              return 'campground';
+            } else {
+              return (stop as HotelStop).lodgingType;
+            }
+          }}
         />
 
         <StopSection
@@ -97,15 +119,6 @@ const RouteItinerary = ({
           stops={restaurantStops}
           getStopName={(stop) => (stop as RestaurantStop).restaurantName}
           getStopType={(stop) => (stop as RestaurantStop).restaurantType}
-        />
-
-        <StopSection
-          title="Suggested Camping"
-          icon={Tent}
-          color="bg-green-600"
-          stops={campingStops}
-          getStopName={(stop) => (stop as CampingStop).campgroundName}
-          getStopType={(stop) => (stop as CampingStop).campingType}
         />
 
         <StopSection
