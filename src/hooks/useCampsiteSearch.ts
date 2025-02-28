@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useCampsiteSearchStore } from "@/stores/campsiteSearchStore";
 import { useLocationSearch } from './useLocationSearch';
@@ -65,7 +64,8 @@ export const useCampsiteSearch = () => {
         console.log("Searching for ZIP code:", searchTerm);
       } else {
         // Otherwise create a location string from city and state
-        if (searchParams.city) locationString += searchParams.city + ', ';
+        if (searchParams.city) locationString += searchParams.city;
+        if (searchParams.city && searchParams.state) locationString += ', ';
         if (searchParams.state) locationString += searchParams.state;
         searchTerm = locationString.trim();
         console.log("Searching for location:", searchTerm);
@@ -80,9 +80,6 @@ export const useCampsiteSearch = () => {
       // Use the state parameter directly for filtering
       const state = searchParams.state;
       
-      // Default coordinates for when geocoding fails - use central location of the state if possible
-      let coordinates: [number, number] = [-76.8867, 40.2732]; // Default to central PA
-      
       try {
         // Use the Places service to find coordinates for the location
         const { data, error } = await supabase.functions.invoke('geocode-location', {
@@ -94,74 +91,83 @@ export const useCampsiteSearch = () => {
 
         console.log("Geocode response:", data, error);
 
-        if (!error && data?.location) {
-          coordinates = [data.location.lng, data.location.lat];
-          console.log("Using coordinates from geocoding:", coordinates);
+        if (error) {
+          console.error("Geocoding error:", error);
+          toast.error('Error finding that location. Please try a different search.');
+          setIsSearching(false);
+          return;
+        }
+
+        if (!data?.location) {
+          console.error("No location found in geocoding response");
+          toast.error('Could not find that location. Please try a different search.');
+          setIsSearching(false);
+          return;
+        }
+
+        const coordinates: [number, number] = [data.location.lng, data.location.lat];
+        console.log("Using coordinates from geocoding:", coordinates);
+        
+        // Set search radius (in meters) based on user selection
+        const radiusMiles = searchParams.radius === 0 ? 500 : searchParams.radius; // Use large radius for "Any Distance"
+        const radiusMeters = radiusMiles * 1609.34; // Convert miles to meters
+        const isAnyDistance = searchParams.radius === 0;
+        
+        console.log(`Searching for campgrounds near coordinates ${coordinates} with radius ${isAnyDistance ? "Any Distance" : radiusMiles + " miles"} (${radiusMeters}m)`);
+        
+        // Get campgrounds near the location
+        const results = await findNearbyCampgrounds(coordinates, radiusMeters, state);
+        console.log("Search results:", results);
+        
+        // Process results
+        let processedResults = [...results];
+        
+        // Calculate distances for all results
+        processedResults.forEach(result => {
+          if (result.location && result.location[0] && result.location[1]) {
+            const distance = calculateDistance(
+              coordinates[1], coordinates[0], 
+              result.location[1], result.location[0]
+            );
+            result.distance = distance;
+          }
+        });
+        
+        // Sort by distance
+        processedResults.sort((a, b) => (a.distance || 999) - (b.distance || 999));
+        
+        // Filter by specific radius if not "Any Distance"
+        if (!isAnyDistance) {
+          processedResults = processedResults.filter(result => 
+            result.distance !== undefined && result.distance <= radiusMiles
+          );
+          console.log(`Filtered to ${processedResults.length} campgrounds within ${radiusMiles} miles`);
+        }
+        
+        if (processedResults.length > 0) {
+          setSearchResults(processedResults);
+          
+          const displayLocation = searchParams.zipCode || locationString || searchTerm;
+          
+          if (isAnyDistance) {
+            toast.success(`Found ${processedResults.length} campgrounds near ${displayLocation}`);
+          } else {
+            toast.success(`Found ${processedResults.length} campgrounds within ${radiusMiles} miles of ${displayLocation}`);
+          }
         } else {
-          console.warn("Geocoding failed, using default coordinates");
-          toast.warning('Using approximate location - precise geocoding failed');
+          const displayLocation = searchParams.zipCode || locationString || searchTerm;
+          
+          if (isAnyDistance) {
+            toast.info(`No campgrounds found near ${displayLocation}`);
+          } else {
+            toast.info(`No campgrounds found within ${radiusMiles} miles of ${displayLocation}`);
+          }
         }
       } catch (geocodeError) {
         console.error("Error during geocoding:", geocodeError);
-        toast.warning('Using approximate location - geocoding service unavailable');
-      }
-
-      // Set search radius (in meters) based on user selection
-      // Use default large radius (50 miles = ~80,000 meters) for "Any Distance" 
-      // but will filter by state anyway
-      const radiusMiles = searchParams.radius === 0 ? 500 : searchParams.radius; // Use large radius for "Any Distance"
-      const radiusMeters = radiusMiles * 1609.34; // Convert miles to meters
-      const isAnyDistance = searchParams.radius === 0;
-      
-      console.log(`Searching for campgrounds near coordinates ${coordinates} with radius ${isAnyDistance ? "Any Distance" : radiusMiles + " miles"} (${radiusMeters}m)`);
-      
-      // Get campgrounds near the location
-      const results = await findNearbyCampgrounds(coordinates, radiusMeters, state);
-      console.log("Search results:", results);
-      
-      // Process results
-      let processedResults = [...results];
-      
-      // Calculate distances for all results
-      processedResults.forEach(result => {
-        if (result.location && result.location[0] && result.location[1]) {
-          const distance = calculateDistance(
-            coordinates[1], coordinates[0], 
-            result.location[1], result.location[0]
-          );
-          result.distance = distance;
-        }
-      });
-      
-      // Sort by distance
-      processedResults.sort((a, b) => (a.distance || 999) - (b.distance || 999));
-      
-      // Filter by specific radius if not "Any Distance"
-      if (!isAnyDistance) {
-        processedResults = processedResults.filter(result => 
-          result.distance !== undefined && result.distance <= radiusMiles
-        );
-        console.log(`Filtered to ${processedResults.length} campgrounds within ${radiusMiles} miles`);
-      }
-      
-      if (processedResults.length > 0) {
-        setSearchResults(processedResults);
-        
-        const displayLocation = searchParams.zipCode || searchParams.city || searchTerm;
-        
-        if (isAnyDistance) {
-          toast.success(`Found ${processedResults.length} campgrounds near ${displayLocation}`);
-        } else {
-          toast.success(`Found ${processedResults.length} campgrounds within ${radiusMiles} miles of ${displayLocation}`);
-        }
-      } else {
-        const displayLocation = searchParams.zipCode || searchParams.city || searchTerm;
-        
-        if (isAnyDistance) {
-          toast.info(`No campgrounds found near ${displayLocation}`);
-        } else {
-          toast.info(`No campgrounds found within ${radiusMiles} miles of ${displayLocation}`);
-        }
+        toast.error('Error locating your search area. Please try again.');
+        setIsSearching(false);
+        return;
       }
     } catch (error) {
       console.error('Error searching for campgrounds:', error);

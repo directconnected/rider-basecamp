@@ -1,113 +1,77 @@
 
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.38.4'
-import { serve } from 'https://deno.land/std@0.177.0/http/server.ts'
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.7.1'
+import { corsHeaders } from '../_shared/cors.ts'
 
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+interface GeocodeRequest {
+  location: string;
+  state?: string;
 }
 
-serve(async (req) => {
+Deno.serve(async (req) => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    const { location, state } = await req.json();
+    const apiKey = Deno.env.get('GOOGLE_PLACES_API_KEY');
+    if (!apiKey) {
+      return new Response(
+        JSON.stringify({ error: 'API key not configured' }),
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    const { location, state } = await req.json() as GeocodeRequest;
     
     if (!location) {
       return new Response(
-        JSON.stringify({ error: 'Location parameter is required' }),
-        { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 400 }
+        JSON.stringify({ error: 'No location provided' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
-    console.log(`Geocoding location: "${location}" with state context: "${state || 'none'}"`);
-    
-    // Check if the input is just a ZIP code
-    const zipCodeRegex = /^\d{5}(-\d{4})?$/;
-    const isZipCode = zipCodeRegex.test(location);
-    
-    let searchQuery = location;
-    // If it's a zip code and we have a state, add the state to improve accuracy
-    if (isZipCode && state) {
-      searchQuery = `${location}, ${state}, USA`;
-    } else if (isZipCode) {
-      searchQuery = `${location}, USA`;
+    // Format the query to include state if provided
+    let query = location;
+    if (state && !location.includes(state)) {
+      query = `${location}, ${state}`;
     }
-    
-    console.log(`Using search query: "${searchQuery}"`);
 
-    // Use nominatim for geocoding (OpenStreetMap)
-    const nominatimUrl = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(searchQuery)}&format=json&addressdetails=1&limit=1`;
-    
-    const response = await fetch(nominatimUrl, {
-      headers: {
-        'User-Agent': 'MotorcycleValueTracker/1.0'
-      }
-    });
-    
+    console.log(`Geocoding location: "${query}"`);
+
+    // Call Google Geocoding API
+    const url = `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(query)}&key=${apiKey}`;
+    const response = await fetch(url);
     const data = await response.json();
-    console.log('Geocoding API response:', data);
-    
-    if (data && data.length > 0) {
-      const result = data[0];
-      console.log('Using geocoding result:', result);
-      
+
+    console.log('Geocoding API response status:', data.status);
+
+    if (data.status !== 'OK' || !data.results || data.results.length === 0) {
+      console.error('Geocoding error or no results:', data.status);
       return new Response(
-        JSON.stringify({ 
-          location: { 
-            lat: parseFloat(result.lat), 
-            lng: parseFloat(result.lon),
-            display_name: result.display_name
-          } 
-        }),
-        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
-    } else {
-      // Try an alternative source - if we have a zip code, we can use a backup source
-      if (isZipCode) {
-        try {
-          // Use zippopotam.us as a fallback for US zip codes
-          const zipUrl = `https://api.zippopotam.us/us/${location}`;
-          const zipResponse = await fetch(zipUrl);
-          const zipData = await zipResponse.json();
-          
-          console.log('Zip API response:', zipData);
-          
-          if (zipData && zipData.places && zipData.places.length > 0) {
-            const place = zipData.places[0];
-            console.log('Using zip result:', place);
-            
-            return new Response(
-              JSON.stringify({ 
-                location: { 
-                  lat: parseFloat(place.latitude), 
-                  lng: parseFloat(place.longitude),
-                  display_name: `${zipData["post code"]}, ${place.state}, ${zipData.country}`
-                } 
-              }),
-              { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-            );
-          }
-        } catch (zipError) {
-          console.error('Error in zip code fallback:', zipError);
-        }
-      }
-      
-      // If we got here, all geocoding attempts failed
-      return new Response(
-        JSON.stringify({ error: 'Location not found' }),
-        { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 404 }
+        JSON.stringify({ error: 'Location not found', details: data.status }),
+        { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
+
+    // Extract location data from first result
+    const result = data.results[0];
+    const location_data = {
+      formatted_address: result.formatted_address,
+      location: result.geometry.location,
+      place_id: result.place_id,
+      types: result.types
+    };
+
+    return new Response(
+      JSON.stringify(location_data),
+      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+    );
   } catch (error) {
     console.error('Error in geocode-location function:', error);
-    
     return new Response(
-      JSON.stringify({ error: 'Internal server error' }),
-      { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 500 }
+      JSON.stringify({ error: error.message }),
+      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   }
-})
+});
