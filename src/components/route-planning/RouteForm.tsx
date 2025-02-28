@@ -37,28 +37,34 @@ const RouteForm = ({ formData, isLoading, onFormDataChange, onPlanRoute }: Route
       </CardHeader>
       <CardContent className="space-y-4">
         <div>
-          <label className="block text-sm font-medium mb-2">Starting Point</label>
+          <label htmlFor="startPoint" className="block text-sm font-medium mb-2">Starting Point</label>
           <div className="flex gap-2">
             <Input 
+              id="startPoint"
+              name="startPoint"
               placeholder="Enter starting location"
               value={formData.startPoint}
               onChange={(e) => onFormDataChange({ startPoint: e.target.value })}
+              aria-label="Starting Point"
             />
-            <Button variant="outline" size="icon">
+            <Button variant="outline" size="icon" type="button" aria-label="Get current location">
               <MapPin className="h-4 w-4" />
             </Button>
           </div>
         </div>
         
         <div>
-          <label className="block text-sm font-medium mb-2">Destination</label>
+          <label htmlFor="destination" className="block text-sm font-medium mb-2">Destination</label>
           <div className="flex gap-2">
             <Input 
+              id="destination"
+              name="destination"
               placeholder="Enter destination"
               value={formData.destination}
               onChange={(e) => onFormDataChange({ destination: e.target.value })}
+              aria-label="Destination"
             />
-            <Button variant="outline" size="icon">
+            <Button variant="outline" size="icon" type="button" aria-label="Select destination on map">
               <MapPin className="h-4 w-4" />
             </Button>
           </div>
@@ -66,30 +72,36 @@ const RouteForm = ({ formData, isLoading, onFormDataChange, onPlanRoute }: Route
 
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium mb-2">Start Date</label>
+            <label htmlFor="startDate" className="block text-sm font-medium mb-2">Start Date</label>
             <div className="flex gap-2">
               <Input 
+                id="startDate"
+                name="startDate"
                 type="date"
                 value={formData.startDate}
                 onChange={(e) => onFormDataChange({ startDate: e.target.value })}
+                aria-label="Start Date"
               />
-              <Button variant="outline" size="icon">
+              <Button variant="outline" size="icon" type="button" aria-label="Select date">
                 <Calendar className="h-4 w-4" />
               </Button>
             </div>
           </div>
           
           <div>
-            <label className="block text-sm font-medium mb-2">Duration (Days)</label>
+            <label htmlFor="duration" className="block text-sm font-medium mb-2">Duration (Days)</label>
             <div className="flex gap-2">
               <Input 
+                id="duration"
+                name="duration"
                 type="number" 
                 placeholder="Days" 
                 min="1"
                 value={formData.duration}
                 onChange={(e) => onFormDataChange({ duration: e.target.value })}
+                aria-label="Duration in days"
               />
-              <Button variant="outline" size="icon">
+              <Button variant="outline" size="icon" type="button" aria-label="Set duration">
                 <Clock className="h-4 w-4" />
               </Button>
             </div>
@@ -98,32 +110,38 @@ const RouteForm = ({ formData, isLoading, onFormDataChange, onPlanRoute }: Route
 
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium mb-2">Vehicle Fuel Mileage</label>
+            <label htmlFor="fuelMileage" className="block text-sm font-medium mb-2">Vehicle Fuel Mileage</label>
             <div className="flex gap-2">
               <Input 
+                id="fuelMileage"
+                name="fuelMileage"
                 type="number" 
                 placeholder="Miles per tank" 
                 min="50"
                 value={formData.fuelMileage}
                 onChange={(e) => onFormDataChange({ fuelMileage: e.target.value })}
+                aria-label="Fuel mileage in miles per tank"
               />
-              <Button variant="outline" size="icon">
+              <Button variant="outline" size="icon" type="button" aria-label="Set fuel mileage">
                 <Fuel className="h-4 w-4" />
               </Button>
             </div>
           </div>
           
           <div>
-            <label className="block text-sm font-medium mb-2">Max Miles Per Day</label>
+            <label htmlFor="milesPerDay" className="block text-sm font-medium mb-2">Max Miles Per Day</label>
             <div className="flex gap-2">
               <Input 
+                id="milesPerDay"
+                name="milesPerDay"
                 type="number" 
                 placeholder="Daily miles" 
                 min="50"
                 value={formData.milesPerDay}
                 onChange={(e) => onFormDataChange({ milesPerDay: e.target.value })}
+                aria-label="Maximum miles per day"
               />
-              <Button variant="outline" size="icon">
+              <Button variant="outline" size="icon" type="button" aria-label="Set daily miles">
                 <LayoutGrid className="h-4 w-4" />
               </Button>
             </div>
@@ -132,13 +150,13 @@ const RouteForm = ({ formData, isLoading, onFormDataChange, onPlanRoute }: Route
 
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium mb-2">Preferred Lodging Type</label>
+            <label htmlFor="preferredLodging" className="block text-sm font-medium mb-2">Preferred Lodging Type</label>
             <div className="flex gap-2">
               <Select 
                 value={formData.preferredLodging} 
                 onValueChange={(value: LodgingType) => onFormDataChange({ preferredLodging: value })}
               >
-                <SelectTrigger className="w-full">
+                <SelectTrigger id="preferredLodging" name="preferredLodging" className="w-full">
                   <SelectValue placeholder="Select lodging type" />
                 </SelectTrigger>
                 <SelectContent>
@@ -151,20 +169,20 @@ const RouteForm = ({ formData, isLoading, onFormDataChange, onPlanRoute }: Route
                   <SelectItem value="campground">Campground</SelectItem>
                 </SelectContent>
               </Select>
-              <Button variant="outline" size="icon">
+              <Button variant="outline" size="icon" type="button" aria-label="Lodging options">
                 <Hotel className="h-4 w-4" />
               </Button>
             </div>
           </div>
           
           <div>
-            <label className="block text-sm font-medium mb-2">Preferred Restaurant Type</label>
+            <label htmlFor="preferredRestaurant" className="block text-sm font-medium mb-2">Preferred Restaurant Type</label>
             <div className="flex gap-2">
               <Select 
                 value={formData.preferredRestaurant} 
                 onValueChange={(value: RestaurantType) => onFormDataChange({ preferredRestaurant: value })}
               >
-                <SelectTrigger className="w-full">
+                <SelectTrigger id="preferredRestaurant" name="preferredRestaurant" className="w-full">
                   <SelectValue placeholder="Select restaurant type" />
                 </SelectTrigger>
                 <SelectContent>
@@ -180,7 +198,7 @@ const RouteForm = ({ formData, isLoading, onFormDataChange, onPlanRoute }: Route
                   <SelectItem value="asian">Asian</SelectItem>
                 </SelectContent>
               </Select>
-              <Button variant="outline" size="icon">
+              <Button variant="outline" size="icon" type="button" aria-label="Restaurant options">
                 <UtensilsCrossed className="h-4 w-4" />
               </Button>
             </div>
@@ -188,13 +206,13 @@ const RouteForm = ({ formData, isLoading, onFormDataChange, onPlanRoute }: Route
         </div>
 
         <div>
-          <label className="block text-sm font-medium mb-2">Preferred Attraction Type</label>
+          <label htmlFor="preferredAttraction" className="block text-sm font-medium mb-2">Preferred Attraction Type</label>
           <div className="flex gap-2">
             <Select 
               value={formData.preferredAttraction} 
               onValueChange={(value: AttractionType) => onFormDataChange({ preferredAttraction: value })}
             >
-              <SelectTrigger className="w-full">
+              <SelectTrigger id="preferredAttraction" name="preferredAttraction" className="w-full">
                 <SelectValue placeholder="Select attraction type" />
               </SelectTrigger>
               <SelectContent>
@@ -209,7 +227,7 @@ const RouteForm = ({ formData, isLoading, onFormDataChange, onPlanRoute }: Route
                 <SelectItem value="point_of_interest">Points of Interest</SelectItem>
               </SelectContent>
             </Select>
-            <Button variant="outline" size="icon">
+            <Button variant="outline" size="icon" type="button" aria-label="Attraction options">
               <Landmark className="h-4 w-4" />
             </Button>
           </div>
@@ -219,6 +237,8 @@ const RouteForm = ({ formData, isLoading, onFormDataChange, onPlanRoute }: Route
           className="w-full"
           onClick={onPlanRoute}
           disabled={isLoading}
+          type="button"
+          aria-label="Plan Route"
         >
           {isLoading ? "Planning Route..." : "Plan Route"}
         </Button>

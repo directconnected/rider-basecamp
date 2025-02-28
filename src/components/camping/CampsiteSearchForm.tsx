@@ -81,9 +81,10 @@ const CampsiteSearchForm = ({
                 name="city"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>City</FormLabel>
+                    <FormLabel htmlFor="city-input">City</FormLabel>
                     <FormControl>
                       <Input
+                        id="city-input"
                         placeholder="Enter city"
                         {...field}
                         onChange={(e) => {
@@ -101,9 +102,10 @@ const CampsiteSearchForm = ({
                 name="state"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>State</FormLabel>
+                    <FormLabel htmlFor="state-input">State</FormLabel>
                     <FormControl>
                       <Input
+                        id="state-input"
                         placeholder="Enter state"
                         {...field}
                         onChange={(e) => {
@@ -121,9 +123,10 @@ const CampsiteSearchForm = ({
                 name="zipCode"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Zip Code</FormLabel>
+                    <FormLabel htmlFor="zipcode-input">Zip Code</FormLabel>
                     <FormControl>
                       <Input
+                        id="zipcode-input"
                         placeholder="Enter zip code"
                         {...field}
                         onChange={(e) => {
@@ -143,7 +146,7 @@ const CampsiteSearchForm = ({
                 name="radius"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Search Radius</FormLabel>
+                    <FormLabel htmlFor="radius-select">Search Radius</FormLabel>
                     <Select
                       value={field.value.toString()}
                       onValueChange={(value) => {
@@ -153,7 +156,7 @@ const CampsiteSearchForm = ({
                       }}
                     >
                       <FormControl>
-                        <SelectTrigger>
+                        <SelectTrigger id="radius-select">
                           <SelectValue placeholder="Select radius" />
                         </SelectTrigger>
                       </FormControl>
@@ -175,6 +178,8 @@ const CampsiteSearchForm = ({
                 type="submit" 
                 disabled={isSearching}
                 className="flex items-center gap-2 w-full sm:w-auto"
+                id="search-button"
+                aria-label="Search Campgrounds"
               >
                 <Search className="h-4 w-4" />
                 <span>{isSearching ? "Searching..." : "Search Campgrounds"}</span>
@@ -186,6 +191,8 @@ const CampsiteSearchForm = ({
                 onClick={onLocationSearch}
                 disabled={isSearching}
                 className="flex items-center gap-2 w-full sm:w-auto"
+                id="location-search-button"
+                aria-label="Search Near My Location"
               >
                 <MapPinned className="h-4 w-4" />
                 <span>{isSearching ? "Searching..." : "Search Near Me"}</span>
