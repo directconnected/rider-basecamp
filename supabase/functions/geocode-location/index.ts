@@ -85,7 +85,7 @@ serve(async (req) => {
                 location: { 
                   lat: parseFloat(place.latitude), 
                   lng: parseFloat(place.longitude),
-                  display_name: `${zipData.post code}, ${place.state}, ${zipData.country}`
+                  display_name: `${zipData["post code"]}, ${place.state}, ${zipData.country}`
                 } 
               }),
               { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
