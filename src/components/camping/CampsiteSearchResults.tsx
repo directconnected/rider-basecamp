@@ -2,8 +2,10 @@
 import React from "react";
 import { CampgroundResult } from "@/hooks/useCampsiteSearch";
 import { Badge } from "@/components/ui/badge";
-import { MapPin, Phone, Globe, Star } from "lucide-react";
+import { MapPin, Phone, Globe, Star, Droplet, Shower, Calendar, Tent, Truck, Dog, Info, Trees } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Card } from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
 
 interface CampsiteSearchResultsProps {
   results: CampgroundResult[];
@@ -53,6 +55,11 @@ const CampsiteSearchResults = ({
   const endIndex = startIndex + ITEMS_PER_PAGE;
   const paginatedResults = results.slice(startIndex, endIndex);
 
+  const formatFeature = (value: string | null | undefined) => {
+    if (!value || value === "" || value.toLowerCase() === "none") return "N/A";
+    return value;
+  };
+
   return (
     <section className="py-12 bg-gray-50">
       <div className="container mx-auto px-4">
@@ -61,79 +68,162 @@ const CampsiteSearchResults = ({
         </h2>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {paginatedResults.map((campsite, index) => (
-            <div key={index} className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow">
-              <div className="p-6 space-y-4">
-                <div className="flex justify-between items-start">
-                  <h3 className="text-xl font-bold text-gray-900">{campsite.name}</h3>
-                  <Badge variant="outline" className="bg-gray-100">
-                    campground
-                  </Badge>
-                </div>
-                
-                <div className="flex items-start gap-2 text-gray-600">
-                  <MapPin className="h-4 w-4 mt-1 flex-shrink-0" />
-                  <span>{campsite.address}</span>
-                </div>
-                
-                {campsite.distance !== undefined && (
-                  <div className="text-sm text-gray-500">
-                    <span className="font-medium">{campsite.distance} miles</span> from search location
+          {paginatedResults.map((campsite, index) => {
+            // Extract additional data if available (these fields come from the database)
+            const waterAvailable = campsite.water || 'N/A';
+            const showers = campsite.showers || 'N/A';
+            const season = campsite.season || 'N/A';
+            const sites = campsite.sites || 'N/A';
+            const rvFriendly = campsite.rv_length ? `Yes (up to ${campsite.rv_length}ft)` : 'N/A';
+            const petFriendly = campsite.pets || 'N/A';
+            const fees = campsite.fee || 'N/A';
+            const campType = campsite.type || 'Standard';
+            
+            return (
+              <Card key={index} className="overflow-hidden hover:shadow-lg transition-shadow">
+                <div className="p-6 space-y-4">
+                  <div className="flex justify-between items-start gap-2">
+                    <h3 className="text-xl font-bold text-gray-900 flex-1">{campsite.name}</h3>
+                    <Badge variant="outline" className="bg-gray-100 whitespace-nowrap">
+                      {campType}
+                    </Badge>
                   </div>
-                )}
-                
-                {campsite.rating && (
-                  <div className="flex items-center gap-1">
-                    <Star className="h-4 w-4 text-yellow-500 fill-yellow-500" />
-                    <span className="font-medium">{campsite.rating.toFixed(1)}</span>
+                  
+                  <div className="flex items-start gap-2 text-gray-600">
+                    <MapPin className="h-4 w-4 mt-1 flex-shrink-0" />
+                    <span>{campsite.address}</span>
                   </div>
-                )}
-                
-                <div className="space-y-2 pt-2">
-                  {campsite.phone_number && (
-                    <div className="flex items-center gap-2 text-gray-600">
-                      <Phone className="h-4 w-4" />
-                      <a href={`tel:${campsite.phone_number}`} className="hover:text-theme-600">
-                        {campsite.phone_number}
-                      </a>
+                  
+                  {campsite.distance !== undefined && (
+                    <div className="text-sm text-gray-600">
+                      <span className="font-medium">{campsite.distance} miles</span> from search location
                     </div>
                   )}
                   
-                  {campsite.website && (
-                    <div className="flex items-center gap-2 text-gray-600">
-                      <Globe className="h-4 w-4" />
-                      <a 
-                        href={campsite.website.startsWith('http') ? campsite.website : `http://${campsite.website}`} 
-                        target="_blank" 
-                        rel="noopener noreferrer"
-                        className="hover:text-theme-600"
-                      >
-                        Visit Website
-                      </a>
+                  {campsite.rating && (
+                    <div className="flex items-center gap-1">
+                      <Star className="h-4 w-4 text-yellow-500 fill-yellow-500" />
+                      <span className="font-medium">{campsite.rating.toFixed(1)}</span>
                     </div>
                   )}
+
+                  <Separator className="my-2" />
+                  
+                  <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-sm text-gray-600">
+                    <div className="flex items-center gap-2">
+                      <Droplet className="h-4 w-4 text-blue-500" />
+                      <span>Water: {formatFeature(waterAvailable)}</span>
+                    </div>
+                    
+                    <div className="flex items-center gap-2">
+                      <Shower className="h-4 w-4 text-blue-500" />
+                      <span>Showers: {formatFeature(showers)}</span>
+                    </div>
+                    
+                    <div className="flex items-center gap-2">
+                      <Calendar className="h-4 w-4 text-green-500" />
+                      <span>Season: {formatFeature(season)}</span>
+                    </div>
+                    
+                    <div className="flex items-center gap-2">
+                      <Tent className="h-4 w-4 text-green-500" />
+                      <span>Sites: {formatFeature(sites)}</span>
+                    </div>
+                    
+                    <div className="flex items-center gap-2">
+                      <Truck className="h-4 w-4 text-orange-500" />
+                      <span>RV: {formatFeature(rvFriendly)}</span>
+                    </div>
+                    
+                    <div className="flex items-center gap-2">
+                      <Dog className="h-4 w-4 text-orange-500" />
+                      <span>Pets: {formatFeature(petFriendly)}</span>
+                    </div>
+                    
+                    <div className="flex items-center gap-2 col-span-2">
+                      <Info className="h-4 w-4 text-purple-500" />
+                      <span>Fees: {formatFeature(fees)}</span>
+                    </div>
+                  </div>
+                  
+                  <Separator className="my-2" />
+                  
+                  <div className="space-y-2 pt-1">
+                    {campsite.phone_number && (
+                      <div className="flex items-center gap-2 text-gray-600">
+                        <Phone className="h-4 w-4" />
+                        <a href={`tel:${campsite.phone_number}`} className="hover:text-theme-600">
+                          {campsite.phone_number}
+                        </a>
+                      </div>
+                    )}
+                    
+                    {campsite.website && (
+                      <div className="flex items-center gap-2 text-gray-600">
+                        <Globe className="h-4 w-4" />
+                        <a 
+                          href={campsite.website.startsWith('http') ? campsite.website : `http://${campsite.website}`} 
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                          className="hover:text-theme-600"
+                        >
+                          Visit Website
+                        </a>
+                      </div>
+                    )}
+                  </div>
                 </div>
-              </div>
-            </div>
-          ))}
+              </Card>
+            );
+          })}
         </div>
 
         {totalPages > 1 && (
           <div className="mt-10 flex justify-center">
-            <nav className="inline-flex">
-              {Array.from({ length: totalPages }).map((_, i) => (
-                <button
-                  key={i}
-                  onClick={() => onPageChange(i + 1)}
-                  className={`px-3 py-1 mx-1 rounded ${
-                    currentPage === i + 1
-                      ? "bg-theme-600 text-white"
-                      : "bg-white text-gray-700 hover:bg-gray-100"
-                  }`}
-                >
-                  {i + 1}
-                </button>
-              ))}
+            <nav className="inline-flex rounded-md shadow-sm" aria-label="Pagination">
+              <button
+                onClick={() => onPageChange(Math.max(1, currentPage - 1))}
+                disabled={currentPage === 1}
+                className="relative inline-flex items-center px-3 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                Previous
+              </button>
+              
+              {Array.from({ length: Math.min(totalPages, 5) }).map((_, i) => {
+                // Logic to show pages around current page
+                let pageNum;
+                if (totalPages <= 5) {
+                  pageNum = i + 1;
+                } else if (currentPage <= 3) {
+                  pageNum = i + 1;
+                } else if (currentPage >= totalPages - 2) {
+                  pageNum = totalPages - 4 + i;
+                } else {
+                  pageNum = currentPage - 2 + i;
+                }
+                
+                return (
+                  <button
+                    key={pageNum}
+                    onClick={() => onPageChange(pageNum)}
+                    className={`relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium ${
+                      currentPage === pageNum
+                        ? "z-10 bg-theme-600 border-theme-600 text-white"
+                        : "text-gray-700 hover:bg-gray-50"
+                    }`}
+                  >
+                    {pageNum}
+                  </button>
+                );
+              })}
+              
+              <button
+                onClick={() => onPageChange(Math.min(totalPages, currentPage + 1))}
+                disabled={currentPage === totalPages}
+                className="relative inline-flex items-center px-3 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                Next
+              </button>
             </nav>
           </div>
         )}

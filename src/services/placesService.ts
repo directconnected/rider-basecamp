@@ -151,7 +151,16 @@ export const findNearbyCampgrounds = async (
           website: site.url,
           phone_number: site.phone,
           types: ['campground'],
-          state: site.state
+          state: site.state,
+          // Add the additional campground information fields
+          water: site.water,
+          showers: site.showers,
+          season: site.season,
+          sites: site.sites,
+          rv_length: site.rv_length,
+          pets: site.pets,
+          fee: site.fee,
+          type: site.type || 'Campground'
         }));
       }
     }
@@ -204,7 +213,17 @@ export const findNearbyCampgrounds = async (
         website: place.website,
         phone_number: place.formatted_phone_number,
         types: place.types,
-        state: placeState
+        state: placeState,
+        // For Places API results, we don't have this detailed information
+        // so we'll set reasonable defaults
+        type: 'Campground',
+        water: place.types?.includes('rv_park') ? 'Yes' : 'N/A',
+        showers: place.types?.includes('rv_park') ? 'Yes' : 'N/A',
+        season: 'N/A',
+        sites: 'N/A',
+        rv_length: place.types?.includes('rv_park') ? 40 : undefined,
+        pets: 'N/A',
+        fee: 'N/A'
       };
     });
     

@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { useCampsiteSearchStore } from "@/stores/campsiteSearchStore";
 import { useLocationSearch } from './useLocationSearch';
@@ -14,6 +15,15 @@ export interface CampgroundResult {
   website?: string;
   types?: string[];
   state?: string;
+  // Additional campground information
+  water?: string;
+  showers?: string;
+  season?: string;
+  sites?: string;
+  rv_length?: number;
+  pets?: string;
+  fee?: string;
+  type?: string;
 }
 
 export const useCampsiteSearch = () => {
