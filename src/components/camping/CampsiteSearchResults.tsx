@@ -72,7 +72,7 @@ const CampsiteSearchResults = ({
                 
                 {campsite.distance !== undefined && (
                   <div className="text-sm text-gray-500">
-                    {Math.round(campsite.distance)} miles from start
+                    <span className="font-medium">{campsite.distance} miles</span> from search location
                   </div>
                 )}
                 
@@ -97,7 +97,7 @@ const CampsiteSearchResults = ({
                     <div className="flex items-center gap-2 text-gray-600">
                       <Globe className="h-4 w-4" />
                       <a 
-                        href={campsite.website} 
+                        href={campsite.website.startsWith('http') ? campsite.website : `http://${campsite.website}`} 
                         target="_blank" 
                         rel="noopener noreferrer"
                         className="hover:text-theme-600"

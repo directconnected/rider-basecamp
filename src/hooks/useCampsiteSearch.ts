@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useCampsiteSearchStore } from "@/stores/campsiteSearchStore";
 import { useLocationSearch } from './useLocationSearch';
@@ -92,12 +91,36 @@ export const useCampsiteSearch = () => {
       const results = await findNearbyCampgrounds(coordinates, radiusMeters, state);
       console.log("Search results:", results);
       
-      if (results && results.length > 0) {
-        setSearchResults(results);
-        setTotalResults(results.length);
-        toast.success(`Found ${results.length} campgrounds near ${locationString}`);
+      // Filter results by distance if coordinates are available
+      const filteredResults = results.filter(result => {
+        if (!result.location || !result.location[0] || !result.location[1]) {
+          return true; // Keep results without location coordinates
+        }
+        
+        // Calculate distance in miles using Haversine formula
+        const distance = calculateDistance(
+          coordinates[1], coordinates[0], 
+          result.location[1], result.location[0]
+        );
+        
+        // Add distance to the result object
+        result.distance = distance;
+        
+        // Only keep results within the specified radius
+        return distance <= radiusMiles;
+      });
+      
+      console.log(`Filtered to ${filteredResults.length} campgrounds within ${radiusMiles} miles`);
+      
+      if (filteredResults.length > 0) {
+        // Sort by distance
+        filteredResults.sort((a, b) => (a.distance || 0) - (b.distance || 0));
+        
+        setSearchResults(filteredResults);
+        setTotalResults(filteredResults.length);
+        toast.success(`Found ${filteredResults.length} campgrounds near ${searchParams.city || locationString}`);
       } else {
-        toast.info(`No campgrounds found near ${locationString}`);
+        toast.info(`No campgrounds found within ${radiusMiles} miles of ${searchParams.city || locationString}`);
       }
     } catch (error) {
       console.error('Error searching for campgrounds:', error);
@@ -139,12 +162,36 @@ export const useCampsiteSearch = () => {
       const results = await findNearbyCampgrounds(coordinates, radiusMeters, state);
       console.log("Search results from geolocation:", results);
       
-      if (results && results.length > 0) {
-        setSearchResults(results);
-        setTotalResults(results.length);
-        toast.success(`Found ${results.length} campgrounds near your location`);
+      // Filter results by distance
+      const filteredResults = results.filter(result => {
+        if (!result.location || !result.location[0] || !result.location[1]) {
+          return true; // Keep results without location coordinates
+        }
+        
+        // Calculate distance in miles using Haversine formula
+        const distance = calculateDistance(
+          coordinates[1], coordinates[0], 
+          result.location[1], result.location[0]
+        );
+        
+        // Add distance to the result object
+        result.distance = distance;
+        
+        // Only keep results within the specified radius
+        return distance <= radiusMiles;
+      });
+      
+      console.log(`Filtered to ${filteredResults.length} campgrounds within ${radiusMiles} miles of your location`);
+      
+      if (filteredResults.length > 0) {
+        // Sort by distance
+        filteredResults.sort((a, b) => (a.distance || 0) - (b.distance || 0));
+        
+        setSearchResults(filteredResults);
+        setTotalResults(filteredResults.length);
+        toast.success(`Found ${filteredResults.length} campgrounds near your location`);
       } else {
-        toast.info('No campgrounds found near your location');
+        toast.info(`No campgrounds found within ${radiusMiles} miles of your location`);
       }
     } catch (error) {
       console.error('Error searching for campgrounds by location:', error);
@@ -152,6 +199,20 @@ export const useCampsiteSearch = () => {
     } finally {
       setIsSearching(false);
     }
+  };
+
+  // Calculate distance between two points in miles using the Haversine formula
+  const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number): number => {
+    const R = 3958.8; // Earth's radius in miles
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLon = (lon2 - lon1) * Math.PI / 180;
+    const a = 
+      Math.sin(dLat/2) * Math.sin(dLat/2) +
+      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * 
+      Math.sin(dLon/2) * Math.sin(dLon/2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    const distance = R * c;
+    return Math.round(distance * 10) / 10; // Round to 1 decimal place
   };
 
   return {
