@@ -27,11 +27,12 @@ const RoutePlanning = () => {
     setEndCoords,
     setFuelStops,
     setHotelStops,
+    resetResults,
   } = useRoutePlanning();
 
   const { calculateRoute } = useRouteCalculation();
 
-  // Store preferences in localStorage whenever they change
+  // Store preferences in localStorage and trigger recalculation when they change
   useEffect(() => {
     if (formData.preferredLodging) {
       localStorage.setItem('preferredLodging', formData.preferredLodging);
@@ -45,9 +46,28 @@ const RoutePlanning = () => {
       localStorage.setItem('preferredAttraction', formData.preferredAttraction);
       console.log('Saved preferredAttraction to localStorage:', formData.preferredAttraction);
     }
-  }, [formData.preferredLodging, formData.preferredRestaurant, formData.preferredAttraction]);
+    
+    // If a route is already displayed and preferences change, force a re-render of results
+    if (currentRoute && (
+      localStorage.getItem('forceRefresh') === 'true' || 
+      localStorage.getItem('preferencesChanged') === 'true'
+    )) {
+      console.log('Preferences changed, refreshing results');
+      localStorage.setItem('forceRefresh', 'false');
+      localStorage.setItem('preferencesChanged', 'false');
+      
+      // This will cause the RouteResults component to re-run its effects
+      resetResults();
+      
+      // Recalculate the route with the new preferences
+      handlePlanRoute();
+    }
+  }, [formData.preferredLodging, formData.preferredRestaurant, formData.preferredAttraction, currentRoute]);
 
   const handlePlanRoute = async () => {
+    // Set flag for preference changes
+    localStorage.setItem('preferencesChanged', 'true');
+    
     await calculateRoute(formData, {
       setIsLoading,
       setStartCoords,
@@ -57,6 +77,12 @@ const RoutePlanning = () => {
       setHotelStops,
       setRouteDetails,
     });
+  };
+
+  // Update handlers to trigger recalculation
+  const handlePreferenceChange = (updatedFormData: any) => {
+    localStorage.setItem('preferencesChanged', 'true');
+    handleFormDataChange(updatedFormData);
   };
 
   return (
@@ -73,7 +99,7 @@ const RoutePlanning = () => {
               <RouteForm 
                 formData={formData}
                 isLoading={isLoading}
-                onFormDataChange={handleFormDataChange}
+                onFormDataChange={handlePreferenceChange}
                 onPlanRoute={handlePlanRoute}
               />
               
@@ -85,6 +111,7 @@ const RoutePlanning = () => {
                   currentRoute={currentRoute}
                   fuelStops={fuelStops}
                   hotelStops={hotelStops}
+                  key={Date.now()} // Force re-render when preferences change
                 />
               )}
             </div>

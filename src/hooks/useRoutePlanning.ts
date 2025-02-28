@@ -84,9 +84,21 @@ export const useRoutePlanning = () => {
   const [endCoords, setEndCoords] = useState<[number, number] | null>(null);
   const [fuelStops, setFuelStops] = useState<FuelStop[]>([]);
   const [hotelStops, setHotelStops] = useState<HotelStop[]>([]);
+  const [forceRefresh, setForceRefresh] = useState(0);
 
   const handleFormDataChange = (newData: Partial<FormData>) => {
     setFormData(prev => ({ ...prev, ...newData }));
+    
+    // Mark that preferences have changed
+    if (newData.preferredLodging || newData.preferredRestaurant || newData.preferredAttraction) {
+      localStorage.setItem('preferencesChanged', 'true');
+    }
+  };
+
+  // Function to force a reset of results when preferences change
+  const resetResults = () => {
+    setForceRefresh(prev => prev + 1);
+    // We don't reset the route details or coordinates, just force a re-render
   };
 
   return {
@@ -98,6 +110,7 @@ export const useRoutePlanning = () => {
     endCoords,
     fuelStops,
     hotelStops,
+    forceRefresh,
     handleFormDataChange,
     setIsLoading,
     setRouteDetails,
@@ -106,6 +119,7 @@ export const useRoutePlanning = () => {
     setEndCoords,
     setFuelStops,
     setHotelStops,
+    resetResults,
     toast
   };
 };
