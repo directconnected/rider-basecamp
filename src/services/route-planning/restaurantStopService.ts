@@ -31,20 +31,6 @@ export const calculateRestaurantStops = async (
       if (restaurant) {
         console.log(`Found restaurant data for stop ${i}:`, restaurant);
         
-        // Use the restaurant's actual type rather than the requested type
-        // Only use the requested type if it was specifically requested (not 'any')
-        let displayType = restaurant.restaurantType || 'restaurant';
-        
-        // If a specific type was requested and found, use that
-        if (restaurantType !== 'any') {
-          displayType = restaurantType;
-        }
-        
-        // Format the display type to be more human-readable
-        displayType = displayType.replace(/_/g, ' ');
-        
-        console.log(`Using restaurant type for display: ${displayType}`);
-        
         restaurantStops.push({
           location: coordinates,
           name: restaurant.address,
@@ -53,10 +39,10 @@ export const calculateRestaurantStops = async (
           rating: restaurant.rating,
           website: restaurant.website,
           phone_number: restaurant.phone_number,
-          restaurantType: displayType
+          restaurantType: restaurant.restaurantType
         });
         
-        console.log(`Added restaurant stop ${i}: ${restaurant.name} with type ${displayType}`);
+        console.log(`Added restaurant stop ${i}: ${restaurant.name} with type ${restaurant.restaurantType}`);
       }
     } catch (error) {
       console.error('Error finding restaurant:', error);
@@ -64,5 +50,11 @@ export const calculateRestaurantStops = async (
   }
 
   console.log(`Final restaurant stops count: ${restaurantStops.length}`);
+  
+  // Log the restaurant types found for debugging
+  if (restaurantStops.length > 0) {
+    console.log('Restaurant types found:', restaurantStops.map(r => r.restaurantType));
+  }
+  
   return restaurantStops;
 };

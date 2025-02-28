@@ -24,41 +24,60 @@ const StopSection = ({ title, icon: Icon, color, stops, getStopName, getStopType
   const formatTypeLabel = (type: string | undefined): string => {
     if (!type || type === 'any') return '';
     
-    // Handle special case for bed_and_breakfast
-    if (type === 'bed_and_breakfast' || type === 'bed and breakfast') {
-      return 'Bed & Breakfast';
+    // Handle special cases with underscores
+    if (type.includes('_')) {
+      // Handle specific cases first
+      if (type === 'bed_and_breakfast') return 'Bed & Breakfast';
+      if (type === 'fast_food') return 'Fast Food';
+      if (type === 'fine_dining') return 'Fine Dining';
+      
+      // For others, replace underscores with spaces and capitalize each word
+      return type
+        .split('_')
+        .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+        .join(' ');
     }
     
-    // Handle special case for fast_food
-    if (type === 'fast_food' || type === 'fast food') {
-      return 'Fast Food';
-    }
+    // Handle special cuisine and attraction types
+    const typeMapping: Record<string, string> = {
+      // Restaurant types
+      'american': 'American',
+      'italian': 'Italian',
+      'chinese': 'Chinese',
+      'mexican': 'Mexican',
+      'japanese': 'Japanese',
+      'thai': 'Thai',
+      'indian': 'Indian',
+      'steakhouse': 'Steakhouse',
+      'seafood': 'Seafood',
+      'barbecue': 'BBQ',
+      'sandwich': 'Sandwich',
+      'pizza': 'Pizza',
+      'cafe': 'Café',
+      'vegetarian': 'Vegetarian',
+      'breakfast': 'Breakfast',
+      'casual': 'Casual Dining',
+      'asian': 'Asian',
+      
+      // Attraction types
+      'museum': 'Museum',
+      'park': 'Park',
+      'tourist_attraction': 'Tourist Attraction',
+      'amusement_park': 'Amusement Park',
+      'art_gallery': 'Art Gallery',
+      'historic_site': 'Historic Site',
+      'natural_feature': 'Natural Feature',
+      'point_of_interest': 'Point of Interest',
+      
+      // Lodging types
+      'hotel': 'Hotel',
+      'motel': 'Motel',
+      'resort': 'Resort',
+      'inn': 'Inn',
+      'campground': 'Campground'
+    };
     
-    // Handle special case for fine_dining
-    if (type === 'fine_dining' || type === 'fine dining') {
-      return 'Fine Dining';
-    }
-    
-    // Handle special cuisines and restaurant types
-    if (type === 'american') return 'American';
-    if (type === 'italian') return 'Italian';
-    if (type === 'chinese') return 'Chinese';
-    if (type === 'mexican') return 'Mexican';
-    if (type === 'japanese') return 'Japanese';
-    if (type === 'thai') return 'Thai';
-    if (type === 'indian') return 'Indian';
-    if (type === 'steakhouse') return 'Steakhouse';
-    if (type === 'seafood') return 'Seafood';
-    if (type === 'bbq') return 'BBQ';
-    if (type === 'sandwich') return 'Sandwich';
-    if (type === 'meal takeaway') return 'Takeout';
-    
-    // Replace underscores with spaces and capitalize each word
-    return type
-      .replace(/_/g, ' ')
-      .split(' ')
-      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-      .join(' ');
+    return typeMapping[type] || type.charAt(0).toUpperCase() + type.slice(1);
   };
 
   return (
@@ -71,7 +90,7 @@ const StopSection = ({ title, icon: Icon, color, stops, getStopName, getStopType
           const formattedType = formatTypeLabel(stopType);
           
           // Debug logging for type labels
-          console.log(`${title} Stop ${index} (${stopName}): Type=${stopType}, Formatted=${formattedType}`);
+          console.log(`Suggested ${title} Stop ${index} (${stopName}): Type=${stopType}, Formatted=${formattedType}`);
           
           return (
             <div key={`${title}-${index}`} className="flex flex-col gap-2 p-4 rounded-lg bg-gray-50">
