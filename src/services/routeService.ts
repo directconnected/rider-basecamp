@@ -1,6 +1,5 @@
 
 import mapboxgl from 'mapbox-gl';
-import { findNearbyGasStation, findNearbyLodging } from "./placesService";
 import { FuelStop, HotelStop } from "@/hooks/useRoutePlanning";
 import { LodgingType } from '@/components/route-planning/types';
 
@@ -68,14 +67,12 @@ export const calculateFuelStops = async (route: any, fuelMileage: number): Promi
     const stopCoordinates = coordinates[stopIndex];
     if (!stopCoordinates) continue;
 
-    const gasStation = await findNearbyGasStation([stopCoordinates[0], stopCoordinates[1]]);
-    if (gasStation) {
-      fuelStops.push({
-        location: gasStation.location,
-        name: gasStation.name,
-        distance: currentMiles
-      });
-    }
+    // Removed Google Places API dependency, now just create a placeholder fuel stop
+    fuelStops.push({
+      location: [stopCoordinates[0], stopCoordinates[1]],
+      name: `Fuel Stop at mile ${Math.round(currentMiles)}`,
+      distance: currentMiles
+    });
 
     lastStopIndex = stopIndex;
     currentMiles += fuelMileage;
@@ -96,7 +93,6 @@ export const calculateHotelStops = async (
   const hotelStops: HotelStop[] = [];
   let currentMiles = 0;
   let lastStopIndex = 0;
-  let maxAttempts = 10; // Maximum number of attempts to find a matching lodging
 
   console.log(`Calculate hotel stops with preferred lodging type: ${preferredLodgingType}`);
 
@@ -112,49 +108,18 @@ export const calculateHotelStops = async (
 
     console.log(`Looking for ${preferredLodgingType} near mile ${currentMiles}`);
     
-    // Try multiple times with increasing radius if we don't find the preferred type
-    let hotel = null;
-    let attempts = 0;
-    let searchRadius = 5000; // Start with 5km
-    
-    while (!hotel && attempts < maxAttempts) {
-      hotel = await findNearbyLodging(
-        [stopCoordinates[0], stopCoordinates[1]], 
-        searchRadius, 
-        preferredLodgingType
-      );
-      
-      if (hotel) {
-        // Check if the lodging type matches our preference
-        if (preferredLodgingType === 'any' || hotel.lodgingType === preferredLodgingType) {
-          console.log(`Found matching lodging: ${hotel.name} with type: ${hotel.lodgingType}`);
-          break;
-        } else {
-          console.log(`Found lodging ${hotel.name} but type ${hotel.lodgingType} doesn't match requested ${preferredLodgingType}, trying again`);
-          hotel = null; // Reset and try again
-        }
-      }
-      
-      attempts++;
-      searchRadius += 5000; // Increase radius by 5km each attempt
-      console.log(`Attempt ${attempts}: Increasing search radius to ${searchRadius}m`);
-    }
-    
-    if (hotel) {
-      console.log(`Found lodging: ${hotel.name} with rating: ${hotel.rating}, type: ${hotel.lodgingType}`);
-      hotelStops.push({
-        location: hotel.location,
-        name: hotel.address,
-        hotelName: hotel.name,
-        distance: currentMiles,
-        rating: hotel.rating,
-        website: hotel.website,
-        phone_number: hotel.phone_number,
-        lodgingType: hotel.lodgingType
-      });
-    } else {
-      console.log(`Could not find ${preferredLodgingType} after ${maxAttempts} attempts, moving to next stop`);
-    }
+    // Since we removed Google Places API dependency, create a placeholder hotel stop
+    const hotelStop: HotelStop = {
+      location: [stopCoordinates[0], stopCoordinates[1]],
+      name: `${preferredLodgingType === 'campground' ? 'Campground' : 'Accommodation'} at mile ${Math.round(currentMiles)}`,
+      hotelName: `${preferredLodgingType === 'campground' ? 'Campground' : 'Accommodation'} Area`,
+      distance: currentMiles,
+      rating: 4.0,
+      lodgingType: preferredLodgingType
+    };
+
+    console.log(`Created placeholder lodging: ${hotelStop.name} with type: ${hotelStop.lodgingType}`);
+    hotelStops.push(hotelStop);
 
     lastStopIndex = stopIndex;
   }

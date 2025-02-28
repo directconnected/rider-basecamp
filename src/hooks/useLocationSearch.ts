@@ -1,10 +1,8 @@
 
 import { useState } from 'react';
-import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { getLocationName } from "@/services/mapService";
 import { calculateDistance } from "@/hooks/camping/campsiteUtils";
-import { findNearbyCampgrounds } from "@/services/placesService";
 import { CampgroundResult } from '@/hooks/camping/types';
 
 type SearchParams = {
@@ -38,38 +36,12 @@ export const useLocationSearch = (
       const { latitude, longitude } = position.coords;
       const locationName = await getLocationName([longitude, latitude]);
       
-      // Use direct Places API search instead of Supabase database
-      console.log(`Searching for campgrounds near ${latitude}, ${longitude} with radius ${searchParams.radius || 50} miles`);
+      // Since we removed Google Places API functionality, show a placeholder message
+      toast.info('Campground search is currently unavailable. Feature under maintenance.');
       
-      // Convert miles to meters for the API
-      const radiusMeters = (searchParams.radius || 50) * 1609.34;
-      
-      const results = await findNearbyCampgrounds(
-        [longitude, latitude], 
-        radiusMeters,
-        searchParams.state || undefined
-      );
-      
-      if (results && results.length > 0) {
-        // Filter by distance if a radius was specified
-        const filteredResults = searchParams.radius 
-          ? results.filter(campsite => {
-              if (campsite.location && campsite.location[0] && campsite.location[1]) {
-                const distance = calculateDistance(latitude, longitude, campsite.location[1], campsite.location[0]);
-                return distance <= (searchParams.radius || 50);
-              }
-              return false;
-            })
-          : results;
-
-        setSearchResults(filteredResults);
-        setTotalResults(filteredResults.length);
-        toast.success(`Found ${filteredResults.length} campsites near ${locationName}`);
-      } else {
-        toast.info('No campsites found in your area');
-        setSearchResults([]);
-        setTotalResults(0);
-      }
+      // Return empty results as we removed the Google Places API dependency
+      setSearchResults([]);
+      setTotalResults(0);
 
     } catch (error) {
       console.error('Error in handleLocationSearch:', error);
