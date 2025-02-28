@@ -29,6 +29,16 @@ const StopSection = ({ title, icon: Icon, color, stops, getStopName, getStopType
       return 'Bed & Breakfast';
     }
     
+    // Handle special case for fast_food
+    if (type === 'fast_food' || type === 'fast food') {
+      return 'Fast Food';
+    }
+    
+    // Handle special case for fine_dining
+    if (type === 'fine_dining' || type === 'fine dining') {
+      return 'Fine Dining';
+    }
+    
     // Replace underscores with spaces and capitalize each word
     return type
       .replace(/_/g, ' ')

@@ -55,7 +55,7 @@ const RouteItinerary = ({
       }))
     : hotelStops.map(hotel => ({
         ...hotel,
-        lodgingType: preferredLodging === 'any' ? 'hotel' : preferredLodging
+        lodgingType: preferredLodging
       }));
 
   // Sort by distance
@@ -63,12 +63,6 @@ const RouteItinerary = ({
 
   // Get preferred attraction type from localStorage
   const preferredAttraction = localStorage.getItem('preferredAttraction') || 'any';
-  console.log('Using preferred attraction from localStorage:', preferredAttraction);
-  
-  // Log all attraction stops for debugging
-  console.log('All attraction stops before filtering:', 
-    attractionStops.map(a => ({name: a.attractionName, type: a.attractionType}))
-  );
   
   // If preferredAttraction is not 'any', filter the attractions to match only that type
   let filteredAttractionStops = attractionStops;
@@ -90,10 +84,6 @@ const RouteItinerary = ({
       );
     }
   }
-  
-  console.log('Filtered attraction stops:', 
-    filteredAttractionStops.map(a => ({name: a.attractionName, type: a.attractionType}))
-  );
 
   // Get preferred restaurant type from localStorage
   const preferredRestaurant = localStorage.getItem('preferredRestaurant') || 'any';
@@ -170,9 +160,10 @@ const RouteItinerary = ({
             stops={restaurantStops}
             getStopName={(stop) => (stop as RestaurantStop).restaurantName}
             getStopType={(stop) => {
-              // Make sure we're returning the actual restaurant type rather than nothing
               const restaurantStop = stop as RestaurantStop;
-              return restaurantStop.restaurantType || 'restaurant';
+              return preferredRestaurant === 'any' ? 
+                (restaurantStop.restaurantType || 'restaurant') : 
+                preferredRestaurant;
             }}
           />
         )}
@@ -186,7 +177,9 @@ const RouteItinerary = ({
             getStopName={(stop) => (stop as AttractionStop).attractionName}
             getStopType={(stop) => {
               const attractionStop = stop as AttractionStop;
-              return attractionStop.attractionType || 'attraction';
+              return preferredAttraction === 'any' ? 
+                (attractionStop.attractionType || 'attraction') : 
+                preferredAttraction;
             }}
           />
         )}

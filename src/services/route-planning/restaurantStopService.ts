@@ -1,38 +1,45 @@
 
 import { findNearestPointIndex } from './routeUtils';
 import { findNearbyRestaurant } from '../placesService';
-import { RestaurantStop } from '@/components/route-planning/types';
+import { RestaurantStop, RestaurantType } from '@/components/route-planning/types';
 
 export const calculateRestaurantStops = async (
   route: any, 
-  milesPerMeal: number = 150, 
-  restaurantType: string = 'any'
+  interval: number = 100,
+  restaurantType: RestaurantType = 'any'
 ): Promise<RestaurantStop[]> => {
-  console.log('Calculating restaurant stops every:', milesPerMeal, 'miles, type:', restaurantType);
+  console.log('Calculating restaurant stops every:', interval, 'miles, type:', restaurantType);
   
   const restaurantStops: RestaurantStop[] = [];
   const totalDistance = route.distance / 1609.34;
   
-  const numStops = Math.floor(totalDistance / milesPerMeal);
+  const numStops = Math.floor(totalDistance / interval);
   
   if (numStops <= 0) return [];
   
   for (let i = 1; i <= numStops; i++) {
-    const progress = (i * milesPerMeal) / totalDistance;
+    const progress = (i * interval) / totalDistance;
     if (progress >= 1) break;
     
     const pointIndex = Math.floor(progress * route.geometry.coordinates.length);
     const coordinates = route.geometry.coordinates[pointIndex] as [number, number];
     
     try {
+      console.log(`Finding restaurant near ${coordinates} with type ${restaurantType}`);
       const restaurant = await findNearbyRestaurant(coordinates, 5000, restaurantType);
       
       if (restaurant) {
-        console.log(`Restaurant data for stop ${i}:`, restaurant);
+        console.log(`Found restaurant data for stop ${i}:`, restaurant);
         
-        // Ensure we're getting the actual restaurant type from the API
-        const actualRestaurantType = restaurant.restaurantType || 'restaurant';
-        console.log(`Restaurant type for ${restaurant.name}: ${actualRestaurantType}`);
+        // Use the provided restaurantType unless it's 'any', then use the type from the API
+        let displayType = restaurantType === 'any' ? 
+          (restaurant.restaurantType || 'restaurant') : 
+          restaurantType;
+        
+        // Format the display type to be more human-readable
+        displayType = displayType.replace(/_/g, ' ');
+        
+        console.log(`Using restaurant type for display: ${displayType}`);
         
         restaurantStops.push({
           location: coordinates,
@@ -42,15 +49,16 @@ export const calculateRestaurantStops = async (
           rating: restaurant.rating,
           website: restaurant.website,
           phone_number: restaurant.phone_number,
-          restaurantType: actualRestaurantType // Use the actual type returned from the API
+          restaurantType: displayType
         });
         
-        console.log(`Added restaurant stop ${i} with type: ${actualRestaurantType}`);
+        console.log(`Added restaurant stop ${i}: ${restaurant.name}`);
       }
     } catch (error) {
       console.error('Error finding restaurant:', error);
     }
   }
 
+  console.log(`Final restaurant stops count: ${restaurantStops.length}`);
   return restaurantStops;
 };
