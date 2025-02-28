@@ -83,9 +83,13 @@ const RouteItinerary = ({
                stop.attractionType?.includes(preferredTypeFormatted);
       });
 
-  console.log(`Filtered attractions from ${attractionStops.length} to ${filteredAttractionStops.length}`,
-              `based on preference: ${preferredAttraction}`);
-  console.log('Attraction types after filtering:', filteredAttractionStops.map(a => a.attractionType));
+  // Get preferred restaurant type from localStorage
+  const preferredRestaurant = localStorage.getItem('preferredRestaurant') || 'any';
+  
+  // Log for debugging
+  console.log(`Displaying attraction stops: ${filteredAttractionStops.length} based on preference: ${preferredAttraction}`);
+  console.log(`Restaurant stops: ${restaurantStops.length} based on preference: ${preferredRestaurant}`);
+  console.log('Restaurant stop types:', restaurantStops.map(r => r.restaurantType));
 
   return (
     <Card className="mt-8">
@@ -165,7 +169,8 @@ const RouteItinerary = ({
           getStopName={(stop) => (stop as RestaurantStop).restaurantName}
           getStopType={(stop) => {
             const type = (stop as RestaurantStop).restaurantType;
-            return type === 'any' ? 'restaurant' : (type || 'restaurant');
+            // Return the actual type rather than defaulting to 'restaurant'
+            return type || 'restaurant';
           }}
         />
 

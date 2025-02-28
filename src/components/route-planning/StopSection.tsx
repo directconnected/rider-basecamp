@@ -18,6 +18,18 @@ interface StopSectionProps {
 const StopSection = ({ title, icon: Icon, color, stops, getStopName, getStopType }: StopSectionProps) => {
   if (!stops || stops.length === 0) return null;
 
+  // Function to format type labels for display
+  const formatTypeLabel = (type: string | undefined): string => {
+    if (!type || type === 'any') return '';
+    
+    // Replace underscores with spaces and capitalize each word
+    return type
+      .replace(/_/g, ' ')
+      .split(' ')
+      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(' ');
+  };
+
   return (
     <div className="space-y-4">
       <h3 className="text-lg font-semibold">{title}:</h3>
@@ -25,6 +37,8 @@ const StopSection = ({ title, icon: Icon, color, stops, getStopName, getStopType
         {stops.map((stop, index) => {
           const StopName = getStopName(stop);
           const StopType = getStopType ? getStopType(stop) : undefined;
+          const formattedType = formatTypeLabel(StopType);
+          
           return (
             <div key={`${title}-${index}`} className="flex flex-col gap-2 p-4 rounded-lg bg-gray-50">
               <div className="flex items-start gap-4">
@@ -32,9 +46,9 @@ const StopSection = ({ title, icon: Icon, color, stops, getStopName, getStopType
                 <div className="flex-1">
                   <div className="flex items-center justify-between">
                     <p className="text-base font-medium">{StopName}</p>
-                    {StopType && (
+                    {formattedType && (
                       <Badge variant="outline" className="ml-2">
-                        {StopType.replace(/_/g, ' ')}
+                        {formattedType}
                       </Badge>
                     )}
                   </div>

@@ -37,7 +37,7 @@ export const calculateRestaurantStops = async (
           rating: restaurant.rating,
           website: restaurant.website,
           phone_number: restaurant.phone_number,
-          restaurantType: restaurantType
+          restaurantType: restaurantType // Ensure this is correctly passed
         });
       }
     } catch (error) {
