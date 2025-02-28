@@ -27,6 +27,7 @@ export interface RestaurantStop extends RatedStop {
 export interface CampingStop extends RatedStop {
   campgroundName: string;
   campingType?: string;
+  amenities?: string[]; // Adding amenities property to CampingStop
 }
 
 export interface AttractionStop extends RatedStop {

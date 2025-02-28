@@ -23,11 +23,11 @@ export const calculateRestaurantStops = async (
   
   const getRestaurantName = (index: number) => {
     switch (restaurantType) {
-      case 'fastfood':
+      case 'fast_food':
         return `Fast Food at mile ${Math.round(currentMiles)}`;
       case 'cafe':
         return `Café at mile ${Math.round(currentMiles)}`;
-      case 'finedining':
+      case 'fine_dining':
         return `Fine Dining at mile ${Math.round(currentMiles)}`;
       case 'any':
       default:
@@ -53,7 +53,7 @@ export const calculateRestaurantStops = async (
         distance: currentMiles,
         rating: 4.0 + (Math.random() * 1.0), // Random rating between 4.0-5.0
         restaurantType: restaurantType === 'any' 
-          ? (['fastfood', 'cafe', 'finedining'] as RestaurantType[])[index % 3]
+          ? (['fast_food', 'cafe', 'fine_dining'] as RestaurantType[])[index % 3]
           : restaurantType
       });
     }

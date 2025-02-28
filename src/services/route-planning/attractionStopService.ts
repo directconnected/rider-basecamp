@@ -27,11 +27,11 @@ export const calculateAttractionStops = async (
         return `Museum at mile ${Math.round(currentMiles)}`;
       case 'park':
         return `Park at mile ${Math.round(currentMiles)}`;
-      case 'landmark':
-        return `Landmark at mile ${Math.round(currentMiles)}`;
+      case 'historic_site':
+        return `Historic Site at mile ${Math.round(currentMiles)}`;
       case 'any':
       default:
-        const types = ['Museum', 'Park', 'Landmark', 'Viewpoint', 'Historic Site'];
+        const types = ['Museum', 'Park', 'Historic Site', 'Viewpoint', 'Tourist Attraction'];
         return `${types[index % types.length]} at mile ${Math.round(currentMiles)}`;
     }
   };
@@ -53,7 +53,7 @@ export const calculateAttractionStops = async (
         distance: currentMiles,
         rating: 4.0 + (Math.random() * 1.0), // Random rating between 4.0-5.0
         attractionType: attractionType === 'any' 
-          ? (['museum', 'park', 'landmark'] as AttractionType[])[index % 3]
+          ? (['museum', 'park', 'historic_site'] as AttractionType[])[index % 3]
           : attractionType
       });
     }
