@@ -37,6 +37,10 @@ export const useAddressSearch = ({
 
       console.log('Search parameters:', searchParams);
       
+      // For debugging - show auth status
+      const { data: authData } = await supabase.auth.getSession();
+      console.log('Auth session:', authData?.session ? 'Authenticated' : 'Anonymous');
+      
       // Build the base query
       let query = supabase.from('campgrounds').select('*');
       
@@ -45,10 +49,11 @@ export const useAddressSearch = ({
         query = query.ilike('city', `%${searchParams.city.trim()}%`);
       }
       
-      // Add state filter if provided - ensure proper handling of abbreviations
+      // Add state filter if provided - try both exact match and case-insensitive
       if (searchParams.state && searchParams.state.trim()) {
-        // Use exact match for state codes (like 'OH')
-        query = query.ilike('state', searchParams.state.trim());
+        const stateValue = searchParams.state.trim();
+        // Try exact match first (more restrictive)
+        query = query.eq('state', stateValue);
       }
       
       // Add zip code filter if provided
@@ -57,7 +62,11 @@ export const useAddressSearch = ({
       }
       
       // Execute the query with detailed logging
-      console.log('Executing Supabase query:', query);
+      console.log('Executing Supabase query...');
+      // Debug build the query
+      const queryString = query.toSQL();
+      console.log('SQL Query:', queryString);
+      
       const { data, error, status, statusText } = await query;
       
       if (error) {
@@ -67,6 +76,7 @@ export const useAddressSearch = ({
         // Check if it's a permissions error
         if (status === 403 || error.message.includes('permission')) {
           toast.error('Permission denied. You may not have access to this data.');
+          console.error('RLS policy issue detected. Please check RLS policies for the campgrounds table.');
         } else {
           toast.error(`Error searching for campgrounds: ${error.message}`);
         }
@@ -82,6 +92,15 @@ export const useAddressSearch = ({
           // Log the exact query that was executed
           console.log('Query executed with no results:', 
             `State: "${searchParams.state}" | City: "${searchParams.city}" | Zip: "${searchParams.zipCode}"`);
+          
+          // Attempt a simpler query to see if it's a filtering issue
+          const { data: allData } = await supabase
+            .from('campgrounds')
+            .select('*')
+            .limit(5);
+          
+          console.log('Test query for any campgrounds:', allData?.length || 0, 'results');
+          
           setSearchResults([]);
           toast.info('No campgrounds found matching your search criteria');
         }
