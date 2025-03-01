@@ -49,7 +49,7 @@ export const useAddressSearch = ({
         query = query.ilike('city', `%${searchParams.city.trim()}%`);
       }
       
-      // Add state filter if provided - try both exact match and case-insensitive
+      // Add state filter if provided
       if (searchParams.state && searchParams.state.trim()) {
         const stateValue = searchParams.state.trim();
         // Try exact match first (more restrictive)
@@ -63,9 +63,6 @@ export const useAddressSearch = ({
       
       // Execute the query with detailed logging
       console.log('Executing Supabase query...');
-      // Debug build the query
-      const queryString = query.toSQL();
-      console.log('SQL Query:', queryString);
       
       const { data, error, status, statusText } = await query;
       
@@ -92,6 +89,23 @@ export const useAddressSearch = ({
           // Log the exact query that was executed
           console.log('Query executed with no results:', 
             `State: "${searchParams.state}" | City: "${searchParams.city}" | Zip: "${searchParams.zipCode}"`);
+          
+          // If no results with exact state match, try a case-insensitive search
+          if (searchParams.state && searchParams.state.trim()) {
+            console.log('Trying case-insensitive state search...');
+            const { data: flexibleStateData } = await supabase
+              .from('campgrounds')
+              .select('*')
+              .ilike('state', `%${searchParams.state.trim()}%`);
+              
+            if (flexibleStateData && flexibleStateData.length > 0) {
+              console.log('Found results with flexible state search:', flexibleStateData.length);
+              setSearchResults(flexibleStateData);
+              toast.success(`Found ${flexibleStateData.length} campgrounds`);
+              setIsSearching(false);
+              return;
+            }
+          }
           
           // Attempt a simpler query to see if it's a filtering issue
           const { data: allData } = await supabase
