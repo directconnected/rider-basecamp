@@ -37,6 +37,22 @@ export const useAddressSearch = ({
 
       console.log('Search parameters:', searchParams);
       
+      // First, let's do a quick test query to check if we can retrieve any data from the campgrounds table
+      const testQuery = await supabase
+        .from('campgrounds')
+        .select('*')
+        .limit(5);
+      
+      if (testQuery.error) {
+        console.error('Error in test query:', testQuery.error);
+        toast.error('Error connecting to database');
+        setIsSearching(false);
+        return;
+      }
+      
+      console.log('Test query results:', testQuery.data);
+      console.log('Total records available:', testQuery.data.length);
+      
       // Build the base query
       let query = supabase.from('campgrounds').select('*');
       
@@ -48,18 +64,7 @@ export const useAddressSearch = ({
       // Add state filter if provided
       if (searchParams.state && searchParams.state.trim()) {
         const state = searchParams.state.trim();
-        
-        // Try multiple ways to match state: exact match or case insensitive
-        const stateConditions = [
-          `state.ilike.%${state}%` // Case insensitive partial match
-        ];
-        
-        // If it's a two-letter state code, also try an exact match
-        if (state.length === 2) {
-          stateConditions.unshift(`state.eq.${state.toUpperCase()}`); // Prioritize exact match
-        }
-        
-        query = query.or(stateConditions.join(','));
+        query = query.ilike('state', `%${state}%`);
       }
       
       // Add zip code filter if provided
