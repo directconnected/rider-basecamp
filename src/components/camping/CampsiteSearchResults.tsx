@@ -117,7 +117,7 @@ const CampsiteSearchResults = ({
               <Card key={index} className="overflow-hidden hover:shadow-lg transition-shadow">
                 <div className="p-6 space-y-4">
                   <div className="flex justify-between items-start gap-2">
-                    <h3 className="text-xl font-bold text-gray-900 flex-1">{campsite.name}</h3>
+                    <h3 className="text-xl font-bold text-gray-900 flex-1">{campsite.campground_name}</h3>
                     <Badge variant="outline" className="bg-gray-100 whitespace-nowrap">
                       {campType}
                     </Badge>
@@ -125,7 +125,7 @@ const CampsiteSearchResults = ({
                   
                   <div className="flex items-start gap-2 text-gray-600">
                     <MapPin className="h-4 w-4 mt-1 flex-shrink-0" />
-                    <span>{campsite.address}</span>
+                    <span>{campsite.address_1}</span>
                   </div>
                   
                   {campsite.distance !== undefined && (
@@ -223,11 +223,11 @@ const CampsiteSearchResults = ({
                   <Separator className="my-2" />
                   
                   <div className="space-y-2 pt-1">
-                    {campsite.phone_number && (
+                    {campsite.phone && (
                       <div className="flex items-center gap-2 text-gray-600">
                         <Phone className="h-4 w-4" />
-                        <a href={`tel:${campsite.phone_number}`} className="hover:text-theme-600">
-                          {campsite.phone_number}
+                        <a href={`tel:${campsite.phone}`} className="hover:text-theme-600">
+                          {campsite.phone}
                         </a>
                       </div>
                     )}
