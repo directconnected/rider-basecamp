@@ -20,6 +20,7 @@ export const useAddressSearch = ({
   setIsSearching,
   setCurrentPage,
 }: AddressSearchParams) => {
+  
   // Function to handle search based on address
   const handleSearch = async () => {
     setIsSearching(true);
