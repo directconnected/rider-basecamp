@@ -1,7 +1,7 @@
-
 import { toast } from 'sonner';
 import { CampgroundResult } from '@/hooks/camping/types';
 import { supabase } from '@/integrations/supabase/client';
+import { calculateDistance } from '@/utils/distanceUtils';
 
 type LocationSearchParams = {
   searchParams: {
@@ -34,8 +34,7 @@ export const useLocationBasedSearch = ({
           const { latitude, longitude } = position.coords;
           console.log(`User location: ${latitude}, ${longitude}`);
           
-          // For now, let's fetch all campgrounds since we don't have a proper 
-          // distance-based search implemented yet
+          // Fetch all campgrounds from the database
           const { data, error } = await supabase
             .from('campgrounds')
             .select('*');
@@ -44,14 +43,76 @@ export const useLocationBasedSearch = ({
             console.error('Error fetching campgrounds:', error);
             toast.error('Error fetching nearby campgrounds');
             setSearchResults([]);
-          } else if (data && data.length > 0) {
-            console.log('Found campgrounds:', data);
-            console.log('Total campgrounds found:', data.length);
-            toast.success(`Found ${data.length} campgrounds`);
-            setSearchResults(data);
-          } else {
+            setIsSearching(false);
+            return;
+          }
+          
+          if (!data || data.length === 0) {
             console.log('No campgrounds found in the database');
             toast.info('No campgrounds found in the database');
+            setSearchResults([]);
+            setIsSearching(false);
+            return;
+          }
+          
+          console.log('Total campgrounds found:', data.length);
+          
+          // Calculate distance for each campground and filter by radius
+          const withDistance = data
+            .map(campground => {
+              // Parse GPS coordinates if available
+              if (!campground.gps_coordinates) {
+                return { ...campground, distance: Infinity };
+              }
+              
+              try {
+                // Handle different GPS coordinate formats
+                const coords = campground.gps_coordinates
+                  .replace(/[°''NnWwEeSs]/g, '')
+                  .split(/,\s*|\s+/);
+                
+                if (coords.length >= 2) {
+                  const campLat = parseFloat(coords[0]);
+                  const campLng = parseFloat(coords[1]);
+                  
+                  if (!isNaN(campLat) && !isNaN(campLng)) {
+                    // Calculate distance in miles between user and campground
+                    const distance = calculateDistance(
+                      latitude, 
+                      longitude, 
+                      campLat, 
+                      campLng
+                    );
+                    
+                    return { ...campground, distance };
+                  }
+                }
+                
+                return { ...campground, distance: Infinity };
+              } catch (e) {
+                console.error('Error parsing coordinates:', e);
+                return { ...campground, distance: Infinity };
+              }
+            })
+            .filter(camp => {
+              // If no radius specified or radius is 0, include all results
+              if (!searchParams.radius) return true;
+              
+              // Otherwise, filter by radius (in miles)
+              return camp.distance !== Infinity && camp.distance <= searchParams.radius;
+            })
+            .sort((a, b) => a.distance - b.distance);
+          
+          if (withDistance.length > 0) {
+            console.log('Found nearby campgrounds:', withDistance.length);
+            console.log('First result distance:', withDistance[0].distance);
+            toast.success(`Found ${withDistance.length} campgrounds near your location`);
+            setSearchResults(withDistance);
+          } else {
+            console.log('No campgrounds found within the specified radius');
+            toast.info(searchParams.radius 
+              ? `No campgrounds found within ${searchParams.radius} miles of your location` 
+              : 'No campgrounds found near your location');
             setSearchResults([]);
           }
           
@@ -61,6 +122,11 @@ export const useLocationBasedSearch = ({
           console.error('Error getting location:', error);
           toast.error('Could not access your location. Please check your browser permissions.');
           setIsSearching(false);
+        },
+        {
+          enableHighAccuracy: true,
+          timeout: 10000,
+          maximumAge: 5000
         }
       );
     } catch (error) {
