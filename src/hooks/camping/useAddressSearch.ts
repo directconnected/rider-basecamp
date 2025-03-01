@@ -79,10 +79,10 @@ export const useAddressSearch = ({
         console.error('Error searching campgrounds:', error);
         toast.error('Error searching for campgrounds');
         setSearchResults([]);
-      } else {
+      } else if (data) {
         console.log('Search results:', data);
         
-        if (data && data.length > 0) {
+        if (data.length > 0) {
           setSearchResults(data);
           toast.success(`Found ${data.length} campgrounds`);
         } else {

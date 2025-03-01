@@ -53,8 +53,7 @@ export const useLocationBasedSearch = ({
           // For this initial test, let's just fetch all campgrounds to verify we can get data
           const { data, error } = await supabase
             .from('campgrounds')
-            .select('*')
-            .limit(50);
+            .select('*');
             
           if (error) {
             console.error('Error fetching campgrounds:', error);
