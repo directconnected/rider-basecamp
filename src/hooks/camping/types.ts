@@ -9,6 +9,7 @@ export interface CampgroundResult {
   website?: string;
   types?: string[];
   state?: string | null;
+  
   // Additional campground information (might be null for Google Places results)
   water?: string | null;
   showers?: string | null;
