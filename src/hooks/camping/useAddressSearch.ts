@@ -36,6 +36,13 @@ export const useAddressSearch = ({
         return;
       }
 
+      // Log the search parameters for debugging
+      console.log('Search parameters:', {
+        city: searchParams.city,
+        state: searchParams.state,
+        zipCode: searchParams.zipCode,
+      });
+
       // Construct dynamic query based on search parameters
       let query = supabase
         .from('campgrounds')
@@ -47,7 +54,8 @@ export const useAddressSearch = ({
       }
       
       if (searchParams.state) {
-        query = query.ilike('state', `%${searchParams.state}%`);
+        // Improve state search by converting to uppercase and ensuring exact match
+        query = query.eq('state', searchParams.state.toUpperCase());
       }
       
       if (searchParams.zipCode) {
@@ -67,6 +75,7 @@ export const useAddressSearch = ({
         toast.success(`Found ${data.length} campgrounds`);
       } else {
         console.log('No campgrounds found matching the search criteria');
+        console.log('Query details:', query);
         setSearchResults([]);
         toast.info('No campgrounds found matching your search criteria');
       }
