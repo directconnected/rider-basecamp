@@ -41,41 +41,18 @@ export const useAddressSearch = ({
       const { data: authData } = await supabase.auth.getSession();
       console.log('Auth session:', authData?.session ? 'Authenticated' : 'Anonymous');
       
-      // First, check if the table has any data at all
-      const { data: countData, error: countError } = await supabase
-        .from('campgrounds')
-        .select('*', { count: 'exact', head: true });
-      
-      if (countError) {
-        console.error('Error checking campgrounds count:', countError);
-        toast.error(`Database connection error: ${countError.message}`);
-        setIsSearching(false);
-        return;
-      }
-      
-      const totalCount = countData?.length || 0;
-      console.log('Total campgrounds in database:', totalCount);
-      
-      if (totalCount === 0) {
-        console.error('The campgrounds table appears to be empty');
-        toast.error('No campgrounds found in the database. The database may be empty.');
-        setIsSearching(false);
-        return;
-      }
-      
-      // Build the base query
+      // Build the query with proper filters
       let query = supabase.from('campgrounds').select('*');
+      
+      // Add state filter if provided
+      if (searchParams.state && searchParams.state.trim()) {
+        // First try with exact match (case insensitive)
+        query = query.ilike('state', searchParams.state.trim());
+      }
       
       // Add city filter if provided
       if (searchParams.city && searchParams.city.trim()) {
         query = query.ilike('city', `%${searchParams.city.trim()}%`);
-      }
-      
-      // Add state filter if provided
-      if (searchParams.state && searchParams.state.trim()) {
-        const stateValue = searchParams.state.trim();
-        // Try exact match first (more restrictive)
-        query = query.eq('state', stateValue);
       }
       
       // Add zip code filter if provided
@@ -83,22 +60,14 @@ export const useAddressSearch = ({
         query = query.eq('zip_code', searchParams.zipCode.trim());
       }
       
-      // Execute the query with detailed logging
+      // Execute the query
       console.log('Executing Supabase query...');
       
-      const { data, error, status, statusText } = await query;
+      const { data, error } = await query;
       
       if (error) {
         console.error('Error searching campgrounds:', error);
-        console.error('Status:', status, statusText);
-        
-        // Check if it's a permissions error
-        if (status === 403 || error.message.includes('permission')) {
-          toast.error('Permission denied. You may not have access to this data.');
-          console.error('RLS policy issue detected. Please check RLS policies for the campgrounds table.');
-        } else {
-          toast.error(`Error searching for campgrounds: ${error.message}`);
-        }
+        toast.error(`Error searching for campgrounds: ${error.message}`);
         setSearchResults([]);
       } else if (data) {
         console.log('Search results:', data);
@@ -108,34 +77,8 @@ export const useAddressSearch = ({
           setSearchResults(data);
           toast.success(`Found ${data.length} campgrounds`);
         } else {
-          // Log the exact query that was executed
           console.log('Query executed with no results:', 
             `State: "${searchParams.state}" | City: "${searchParams.city}" | Zip: "${searchParams.zipCode}"`);
-          
-          // If no results with exact state match, try a case-insensitive search
-          if (searchParams.state && searchParams.state.trim()) {
-            console.log('Trying case-insensitive state search...');
-            const { data: flexibleStateData } = await supabase
-              .from('campgrounds')
-              .select('*')
-              .ilike('state', `%${searchParams.state.trim()}%`);
-              
-            if (flexibleStateData && flexibleStateData.length > 0) {
-              console.log('Found results with flexible state search:', flexibleStateData.length);
-              setSearchResults(flexibleStateData);
-              toast.success(`Found ${flexibleStateData.length} campgrounds`);
-              setIsSearching(false);
-              return;
-            }
-          }
-          
-          // Attempt a simpler query to see if it's a filtering issue
-          const { data: allData } = await supabase
-            .from('campgrounds')
-            .select('*')
-            .limit(5);
-          
-          console.log('Test query for any campgrounds:', allData?.length || 0, 'results');
           
           setSearchResults([]);
           toast.info('No campgrounds found matching your search criteria');
