@@ -91,11 +91,12 @@ export const useAddressSearch = ({
     // If we get here, we know we can access the database and it has data
     // Now try the specific state search
     
-    // Primary search approach - try multiple strategies in one query using OR
+    // Primary search approach - try multiple strategies in one query
+    // FIX: The error was in this line - using the OR condition incorrectly
     const { data: stateData, error: stateError } = await supabase
       .from('campgrounds')
       .select('*')
-      .or(`state.eq.${normalizedState},state.ilike.${normalizedState},state.ilike.%${normalizedState}%`);
+      .or(`state.eq.${normalizedState},state.ilike.%${normalizedState}%`);
     
     if (stateError) {
       console.error('Database error during state search:', stateError);
@@ -202,7 +203,7 @@ export const useAddressSearch = ({
     const { data: distinctStates, error: distinctError } = await supabase
       .from('campgrounds')
       .select('state')
-      .is('state', null, { not: true })
+      .not('state', 'is', null)
       .limit(100);
       
     if (distinctError) {
@@ -255,7 +256,8 @@ export const useAddressSearch = ({
     // Apply state filter if provided
     if (searchParams.state) {
       const normalizedState = searchParams.state.trim().toUpperCase();
-      query = query.or(`state.eq.${normalizedState},state.ilike.${normalizedState},state.ilike.%${normalizedState}%`);
+      // FIX: Using the correct OR syntax for the query
+      query = query.or(`state.eq.${normalizedState},state.ilike.%${normalizedState}%`);
     }
     
     // Apply zip code filter if provided
