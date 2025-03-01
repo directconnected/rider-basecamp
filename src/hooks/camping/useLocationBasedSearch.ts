@@ -28,29 +28,14 @@ export const useLocationBasedSearch = ({
     setCurrentPage(1);
     
     try {
-      // First, let's do a quick test query to check if we can retrieve any data from the campgrounds table
-      const testQuery = await supabase
-        .from('campgrounds')
-        .select('*')
-        .limit(5);
-      
-      if (testQuery.error) {
-        console.error('Error in test query:', testQuery.error);
-        toast.error('Error connecting to database');
-        setIsSearching(false);
-        return;
-      }
-      
-      console.log('Test query results:', testQuery.data);
-      console.log('Total test records:', testQuery.data.length);
-      
       // Request user's location
       navigator.geolocation.getCurrentPosition(
         async (position) => {
           const { latitude, longitude } = position.coords;
           console.log(`User location: ${latitude}, ${longitude}`);
           
-          // For this initial test, let's just fetch all campgrounds to verify we can get data
+          // For now, let's fetch all campgrounds since we don't have a proper 
+          // distance-based search implemented yet
           const { data, error } = await supabase
             .from('campgrounds')
             .select('*');
