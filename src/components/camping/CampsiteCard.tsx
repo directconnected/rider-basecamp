@@ -1,88 +1,101 @@
 
-import React from "react";
-import { Link } from "react-router-dom";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { CampgroundResult } from "@/hooks/camping/types";
-import { Badge } from "@/components/ui/badge";
-import { MapPin, Phone, Globe } from "lucide-react";
+import React from 'react';
+import { Card, CardContent, CardHeader } from '@/components/ui/card';
+import { ExternalLink, MapPin, Phone } from 'lucide-react';
+import { CampgroundResult } from '@/hooks/camping/types';
+import { Button } from '@/components/ui/button';
 
 interface CampsiteCardProps {
-  campsite: CampgroundResult;
+  campground: CampgroundResult;
 }
 
-const CampsiteCard = ({ campsite }: CampsiteCardProps) => {
+const CampsiteCard = ({ campground }: CampsiteCardProps) => {
+  const {
+    campground_name,
+    address_1,
+    address_2,
+    city,
+    state,
+    zip_code,
+    phone,
+    website
+  } = campground;
+
+  const formatAddress = () => {
+    const addressParts = [];
+    if (address_1) addressParts.push(address_1);
+    if (address_2) addressParts.push(address_2);
+    
+    let cityStateZip = '';
+    if (city) cityStateZip += city;
+    if (state) cityStateZip += city ? `, ${state}` : state;
+    if (zip_code) cityStateZip += cityStateZip ? ` ${zip_code}` : zip_code;
+    
+    if (cityStateZip) addressParts.push(cityStateZip);
+    
+    return addressParts.join(', ');
+  };
+
+  const getMapLink = () => {
+    const query = encodeURIComponent(`${campground_name} ${formatAddress()}`);
+    return `https://maps.google.com/maps?q=${query}`;
+  };
+
+  const formatWebsiteUrl = (url: string) => {
+    if (!url) return '';
+    return url.startsWith('http') ? url : `https://${url}`;
+  };
+
   return (
     <Card className="h-full flex flex-col">
-      <CardHeader>
-        <CardTitle className="text-xl">{campsite.name}</CardTitle>
-        <CardDescription className="flex items-start gap-2">
-          <MapPin className="h-4 w-4 mt-1 flex-shrink-0" />
-          <span>{campsite.address}</span>
-        </CardDescription>
+      <CardHeader className="pb-2">
+        <h3 className="text-xl font-bold line-clamp-2">{campground_name || 'Unnamed Campground'}</h3>
       </CardHeader>
-      <CardContent className="flex-grow">
-        {campsite.distance !== undefined && (
-          <div className="text-sm text-gray-600 mb-2">
-            <span className="font-medium">{campsite.distance} miles</span> from search location
-          </div>
-        )}
-        
-        {campsite.types && campsite.types.map((type, index) => (
-          <Badge key={index} variant="outline" className="mr-2 mb-2">
-            {type}
-          </Badge>
-        ))}
-        
-        <div className="space-y-2 mt-4">
-          {campsite.water && (
-            <div className="text-sm">
-              <span className="font-medium">Water:</span> {campsite.water}
+      <CardContent className="flex-1 flex flex-col justify-between">
+        <div className="space-y-4">
+          {formatAddress() && (
+            <div className="flex items-start gap-2">
+              <MapPin className="h-5 w-5 text-gray-500 mt-0.5 flex-shrink-0" />
+              <p className="text-sm text-gray-500">{formatAddress()}</p>
             </div>
           )}
           
-          {campsite.showers && (
-            <div className="text-sm">
-              <span className="font-medium">Showers:</span> {campsite.showers}
-            </div>
-          )}
-          
-          {campsite.pets && (
-            <div className="text-sm">
-              <span className="font-medium">Pets:</span> {campsite.pets}
-            </div>
-          )}
-          
-          {campsite.fee && (
-            <div className="text-sm">
-              <span className="font-medium">Fee:</span> {campsite.fee}
+          {phone && (
+            <div className="flex items-center gap-2">
+              <Phone className="h-5 w-5 text-gray-500" />
+              <p className="text-sm text-gray-500">{phone}</p>
             </div>
           )}
         </div>
-      </CardContent>
-      <CardFooter className="border-t pt-4 flex flex-col items-start space-y-2">
-        {campsite.phone_number && (
-          <div className="flex items-center gap-2 text-gray-600">
-            <Phone className="h-4 w-4" />
-            <a href={`tel:${campsite.phone_number}`} className="hover:underline">
-              {campsite.phone_number}
-            </a>
-          </div>
-        )}
         
-        {campsite.website && (
-          <div className="flex items-center gap-2 text-gray-600">
-            <Globe className="h-4 w-4" />
-            <a 
-              href={campsite.website.startsWith('http') ? campsite.website : `https://${campsite.website}`} 
-              target="_blank" 
-              rel="noopener noreferrer"
-              className="hover:underline"
+        <div className="mt-4 pt-4 border-t border-gray-100 flex flex-col sm:flex-row gap-2 justify-end">
+          {website && (
+            <Button 
+              variant="outline" 
+              size="sm" 
+              className="flex items-center gap-1"
+              asChild
             >
-              Visit Website
+              <a href={formatWebsiteUrl(website)} target="_blank" rel="noopener noreferrer">
+                <ExternalLink className="h-4 w-4" />
+                <span>Website</span>
+              </a>
+            </Button>
+          )}
+          
+          <Button 
+            variant="outline" 
+            size="sm" 
+            className="flex items-center gap-1"
+            asChild
+          >
+            <a href={getMapLink()} target="_blank" rel="noopener noreferrer">
+              <MapPin className="h-4 w-4" />
+              <span>View Map</span>
             </a>
-          </div>
-        )}
-      </CardFooter>
+          </Button>
+        </div>
+      </CardContent>
     </Card>
   );
 };

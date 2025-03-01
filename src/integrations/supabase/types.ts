@@ -9,6 +9,51 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      campgrounds: {
+        Row: {
+          address_1: string | null
+          address_2: string | null
+          campground_name: string | null
+          city: string | null
+          created_at: string
+          email: string | null
+          gps_coordinates: string | null
+          id: number
+          phone: string | null
+          state: string | null
+          website: string | null
+          zip_code: string | null
+        }
+        Insert: {
+          address_1?: string | null
+          address_2?: string | null
+          campground_name?: string | null
+          city?: string | null
+          created_at?: string
+          email?: string | null
+          gps_coordinates?: string | null
+          id?: number
+          phone?: string | null
+          state?: string | null
+          website?: string | null
+          zip_code?: string | null
+        }
+        Update: {
+          address_1?: string | null
+          address_2?: string | null
+          campground_name?: string | null
+          city?: string | null
+          created_at?: string
+          email?: string | null
+          gps_coordinates?: string | null
+          id?: number
+          phone?: string | null
+          state?: string | null
+          website?: string | null
+          zip_code?: string | null
+        }
+        Relationships: []
+      }
       data_2025: {
         Row: {
           clutch: string | null
