@@ -1,66 +1,66 @@
 
-import { RestaurantStop, RestaurantType } from '@/components/route-planning/types';
+import { RestaurantStop, RestaurantType } from "@/components/route-planning/types";
+import { fetchNearbyRestaurants } from "@/services/routePointsService";
 
+/**
+ * Calculates restaurant stops along a route
+ */
 export const calculateRestaurantStops = async (
   route: any, 
-  interval: number = 100,
-  restaurantType: RestaurantType = 'any'
+  spacing: number = 150,
+  preferredType: RestaurantType = 'any'
 ): Promise<RestaurantStop[]> => {
-  console.log(`Calculating restaurant stops without Places API (type: ${restaurantType})`);
-  
-  const restaurantStops: RestaurantStop[] = [];
-  
-  if (!route || !route.geometry || !route.geometry.coordinates) {
-    console.log('Invalid route data for restaurant stop calculation');
+  try {
+    if (!route?.geometry?.coordinates) {
+      console.error('Invalid route geometry');
+      return [];
+    }
+    
+    const totalDistanceInMeters = route.distance;
+    const totalDistanceInMiles = totalDistanceInMeters / 1609.34;
+    const coordinates = route.geometry.coordinates;
+    
+    const restaurantStops: RestaurantStop[] = [];
+    
+    // Try to place stops roughly every 'spacing' miles
+    const numStops = Math.max(1, Math.ceil(totalDistanceInMiles / spacing));
+    
+    if (numStops <= 1) {
+      // For short routes, just add one restaurant near the middle
+      const midpointIndex = Math.floor(coordinates.length / 2);
+      const [lon, lat] = coordinates[midpointIndex];
+      
+      const nearbyRestaurants = await fetchNearbyRestaurants(lat, lon, preferredType, 2);
+      restaurantStops.push(...nearbyRestaurants);
+    } else {
+      // For longer routes, space restaurants out
+      for (let i = 1; i < numStops; i++) {
+        const segmentDistance = (i * totalDistanceInMiles) / numStops;
+        const segmentIndex = Math.floor((i * coordinates.length) / numStops);
+        
+        // Get coordinates for this segment
+        if (segmentIndex >= coordinates.length) continue;
+        const [lon, lat] = coordinates[segmentIndex];
+        
+        // Fetch restaurants near this point
+        const nearbyRestaurants = await fetchNearbyRestaurants(lat, lon, preferredType, 1);
+        
+        // Add to our stops
+        nearbyRestaurants.forEach(restaurant => {
+          // Adjust distance to be from the start of the route
+          const adjustedRestaurant = {
+            ...restaurant,
+            distance: Math.round(segmentDistance)
+          };
+          restaurantStops.push(adjustedRestaurant);
+        });
+      }
+    }
+    
+    console.log(`Found ${restaurantStops.length} restaurant stops with preferred type: ${preferredType}`);
+    return restaurantStops;
+  } catch (error) {
+    console.error("Error calculating restaurant stops:", error);
     return [];
   }
-  
-  const totalDistanceInMeters = route.distance;
-  const totalDistanceInMiles = totalDistanceInMeters / 1609.34;
-  
-  // Place restaurants at regular intervals
-  let currentMiles = interval / 2; // First stop halfway to the interval
-  
-  const getRestaurantName = (index: number) => {
-    switch (restaurantType) {
-      case 'fast_food':
-        return `Fast Food at mile ${Math.round(currentMiles)}`;
-      case 'cafe':
-        return `Café at mile ${Math.round(currentMiles)}`;
-      case 'fine_dining':
-        return `Fine Dining at mile ${Math.round(currentMiles)}`;
-      case 'any':
-      default:
-        const types = ['Fast Food', 'Café', 'Restaurant', 'Diner', 'Bistro'];
-        return `${types[index % types.length]} at mile ${Math.round(currentMiles)}`;
-    }
-  };
-  
-  let index = 0;
-  while (currentMiles < totalDistanceInMiles) {
-    // Find coordinates near this mileage point
-    const mileageProgress = currentMiles / totalDistanceInMiles;
-    const coordinateIndex = Math.floor(mileageProgress * route.geometry.coordinates.length);
-    
-    if (coordinateIndex < route.geometry.coordinates.length) {
-      const coords = route.geometry.coordinates[coordinateIndex];
-      const name = getRestaurantName(index);
-      
-      restaurantStops.push({
-        location: [coords[0], coords[1]],
-        name: name,
-        restaurantName: name,
-        distance: currentMiles,
-        rating: 4.0 + (Math.random() * 1.0), // Random rating between 4.0-5.0
-        restaurantType: restaurantType === 'any' 
-          ? (['fast_food', 'cafe', 'fine_dining'] as RestaurantType[])[index % 3]
-          : restaurantType
-      });
-    }
-    
-    currentMiles += interval;
-    index++;
-  }
-  
-  return restaurantStops;
 };

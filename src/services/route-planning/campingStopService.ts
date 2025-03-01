@@ -1,46 +1,58 @@
 
-import { CampingStop } from '@/components/route-planning/types';
+import { CampingStop } from "@/components/route-planning/types";
+import { fetchNearbyCampgrounds } from "@/services/routePointsService";
 
+/**
+ * Calculates camping stops along a route
+ */
 export const calculateCampingStops = async (
   route: any, 
-  interval: number = 200
+  milesPerDay: number = 300
 ): Promise<CampingStop[]> => {
-  console.log('Calculating camping stops without Places API');
-  
-  const campingStops: CampingStop[] = [];
-  
-  if (!route || !route.geometry || !route.geometry.coordinates) {
-    console.log('Invalid route data for camping stop calculation');
-    return [];
-  }
-  
-  const totalDistanceInMeters = route.distance;
-  const totalDistanceInMiles = totalDistanceInMeters / 1609.34;
-  
-  // Place camping stops at regular intervals
-  let currentMiles = interval / 2; // First stop halfway to the interval
-  
-  while (currentMiles < totalDistanceInMiles) {
-    // Find coordinates near this mileage point
-    const mileageProgress = currentMiles / totalDistanceInMiles;
-    const coordinateIndex = Math.floor(mileageProgress * route.geometry.coordinates.length);
+  try {
+    if (!route?.geometry?.coordinates) {
+      console.error('Invalid route geometry');
+      return [];
+    }
     
-    if (coordinateIndex < route.geometry.coordinates.length) {
-      const coords = route.geometry.coordinates[coordinateIndex];
-      const name = `Campground at mile ${Math.round(currentMiles)}`;
+    const totalDistanceInMeters = route.distance;
+    const totalDistanceInMiles = totalDistanceInMeters / 1609.34;
+    const coordinates = route.geometry.coordinates;
+    
+    const campingStops: CampingStop[] = [];
+    let currentMiles = 0;
+    
+    while (currentMiles < totalDistanceInMiles) {
+      currentMiles += milesPerDay;
+      if (currentMiles >= totalDistanceInMiles) break;
       
-      campingStops.push({
-        location: [coords[0], coords[1]],
-        name: name,
-        campgroundName: name,
-        distance: currentMiles,
-        rating: 4.0 + (Math.random() * 1.0), // Random rating between 4.0-5.0
-        amenities: ['Tent sites', 'Restrooms', 'Fire pits']
+      // Calculate the index in the coordinates array
+      const segmentIndex = Math.min(
+        Math.floor((currentMiles / totalDistanceInMiles) * coordinates.length),
+        coordinates.length - 1
+      );
+      
+      // Get coordinates for this segment
+      const [lon, lat] = coordinates[segmentIndex];
+      
+      // Fetch campgrounds near this point
+      const nearbyCampgrounds = await fetchNearbyCampgrounds(lat, lon, 1);
+      
+      // Add to our stops
+      nearbyCampgrounds.forEach(campground => {
+        // Adjust distance to be from the start of the route
+        const adjustedCampground = {
+          ...campground,
+          distance: Math.round(currentMiles)
+        };
+        campingStops.push(adjustedCampground);
       });
     }
     
-    currentMiles += interval;
+    console.log(`Found ${campingStops.length} camping stops`);
+    return campingStops;
+  } catch (error) {
+    console.error("Error calculating camping stops:", error);
+    return [];
   }
-  
-  return campingStops;
 };

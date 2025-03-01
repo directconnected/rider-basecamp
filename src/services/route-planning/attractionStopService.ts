@@ -1,66 +1,66 @@
 
-import { AttractionStop, AttractionType } from '@/components/route-planning/types';
+import { AttractionStop, AttractionType } from "@/components/route-planning/types";
+import { fetchNearbyAttractions } from "@/services/routePointsService";
 
+/**
+ * Calculates attraction stops along a route
+ */
 export const calculateAttractionStops = async (
   route: any, 
-  interval: number = 100,
-  attractionType: AttractionType = 'any'
+  spacing: number = 100,
+  preferredType: AttractionType = 'any'
 ): Promise<AttractionStop[]> => {
-  console.log(`Calculating attraction stops without Places API (type: ${attractionType})`);
-  
-  const attractionStops: AttractionStop[] = [];
-  
-  if (!route || !route.geometry || !route.geometry.coordinates) {
-    console.log('Invalid route data for attraction stop calculation');
+  try {
+    if (!route?.geometry?.coordinates) {
+      console.error('Invalid route geometry');
+      return [];
+    }
+    
+    const totalDistanceInMeters = route.distance;
+    const totalDistanceInMiles = totalDistanceInMeters / 1609.34;
+    const coordinates = route.geometry.coordinates;
+    
+    const attractionStops: AttractionStop[] = [];
+    
+    // Try to place stops roughly every 'spacing' miles
+    const numStops = Math.max(1, Math.ceil(totalDistanceInMiles / spacing));
+    
+    if (numStops <= 1) {
+      // For short routes, just add one attraction near the middle
+      const midpointIndex = Math.floor(coordinates.length / 2);
+      const [lon, lat] = coordinates[midpointIndex];
+      
+      const nearbyAttractions = await fetchNearbyAttractions(lat, lon, preferredType, 2);
+      attractionStops.push(...nearbyAttractions);
+    } else {
+      // For longer routes, space attractions out
+      for (let i = 1; i < numStops; i++) {
+        const segmentDistance = (i * totalDistanceInMiles) / numStops;
+        const segmentIndex = Math.floor((i * coordinates.length) / numStops);
+        
+        // Get coordinates for this segment
+        if (segmentIndex >= coordinates.length) continue;
+        const [lon, lat] = coordinates[segmentIndex];
+        
+        // Fetch attractions near this point
+        const nearbyAttractions = await fetchNearbyAttractions(lat, lon, preferredType, 1);
+        
+        // Add to our stops
+        nearbyAttractions.forEach(attraction => {
+          // Adjust distance to be from the start of the route
+          const adjustedAttraction = {
+            ...attraction,
+            distance: Math.round(segmentDistance)
+          };
+          attractionStops.push(adjustedAttraction);
+        });
+      }
+    }
+    
+    console.log(`Found ${attractionStops.length} attraction stops with preferred type: ${preferredType}`);
+    return attractionStops;
+  } catch (error) {
+    console.error("Error calculating attraction stops:", error);
     return [];
   }
-  
-  const totalDistanceInMeters = route.distance;
-  const totalDistanceInMiles = totalDistanceInMeters / 1609.34;
-  
-  // Place attractions at regular intervals
-  let currentMiles = interval / 2; // First stop halfway to the interval
-  
-  const getAttractionName = (index: number) => {
-    switch (attractionType) {
-      case 'museum':
-        return `Museum at mile ${Math.round(currentMiles)}`;
-      case 'park':
-        return `Park at mile ${Math.round(currentMiles)}`;
-      case 'historic_site':
-        return `Historic Site at mile ${Math.round(currentMiles)}`;
-      case 'any':
-      default:
-        const types = ['Museum', 'Park', 'Historic Site', 'Viewpoint', 'Tourist Attraction'];
-        return `${types[index % types.length]} at mile ${Math.round(currentMiles)}`;
-    }
-  };
-  
-  let index = 0;
-  while (currentMiles < totalDistanceInMiles) {
-    // Find coordinates near this mileage point
-    const mileageProgress = currentMiles / totalDistanceInMiles;
-    const coordinateIndex = Math.floor(mileageProgress * route.geometry.coordinates.length);
-    
-    if (coordinateIndex < route.geometry.coordinates.length) {
-      const coords = route.geometry.coordinates[coordinateIndex];
-      const name = getAttractionName(index);
-      
-      attractionStops.push({
-        location: [coords[0], coords[1]],
-        name: name,
-        attractionName: name,
-        distance: currentMiles,
-        rating: 4.0 + (Math.random() * 1.0), // Random rating between 4.0-5.0
-        attractionType: attractionType === 'any' 
-          ? (['museum', 'park', 'historic_site'] as AttractionType[])[index % 3]
-          : attractionType
-      });
-    }
-    
-    currentMiles += interval;
-    index++;
-  }
-  
-  return attractionStops;
 };

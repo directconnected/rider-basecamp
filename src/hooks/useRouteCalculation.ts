@@ -4,6 +4,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { initializeMapbox, geocodeLocation } from "@/services/mapService";
 import { calculateFuelStops, calculateHotelStops, planRoute } from "@/services/routeService";
 import { FormData, RouteDetails, FuelStop, HotelStop } from "./useRoutePlanning";
+import { fetchNearbyFuelStops } from "@/services/routePointsService";
 
 export const useRouteCalculation = () => {
   const { toast } = useToast();
@@ -76,7 +77,37 @@ export const useRouteCalculation = () => {
       const fuelMileage = parseInt(formData.fuelMileage);
       const milesPerDay = parseInt(formData.milesPerDay);
       
+      // Try to use database fuel stops first, fall back to calculated ones if needed
+      const totalDistanceInMiles = Math.round(route.distance / 1609.34);
+      const numFuelStops = Math.max(1, Math.ceil(totalDistanceInMiles / fuelMileage));
+      const databaseFuelStops: FuelStop[] = [];
+      
+      // Try to get fuel stops from the database at roughly evenly-spaced intervals
+      for (let i = 1; i <= numFuelStops; i++) {
+        const stopDistance = (i * fuelMileage) > totalDistanceInMiles 
+          ? totalDistanceInMiles - 20 // Just before the destination
+          : i * fuelMileage;
+          
+        const stopIndex = Math.floor((stopDistance / totalDistanceInMiles) * route.geometry.coordinates.length);
+        if (stopIndex < route.geometry.coordinates.length) {
+          const [lon, lat] = route.geometry.coordinates[stopIndex];
+          const nearbyFuelStops = await fetchNearbyFuelStops(lat, lon, 1);
+          
+          if (nearbyFuelStops.length > 0) {
+            const fuelStop = {
+              ...nearbyFuelStops[0],
+              distance: stopDistance,
+            };
+            databaseFuelStops.push(fuelStop);
+          }
+        }
+      }
+      
+      // Use database fuel stops if we found enough, otherwise use the calculation
       const calculatedFuelStops = await calculateFuelStops(route, fuelMileage);
+      const fuelStopsToUse = databaseFuelStops.length >= numFuelStops / 2 
+        ? databaseFuelStops 
+        : calculatedFuelStops;
       
       // Save preferences to localStorage for reference by other components
       if (formData.preferredLodging) {
@@ -98,7 +129,7 @@ export const useRouteCalculation = () => {
         formData.preferredLodging
       );
       
-      setFuelStops(calculatedFuelStops);
+      setFuelStops(fuelStopsToUse);
       setHotelStops(calculatedHotelStops);
 
       const totalMiles = Math.round(route.distance / 1609.34);
@@ -112,7 +143,7 @@ export const useRouteCalculation = () => {
 
       toast({
         title: "Route Planned",
-        description: `Your route has been planned with ${calculatedFuelStops.length} fuel stops and ${calculatedHotelStops.length} overnight stays.`,
+        description: `Your route has been planned with ${fuelStopsToUse.length} fuel stops and ${calculatedHotelStops.length} overnight stays.`,
       });
     } catch (error) {
       console.error("Route planning error:", error);
