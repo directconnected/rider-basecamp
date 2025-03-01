@@ -45,9 +45,10 @@ export const useAddressSearch = ({
         query = query.ilike('city', `%${searchParams.city.trim()}%`);
       }
       
-      // Add state filter if provided
+      // Add state filter if provided - ensure proper handling of abbreviations
       if (searchParams.state && searchParams.state.trim()) {
-        query = query.eq('state', searchParams.state.trim());
+        // Use ilike for case-insensitive matching with state codes
+        query = query.ilike('state', `%${searchParams.state.trim()}%`);
       }
       
       // Add zip code filter if provided
