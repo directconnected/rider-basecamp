@@ -7,7 +7,8 @@ import { fetchNearbyCampgrounds } from "@/services/routePointsService";
  */
 export const calculateCampingStops = async (
   route: any, 
-  milesPerDay: number = 300
+  milesPerDay: number = 300,
+  preferredCampingType: string = 'any'
 ): Promise<CampingStop[]> => {
   try {
     if (!route?.geometry?.coordinates) {
@@ -35,8 +36,8 @@ export const calculateCampingStops = async (
       // Get coordinates for this segment
       const [lon, lat] = coordinates[segmentIndex];
       
-      // Fetch campgrounds near this point
-      const nearbyCampgrounds = await fetchNearbyCampgrounds(lat, lon, 1);
+      // Fetch campgrounds near this point with preferred type
+      const nearbyCampgrounds = await fetchNearbyCampgrounds(lat, lon, 1, preferredCampingType);
       
       // Add to our stops
       nearbyCampgrounds.forEach(campground => {
@@ -49,7 +50,7 @@ export const calculateCampingStops = async (
       });
     }
     
-    console.log(`Found ${campingStops.length} camping stops`);
+    console.log(`Found ${campingStops.length} camping stops with type: ${preferredCampingType}`);
     return campingStops;
   } catch (error) {
     console.error("Error calculating camping stops:", error);

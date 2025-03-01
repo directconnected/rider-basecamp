@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import { CampgroundResult } from "@/hooks/camping/types"; 
 import { findNearbyPoints } from "@/utils/distanceUtils";
@@ -164,13 +163,20 @@ export const fetchNearbyHotels = async (
 export const fetchNearbyCampgrounds = async (
   latitude: number,
   longitude: number,
-  maxResults: number = 2
+  maxResults: number = 2,
+  preferredType: string = 'any'
 ): Promise<CampingStop[]> => {
   try {
-    const { data, error } = await supabase
+    let query = supabase
       .from('route_points')
       .select('*')
       .eq('point_type', 'camping');
+    
+    if (preferredType !== 'any') {
+      query = query.eq('camping_type', preferredType);
+    }
+
+    const { data, error } = await query;
 
     if (error) {
       console.error('Error fetching campgrounds:', error);

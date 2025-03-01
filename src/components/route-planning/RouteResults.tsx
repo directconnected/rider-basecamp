@@ -183,7 +183,8 @@ const RouteResults: React.FC<RouteResultsProps> = ({
           console.log('Calculating camping stops for campground preference');
           const camping = await calculateCampingStops(
             currentRoute, 
-            Math.floor(routeDetails.distance / (hotelStops.length || 1))
+            Math.floor(routeDetails.distance / (hotelStops.length || 1)),
+            preferredLodging
           );
           setCampingStops(camping);
           console.log('Calculated camping stops:', camping);
