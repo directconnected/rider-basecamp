@@ -63,12 +63,39 @@ export const useAddressSearch = ({
     // Log database connection state
     console.log('Supabase client initialized:', supabase ? 'Yes' : 'No');
     
-    // Primary search approach for state field - focusing on exact matches
-    // Use both equals and case-insensitive search in parallel
+    // First, try a simple test query to see if we can get ANY data from the table
+    // This helps us confirm if we have database connectivity and permissions
+    console.log('Performing test query to check database access...');
+    const { data: testData, error: testError } = await supabase
+      .from('campgrounds')
+      .select('*')
+      .limit(5);
+    
+    if (testError) {
+      console.error('Database access error during test query:', testError);
+      toast.error('Error accessing the campgrounds database');
+      setIsSearching(false);
+      return;
+    }
+    
+    console.log('Test query results:', testData);
+    console.log(`Found ${testData?.length || 0} records in test query`);
+    
+    if (!testData || testData.length === 0) {
+      console.log('No data returned from test query. Database might be empty or connection issue.');
+      toast.info('No campground data is available in the database');
+      setIsSearching(false);
+      return;
+    }
+    
+    // If we get here, we know we can access the database and it has data
+    // Now try the specific state search
+    
+    // Primary search approach - try multiple strategies in one query using OR
     const { data: stateData, error: stateError } = await supabase
       .from('campgrounds')
       .select('*')
-      .or(`state.eq.${normalizedState},state.ilike.${normalizedState}`);
+      .or(`state.eq.${normalizedState},state.ilike.${normalizedState},state.ilike.%${normalizedState}%`);
     
     if (stateError) {
       console.error('Database error during state search:', stateError);
@@ -87,32 +114,9 @@ export const useAddressSearch = ({
       return;
     }
     
-    // If no direct matches, try a more flexible search approach
-    console.log('No direct state matches found, trying partial match');
+    // If no matches with state code, try with full state name
+    console.log('No matches with state code, trying full state name');
     
-    // Try partial match (state code might be part of a longer field)
-    const { data: partialMatchData, error: partialMatchError } = await supabase
-      .from('campgrounds')
-      .select('*')
-      .ilike('state', `%${normalizedState}%`);
-    
-    if (partialMatchError) {
-      console.error('Database error during partial match query:', partialMatchError);
-    } else {
-      console.log('Partial match query results:', partialMatchData);
-    }
-    
-    if (!partialMatchError && partialMatchData && partialMatchData.length > 0) {
-      console.log(`Found ${partialMatchData.length} campgrounds with partial state match`);
-      setSearchResults(partialMatchData);
-      toast.success(`Found ${partialMatchData.length} campgrounds`);
-      setIsSearching(false);
-      return;
-    }
-    
-    console.log('No partial matches, trying full state name variations');
-    
-    // Try full state name variations as a last resort
     const stateMap: Record<string, string[]> = {
       'AL': ['alabama'],
       'AK': ['alaska'],
@@ -166,102 +170,81 @@ export const useAddressSearch = ({
       'WY': ['wyoming'],
     };
     
-    const stateVariations = stateMap[normalizedState] || [];
+    const stateNames = stateMap[normalizedState] || [];
     
-    if (stateVariations.length > 0) {
-      console.log('Trying full state name variations:', stateVariations);
+    if (stateNames.length > 0) {
+      console.log('Trying full state names:', stateNames);
       
-      // Try each state name variation individually to find a match
-      for (const variation of stateVariations) {
-        // Try exact match with full state name
-        const { data: fullNameExactData, error: fullNameExactError } = await supabase
-          .from('campgrounds')
-          .select('*')
-          .eq('state', variation);
+      // Create an OR query for all variations of the state name
+      let orConditions = stateNames.map(name => `state.ilike.%${name}%`).join(',');
+      
+      const { data: fullNameData, error: fullNameError } = await supabase
+        .from('campgrounds')
+        .select('*')
+        .or(orConditions);
+      
+      if (fullNameError) {
+        console.error('Database error during full name search:', fullNameError);
+      } else {
+        console.log('Full state name search results:', fullNameData);
         
-        if (fullNameExactError) {
-          console.error(`Database error during full name (${variation}) exact match:`, fullNameExactError);
-        } else {
-          console.log(`Full name (${variation}) exact match results:`, fullNameExactData);
-        }
-        
-        if (!fullNameExactError && fullNameExactData && fullNameExactData.length > 0) {
-          console.log(`Found ${fullNameExactData.length} campgrounds with full state name exact match`);
-          setSearchResults(fullNameExactData);
-          toast.success(`Found ${fullNameExactData.length} campgrounds`);
-          setIsSearching(false);
-          return;
-        }
-        
-        // Try case-insensitive match with full state name
-        const { data: fullNameCaseInsensitiveData, error: fullNameCaseInsensitiveError } = await supabase
-          .from('campgrounds')
-          .select('*')
-          .ilike('state', variation);
-        
-        if (fullNameCaseInsensitiveError) {
-          console.error(`Database error during full name (${variation}) case-insensitive match:`, fullNameCaseInsensitiveError);
-        } else {
-          console.log(`Full name (${variation}) case-insensitive results:`, fullNameCaseInsensitiveData);
-        }
-        
-        if (!fullNameCaseInsensitiveError && fullNameCaseInsensitiveData && fullNameCaseInsensitiveData.length > 0) {
-          console.log(`Found ${fullNameCaseInsensitiveData.length} campgrounds with full state name case-insensitive match`);
-          setSearchResults(fullNameCaseInsensitiveData);
-          toast.success(`Found ${fullNameCaseInsensitiveData.length} campgrounds`);
-          setIsSearching(false);
-          return;
-        }
-        
-        // Try partial match with full state name
-        const { data: fullNamePartialData, error: fullNamePartialError } = await supabase
-          .from('campgrounds')
-          .select('*')
-          .ilike('state', `%${variation}%`);
-        
-        if (fullNamePartialError) {
-          console.error(`Database error during full name (${variation}) partial match:`, fullNamePartialError);
-        } else {
-          console.log(`Full name (${variation}) partial match results:`, fullNamePartialData);
-        }
-        
-        if (!fullNamePartialError && fullNamePartialData && fullNamePartialData.length > 0) {
-          console.log(`Found ${fullNamePartialData.length} campgrounds with full state name partial match`);
-          setSearchResults(fullNamePartialData);
-          toast.success(`Found ${fullNamePartialData.length} campgrounds`);
+        if (fullNameData && fullNameData.length > 0) {
+          console.log(`Found ${fullNameData.length} campgrounds with full state name`);
+          setSearchResults(fullNameData);
+          toast.success(`Found ${fullNameData.length} campgrounds`);
           setIsSearching(false);
           return;
         }
       }
     }
     
-    // Get all campgrounds to see what's available
-    console.log('No state matches found. Checking all available campgrounds...');
-    
-    const { data: allCampgrounds, error: allCampgroundsError } = await supabase
+    // Last resort - just check what column values actually exist in the state field
+    const { data: distinctStates, error: distinctError } = await supabase
       .from('campgrounds')
-      .select('*');
-    
-    if (allCampgroundsError) {
-      console.error('Error checking for any campgrounds:', allCampgroundsError);
+      .select('state')
+      .is('state', null, { not: true })
+      .limit(100);
+      
+    if (distinctError) {
+      console.error('Error checking distinct states:', distinctError);
     } else {
-      console.log('All available campgrounds in database:', allCampgrounds);
-      if (allCampgrounds && allCampgrounds.length === 0) {
-        console.log('The campgrounds table appears to be empty!');
-        toast.info('No campground data is available in the database');
-      } else {
-        console.log(`Found ${allCampgrounds.length} total campgrounds in database, but none match the search criteria`);
-        toast.info(`No campgrounds found matching "${normalizedState}". There are ${allCampgrounds.length} campgrounds in other states.`);
-      }
+      console.log('Available state values in database:', distinctStates);
+      const availableStates = distinctStates.map(item => item.state).filter(Boolean);
+      console.log('Unique state values:', [...new Set(availableStates)]);
     }
     
     // If we got this far, no results were found
+    toast.info(`No campgrounds found matching "${normalizedState}"`);
     setSearchResults([]);
     setIsSearching(false);
   };
 
   // Handle combined search with city, state, and/or zip code
   const handleCombinedSearch = async () => {
+    // First, try a simple test query to see if we can get ANY data from the table
+    console.log('Performing test query to check database access...');
+    const { data: testData, error: testError } = await supabase
+      .from('campgrounds')
+      .select('*')
+      .limit(5);
+    
+    if (testError) {
+      console.error('Database access error during test query:', testError);
+      toast.error('Error accessing the campgrounds database');
+      setIsSearching(false);
+      return;
+    }
+    
+    console.log('Test query results:', testData);
+    console.log(`Found ${testData?.length || 0} records in test query`);
+    
+    if (!testData || testData.length === 0) {
+      console.log('No data returned from test query. Database might be empty or connection issue.');
+      toast.info('No campground data is available in the database');
+      setIsSearching(false);
+      return;
+    }
+    
     let query = supabase.from('campgrounds').select('*');
     
     // Apply city filter if provided
@@ -296,25 +279,8 @@ export const useAddressSearch = ({
         setSearchResults(data);
         toast.success(`Found ${data.length} campgrounds`);
       } else {
-        // Get all campgrounds to see what's available
-        const { data: allData, error: allError } = await supabase
-          .from('campgrounds')
-          .select('*');
-        
-        if (allError) {
-          console.error('Error checking for all campgrounds:', allError);
-        } else {
-          console.log('All available campgrounds:', allData);
-          if (allData && allData.length === 0) {
-            console.log('The campgrounds table appears to be empty!');
-            toast.info('No campground data is available in the database');
-          } else {
-            console.log(`Found ${allData.length} total campgrounds in database, but none match the search criteria`);
-          }
-        }
-        
-        setSearchResults([]);
         toast.info('No campgrounds found matching your search criteria');
+        setSearchResults([]);
       }
     }
     
