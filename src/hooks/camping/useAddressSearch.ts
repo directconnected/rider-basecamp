@@ -43,30 +43,51 @@ export const useAddressSearch = ({
         zipCode: searchParams.zipCode,
       });
 
-      // Construct dynamic query based on search parameters
+      // Construct initial query
       let query = supabase
         .from('campgrounds')
         .select('*');
 
-      // Add filters based on provided parameters
+      // Apply city filter if provided
       if (searchParams.city) {
         query = query.ilike('city', `%${searchParams.city}%`);
       }
       
+      // Apply state filter if provided - with special handling
       if (searchParams.state) {
-        // Normalize state input (trim whitespace and convert to uppercase)
+        // Normalize state input (trim and uppercase)
         const normalizedState = searchParams.state.trim().toUpperCase();
         console.log('Searching for state:', normalizedState);
         
-        // Use ilike for more flexibility in matching state codes
-        query = query.ilike('state', normalizedState);
+        // Try different approaches to match state - this is more flexible
+        // First, let's try an exact match
+        const { data: exactMatchData, error: exactMatchError } = await supabase
+          .from('campgrounds')
+          .select('*')
+          .eq('state', normalizedState);
+          
+        // If exact match works, use those results
+        if (!exactMatchError && exactMatchData && exactMatchData.length > 0) {
+          console.log(`Found ${exactMatchData.length} campgrounds with exact state match`);
+          setSearchResults(exactMatchData);
+          toast.success(`Found ${exactMatchData.length} campgrounds`);
+          setIsSearching(false);
+          return;
+        }
+        
+        console.log('No exact state matches found, trying alternatives');
+        
+        // If no exact match, let's try contains (for cases where state might be stored as "Pennsylvania" instead of "PA")
+        query = query.or(`state.ilike.%${normalizedState}%`);
       }
       
+      // Apply zip code filter if provided
       if (searchParams.zipCode) {
         query = query.ilike('zip_code', `%${searchParams.zipCode}%`);
       }
 
       // Execute the query
+      console.log('Executing query with filters:', query);
       const { data, error } = await query;
 
       if (error) {
@@ -79,28 +100,43 @@ export const useAddressSearch = ({
         setSearchResults(data);
         toast.success(`Found ${data.length} campgrounds`);
       } else {
-        console.log('No campgrounds found matching the search criteria');
-        console.log('Query details:', query);
+        console.log('No campgrounds found with initial search, trying one last approach');
         
-        // If no results with state search, try a more lenient search
+        // Last resort: try a very flexible search with full state name variations
         if (searchParams.state && !searchParams.city && !searchParams.zipCode) {
-          const normalizedState = searchParams.state.trim().toUpperCase();
-          console.log('Trying more lenient state search for:', normalizedState);
+          const stateInput = searchParams.state.trim();
           
-          // Try partial match search for state codes
-          const lenientQuery = supabase
-            .from('campgrounds')
-            .select('*')
-            .ilike('state', `%${normalizedState}%`);
+          // Map of state abbreviations to full names for common states
+          const stateMap: Record<string, string[]> = {
+            'PA': ['pennsylvania'],
+            'NY': ['new york'],
+            'CA': ['california'],
+            'TX': ['texas'],
+            'FL': ['florida'],
+            // Add more as needed
+          };
+          
+          const stateVariations = stateMap[stateInput.toUpperCase()] || [];
+          
+          if (stateVariations.length > 0) {
+            console.log('Trying state name variations:', stateVariations);
             
-          const { data: lenientData, error: lenientError } = await lenientQuery;
-          
-          if (!lenientError && lenientData && lenientData.length > 0) {
-            console.log(`Found ${lenientData.length} campgrounds with lenient state search`);
-            setSearchResults(lenientData);
-            toast.success(`Found ${lenientData.length} campgrounds`);
-            setIsSearching(false);
-            return;
+            let finalQuery = supabase.from('campgrounds').select('*');
+            
+            // Build OR query for each variation
+            for (const variation of stateVariations) {
+              finalQuery = finalQuery.or(`state.ilike.%${variation}%`);
+            }
+            
+            const { data: finalData, error: finalError } = await finalQuery;
+            
+            if (!finalError && finalData && finalData.length > 0) {
+              console.log(`Found ${finalData.length} campgrounds with state name variations`);
+              setSearchResults(finalData);
+              toast.success(`Found ${finalData.length} campgrounds`);
+              setIsSearching(false);
+              return;
+            }
           }
         }
         
