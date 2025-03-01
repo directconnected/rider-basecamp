@@ -258,8 +258,14 @@ export const fetchPointsInRadius = async (
       return [];
     }
 
+    // Cast the data to ensure TypeScript knows it's compatible with RoutePoint
+    const typedData = data.map(item => ({
+      ...item,
+      point_type: item.point_type as 'fuel' | 'hotel' | 'restaurant' | 'camping' | 'attraction'
+    }));
+
     // Filter points by distance using the utility function
-    return findNearbyPoints(latitude, longitude, data || [], radiusMiles);
+    return findNearbyPoints(latitude, longitude, typedData || [], radiusMiles);
   } catch (error) {
     console.error('Error in fetchPointsInRadius:', error);
     return [];
