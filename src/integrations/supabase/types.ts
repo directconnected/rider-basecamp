@@ -243,6 +243,78 @@ export type Database = {
         }
         Relationships: []
       }
+      route_points: {
+        Row: {
+          address: string | null
+          amenities: Database["public"]["Enums"]["campsite_amenity"][] | null
+          attraction_type: string | null
+          camping_type: string | null
+          city: string | null
+          created_at: string
+          email: string | null
+          id: string
+          latitude: number
+          lodging_type: string | null
+          longitude: number
+          name: string
+          phone: string | null
+          point_type: string
+          price_level: number | null
+          rating: number | null
+          restaurant_type: string | null
+          review_count: number | null
+          state: string | null
+          website: string | null
+          zip_code: string | null
+        }
+        Insert: {
+          address?: string | null
+          amenities?: Database["public"]["Enums"]["campsite_amenity"][] | null
+          attraction_type?: string | null
+          camping_type?: string | null
+          city?: string | null
+          created_at?: string
+          email?: string | null
+          id?: string
+          latitude: number
+          lodging_type?: string | null
+          longitude: number
+          name: string
+          phone?: string | null
+          point_type: string
+          price_level?: number | null
+          rating?: number | null
+          restaurant_type?: string | null
+          review_count?: number | null
+          state?: string | null
+          website?: string | null
+          zip_code?: string | null
+        }
+        Update: {
+          address?: string | null
+          amenities?: Database["public"]["Enums"]["campsite_amenity"][] | null
+          attraction_type?: string | null
+          camping_type?: string | null
+          city?: string | null
+          created_at?: string
+          email?: string | null
+          id?: string
+          latitude?: number
+          lodging_type?: string | null
+          longitude?: number
+          name?: string
+          phone?: string | null
+          point_type?: string
+          price_level?: number | null
+          rating?: number | null
+          restaurant_type?: string | null
+          review_count?: number | null
+          state?: string | null
+          website?: string | null
+          zip_code?: string | null
+        }
+        Relationships: []
+      }
       routes: {
         Row: {
           created_at: string | null
@@ -440,6 +512,22 @@ export type Database = {
       }
     }
     Enums: {
+      campsite_amenity:
+        | "water_hookup"
+        | "electric_hookup"
+        | "sewer_hookup"
+        | "wifi"
+        | "showers"
+        | "restrooms"
+        | "laundry"
+        | "camp_store"
+        | "hiking_trails"
+        | "lake_access"
+        | "rv_dump_station"
+        | "pet_friendly"
+        | "playground"
+        | "fire_rings"
+        | "picnic_tables"
       service_type:
         | "oil_change"
         | "tire_replacement"
