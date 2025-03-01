@@ -1,12 +1,10 @@
 
 import { useState } from 'react';
 import { useCampsiteSearchStore } from '@/stores/campsiteSearchStore';
-import { toast } from 'sonner';
 import { CampgroundResult } from '@/hooks/camping/types';
 import { useLocationBasedSearch } from '@/hooks/camping/useLocationBasedSearch';
 import { useAddressSearch } from '@/hooks/camping/useAddressSearch';
 
-// This hook combines functionality for searching campgrounds
 const useCampsiteSearch = () => {
   const { searchParams, setSearchParams } = useCampsiteSearchStore();
   const [searchResults, setSearchResults] = useState<CampgroundResult[]>([]);
@@ -15,10 +13,10 @@ const useCampsiteSearch = () => {
 
   // Initialize the location-based search hook
   const { handleLocationSearch } = useLocationBasedSearch({
-  searchParams,
-  setSearchResults,
-  setIsSearching,
-  setCurrentPage
+    searchParams,
+    setSearchResults,
+    setIsSearching,
+    setCurrentPage
   });
 
   // Initialize the address-based search hook
@@ -44,13 +42,8 @@ const useCampsiteSearch = () => {
   };
 
   // Handle search based on address (city, state, zip code)
-  const handleSearch = async () => {
-    if (!searchParams.city && !searchParams.state && !searchParams.zipCode) {
-      toast.error('Please enter a city, state, or zip code to search');
-      return;
-    }
-
-    await handleAddressSearch();
+  const handleSearch = () => {
+    handleAddressSearch();
   };
 
   return {

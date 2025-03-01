@@ -44,15 +44,17 @@ const CampsiteSearchResults = ({
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {paginatedResults.map((campsite, index) => (
-            <CampsiteCard key={index} campsite={campsite} />
+            <CampsiteCard key={campsite.id || index} campsite={campsite} />
           ))}
         </div>
 
-        <CampsitePagination 
-          currentPage={currentPage}
-          totalPages={totalPages}
-          onPageChange={onPageChange}
-        />
+        {totalPages > 1 && (
+          <CampsitePagination 
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onPageChange={onPageChange}
+          />
+        )}
       </div>
     </section>
   );
