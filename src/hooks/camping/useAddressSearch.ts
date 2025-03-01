@@ -41,6 +41,28 @@ export const useAddressSearch = ({
       const { data: authData } = await supabase.auth.getSession();
       console.log('Auth session:', authData?.session ? 'Authenticated' : 'Anonymous');
       
+      // First, check if the table has any data at all
+      const { data: countData, error: countError } = await supabase
+        .from('campgrounds')
+        .select('*', { count: 'exact', head: true });
+      
+      if (countError) {
+        console.error('Error checking campgrounds count:', countError);
+        toast.error(`Database connection error: ${countError.message}`);
+        setIsSearching(false);
+        return;
+      }
+      
+      const totalCount = countData?.length || 0;
+      console.log('Total campgrounds in database:', totalCount);
+      
+      if (totalCount === 0) {
+        console.error('The campgrounds table appears to be empty');
+        toast.error('No campgrounds found in the database. The database may be empty.');
+        setIsSearching(false);
+        return;
+      }
+      
       // Build the base query
       let query = supabase.from('campgrounds').select('*');
       
