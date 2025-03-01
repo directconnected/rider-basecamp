@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { useCampsiteSearchStore } from '@/stores/campsiteSearchStore';
 import { toast } from 'sonner';
 import { CampgroundResult } from '@/hooks/camping/types';
-import { useLocationBasedSearch } from '@/hooks/camping/useLocationBasedSearch';
+// import { useLocationBasedSearch } from '@/hooks/camping/useLocationBasedSearch';
 import { useAddressSearch } from '@/hooks/camping/useAddressSearch';
 
 // This hook combines functionality for searching campgrounds
@@ -14,12 +14,12 @@ const useCampsiteSearch = () => {
   const [currentPage, setCurrentPage] = useState(1);
 
   // Initialize the location-based search hook
-  const { handleLocationSearch } = useLocationBasedSearch({
-    searchParams,
-    setSearchResults,
-    setIsSearching,
-    setCurrentPage
-  });
+  // const { handleLocationSearch } = useLocationBasedSearch({
+  //  searchParams,
+  //  setSearchResults,
+  //  setIsSearching,
+  //  setCurrentPage
+  // });
 
   // Initialize the address-based search hook
   const { handleSearch: handleAddressSearch } = useAddressSearch({
@@ -59,7 +59,7 @@ const useCampsiteSearch = () => {
     searchResults,
     isSearching,
     handleSearch,
-    handleLocationSearch,
+    // handleLocationSearch,
     currentPage,
     totalPages,
     handlePageChange,
