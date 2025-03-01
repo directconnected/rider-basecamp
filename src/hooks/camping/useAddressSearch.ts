@@ -43,9 +43,6 @@ export const useAddressSearch = ({
 
       console.log(`Address search: ${addressString}, radius: ${searchParams.radius}mi`);
       
-      // Since we're removing Google Places API functionality, we'll return a placeholder message
-      toast.info('Campground search functionality has been removed');
-      
       // Return empty results
       setSearchResults([]);
     } catch (error) {
