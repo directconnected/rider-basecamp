@@ -47,8 +47,8 @@ export const useAddressSearch = ({
       
       // Add state filter if provided - ensure proper handling of abbreviations
       if (searchParams.state && searchParams.state.trim()) {
-        // Use ilike for case-insensitive matching with state codes
-        query = query.ilike('state', `%${searchParams.state.trim()}%`);
+        // Use exact match for state codes (like 'OH')
+        query = query.ilike('state', searchParams.state.trim());
       }
       
       // Add zip code filter if provided
@@ -56,12 +56,20 @@ export const useAddressSearch = ({
         query = query.eq('zip_code', searchParams.zipCode.trim());
       }
       
-      // Execute the query
-      const { data, error } = await query;
+      // Execute the query with detailed logging
+      console.log('Executing Supabase query:', query);
+      const { data, error, status, statusText } = await query;
       
       if (error) {
         console.error('Error searching campgrounds:', error);
-        toast.error('Error searching for campgrounds');
+        console.error('Status:', status, statusText);
+        
+        // Check if it's a permissions error
+        if (status === 403 || error.message.includes('permission')) {
+          toast.error('Permission denied. You may not have access to this data.');
+        } else {
+          toast.error(`Error searching for campgrounds: ${error.message}`);
+        }
         setSearchResults([]);
       } else if (data) {
         console.log('Search results:', data);
@@ -71,6 +79,9 @@ export const useAddressSearch = ({
           setSearchResults(data);
           toast.success(`Found ${data.length} campgrounds`);
         } else {
+          // Log the exact query that was executed
+          console.log('Query executed with no results:', 
+            `State: "${searchParams.state}" | City: "${searchParams.city}" | Zip: "${searchParams.zipCode}"`);
           setSearchResults([]);
           toast.info('No campgrounds found matching your search criteria');
         }
