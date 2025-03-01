@@ -64,6 +64,7 @@ export const useAddressSearch = ({
         setSearchResults([]);
       } else if (data) {
         console.log('Search results:', data);
+        console.log('Total campgrounds found:', data.length);
         
         if (data.length > 0) {
           setSearchResults(data);

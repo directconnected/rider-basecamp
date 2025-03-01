@@ -43,6 +43,7 @@ const useCampsiteSearch = () => {
 
   // Handle search based on address (city, state, zip code)
   const handleSearch = () => {
+    console.log('Starting address search with params:', searchParams);
     handleAddressSearch();
   };
 

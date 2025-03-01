@@ -46,6 +46,7 @@ export const useLocationBasedSearch = ({
             setSearchResults([]);
           } else if (data && data.length > 0) {
             console.log('Found campgrounds:', data);
+            console.log('Total campgrounds found:', data.length);
             toast.success(`Found ${data.length} campgrounds`);
             setSearchResults(data);
           } else {
