@@ -1,6 +1,6 @@
 
 import { AttractionStop, AttractionType } from "@/components/route-planning/types";
-import { fetchNearbyAttractions } from "@/services/routePointsService";
+import { fetchNearbyAttractions } from "@/services/route-points";
 
 /**
  * Calculates attraction stops along a route

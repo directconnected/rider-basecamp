@@ -1,6 +1,6 @@
 
 import { RestaurantStop, RestaurantType } from "@/components/route-planning/types";
-import { fetchNearbyRestaurants } from "@/services/routePointsService";
+import { fetchNearbyRestaurants } from "@/services/route-points";
 
 /**
  * Calculates restaurant stops along a route

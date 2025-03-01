@@ -1,6 +1,6 @@
 
 import { CampingStop } from "@/components/route-planning/types";
-import { fetchNearbyCampgrounds } from "@/services/routePointsService";
+import { fetchNearbyCampgrounds } from "@/services/route-points";
 
 /**
  * Calculates camping stops along a route

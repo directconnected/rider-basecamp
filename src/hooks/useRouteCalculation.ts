@@ -1,10 +1,9 @@
-
 import mapboxgl from 'mapbox-gl';
 import { useToast } from "@/components/ui/use-toast";
 import { initializeMapbox, geocodeLocation } from "@/services/mapService";
 import { calculateFuelStops, calculateHotelStops, planRoute } from "@/services/routeService";
 import { FormData, RouteDetails, FuelStop, HotelStop } from "./useRoutePlanning";
-import { fetchNearbyFuelStops } from "@/services/routePointsService";
+import { fetchNearbyFuelStops } from "@/services/route-points";
 
 export const useRouteCalculation = () => {
   const { toast } = useToast();
